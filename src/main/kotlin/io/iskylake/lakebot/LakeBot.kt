@@ -15,6 +15,7 @@
  *
  */
 
+@file:JvmName("LakeBot")
 package io.iskylake.lakebot
 
 import io.iskylake.lakebot.commands.Command
