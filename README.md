@@ -1,4 +1,4 @@
-# LakeBot [![Support Server](https://discordapp.com/api/guilds/346332300385976321/embed.png)](https://discord.gg/QsTevwF) [![JitPack](https://jitpack.io/v/ISkylakeS/LakeBot.svg)](https://jitpack.io/#KabyBot/KabyBot)
+# LakeBot [![Support Server](https://discordapp.com/api/guilds/346332300385976321/embed.png)](https://discord.gg/QsTevwF) [![JitPack](https://jitpack.io/v/ISkylakeS/LakeBot.svg)](https://jitpack.io/#ISkylakeS/LakeBot)
 LakeBot is the next generation of [KabyBot](https://github.com/KabyBot/KabyBot). It is Discord multi-purpose bot coded in 100% [Kotlin](https://kotlinlang.org/).
 
 [![Powered By JDA](http://i.imgur.com/4Fhq6yQ.png)](https://github.com/DV8FromTheWorld/JDA)
