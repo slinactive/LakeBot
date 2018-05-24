@@ -15,18 +15,5 @@
  *
  */
 
-package io.iskylake.lakebot
+rootProject.name = 'TestApplication'
 
-import io.iskylake.lakebot.entities.handlers.CommandHandler
-import io.iskylake.lakebot.entities.handlers.EventHandler
-
-import java.awt.Color
-
-object Immutable {
-    const val DEFAULT_PREFIX = "lb!"
-    const val VERSION = "0.1.0"
-    val BOT_TOKEN = System.getenv("BOT_TOKEN") ?: ""
-    val SUCCESS = Color(232, 66, 102)
-    val FAILURE = Color(229, 57, 53)
-    val CONFIRMATION = Color(118, 255, 3)
-}
