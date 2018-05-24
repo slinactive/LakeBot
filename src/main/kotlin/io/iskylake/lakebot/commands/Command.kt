@@ -27,6 +27,8 @@ interface Command {
             val args = this.javaClass.`package`.name.split("\\.".toRegex())
             return CommandCategory[args.last()] ?: CommandCategory.UNKNOWN
         }
+    val isDeveloper: Boolean
+        get() = category == CommandCategory.DEVELOPER
     val cooldown: Long
         get() = 0
     val description: String

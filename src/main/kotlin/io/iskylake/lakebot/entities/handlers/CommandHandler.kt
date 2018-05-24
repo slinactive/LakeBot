@@ -52,14 +52,25 @@ object CommandHandler {
                 val args = event.message.contentRaw.split("\\s".toRegex(), 2)
                 val command = this[args[0].toLowerCase().substring(Immutable.DEFAULT_PREFIX.length)]
                 if (command !== null) {
-                    if (command.cooldown > 0) {
-                        val key = "${command.name}|${event.author.id}"
-                        val time = getRemainingCooldown(key)
-                        if (time > 0) {
-                            val error: String? = getCooldownError(time)
-                            if (error !== null) {
-                                event.channel.sendError(error).queue()
+                    if (command.isDeveloper && event.author.idLong !in Immutable.DEVELOPERS) {
+                        event.sendError("You don't have permissions to execute this command!").queue()
+                    } else {
+                        if (command.cooldown > 0) {
+                            val key = "${command.name}|${event.author.id}"
+                            val time = getRemainingCooldown(key)
+                            if (time > 0) {
+                                val error: String? = getCooldownError(time)
+                                if (error !== null) {
+                                    event.channel.sendError(error).queue()
+                                } else {
+                                    if (args.size > 1) {
+                                        command(event, args[1].split("\\s+".toRegex()).toTypedArray())
+                                    } else {
+                                        command(event, emptyArray())
+                                    }
+                                }
                             } else {
+                                applyCooldown(key, command.cooldown)
                                 if (args.size > 1) {
                                     command(event, args[1].split("\\s+".toRegex()).toTypedArray())
                                 } else {
@@ -67,18 +78,11 @@ object CommandHandler {
                                 }
                             }
                         } else {
-                            applyCooldown(key, command.cooldown)
                             if (args.size > 1) {
                                 command(event, args[1].split("\\s+".toRegex()).toTypedArray())
                             } else {
                                 command(event, emptyArray())
                             }
-                        }
-                    } else {
-                        if (args.size > 1) {
-                            command(event, args[1].split("\\s+".toRegex()).toTypedArray())
-                        } else {
-                            command(event, emptyArray())
                         }
                     }
                 }

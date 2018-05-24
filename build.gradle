@@ -31,7 +31,7 @@ plugins {
 }
 
 group 'io.iskylake.lakebot'
-version '0.1.0'
+version '0.2.4'
 
 apply plugin: 'kotlin'
 
@@ -53,6 +53,7 @@ dependencies {
     compile "net.dv8tion:JDA:3.6.0_367"
     compile "org.slf4j:slf4j-simple:1.7.5"
     compile "org.json:json:20171018"
+    compile "org.codehaus.groovy:groovy:3.0.0-alpha-1"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-script-runtime:$kotlin_version"

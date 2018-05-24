@@ -16,6 +16,7 @@
 
 package io.iskylake.lakebot
 
+import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
@@ -28,13 +29,12 @@ import net.dv8tion.jda.core.entities.Game.streaming
 
 import kotlin.system.exitProcess
 
-import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmDaemonLocalEvalScriptEngineFactory as KotlinEvalFactory
-
 val DEFAULT_COMMANDS = listOf(
-    UptimeCommand(),
-    HelpCommand()
+        HelpCommand(),
+        UptimeCommand(),
+        EvalCommand(),
+        ShutdownCommand()
 )
-val SCRIPT_ENGINE = KotlinEvalFactory().scriptEngine
 lateinit var DISCORD: JDA
 fun main(args: Array<String>) {
     try {
@@ -52,13 +52,6 @@ fun main(args: Array<String>) {
                 game {
                     streaming("${Immutable.VERSION} | ${Immutable.DEFAULT_PREFIX}help", "https://twitch.tv/raidlier")
                 }
-            }
-            while (true) {
-                val read = readLine() ?: "this"
-                if (read == "exit") {
-                    break
-                }
-                println(SCRIPT_ENGINE.eval(read))
             }
             System.setProperty("lakebot.version", Immutable.VERSION)
             System.setProperty("kotlin.version", KotlinVersion.CURRENT.toString())
