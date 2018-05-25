@@ -19,6 +19,7 @@ package io.iskylake.lakebot
 import io.iskylake.lakebot.commands.`fun`.*
 import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
+import io.iskylake.lakebot.commands.moderation.*
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
 import io.iskylake.lakebot.entities.handlers.EventHandler
@@ -40,7 +41,9 @@ val DEFAULT_COMMANDS = listOf(
         SayCommand(),
         // General
         HelpCommand(),
-        UptimeCommand()
+        UptimeCommand(),
+        // Moderation
+        PruneCommand()
 )
 lateinit var DISCORD: JDA
 fun main(args: Array<String>) {
