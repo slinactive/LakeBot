@@ -90,7 +90,7 @@ class EvalCommand : Command {
                 "kotlin.streams",
                 "kotlin.properties"
         )
-        val IMPORT_REGEX = "(\")?(import\\s+(\\w+|\\d+|_|\\*|\\.)+(?:\\s+(as){1}\\s+(\\w+|\\d+|_))?;?)(\")?".toRegex()
+        val IMPORT_REGEX = "(\")?(import\\s+(\\w+|\\d+|_|\\*|\\.)+(?:\\s+(as)\\s+(\\w+|\\d+|_))?;?)(\")?".toRegex()
     }
     override val name = "eval"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <code>"
