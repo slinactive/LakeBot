@@ -28,7 +28,7 @@ object TimeUtils {
         val instant: Instant = Instant.ofEpochMilli(millis)
         return instant.atZone(zone).toOffsetDateTime()
     }
-    inline fun millisToDate(crossinline millis: () -> Long, zone: ZoneId = ZoneId.of("Etc/GMT0")) = millisToDate(millis(), zone)
+    inline fun millisToDate(zone: ZoneId = ZoneId.of("Etc/GMT0"), crossinline millis: () -> Long) = millisToDate(millis(), zone)
     fun weeksToDays(weeks: Long): Long = weeks * 7
     fun weeksToHours(weeks: Long): Long = weeksToDays(weeks) * 24
     fun weeksToMinutes(weeks: Long): Long = weeksToHours(weeks) * 60
