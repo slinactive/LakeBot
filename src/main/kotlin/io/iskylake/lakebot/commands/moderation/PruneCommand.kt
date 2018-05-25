@@ -18,10 +18,11 @@ package io.iskylake.lakebot.commands.moderation
 
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
+
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.User
-
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+
 import java.util.concurrent.TimeUnit
 
 class PruneCommand : Command {
@@ -32,7 +33,7 @@ class PruneCommand : Command {
         val dash = '\u2014'
         """$command $dash clears all messages
             |$command @mention $dash clears messages from specified user
-            |$command embeds $dash clears embed messages
+            |$command embeds $dash clears embed mогessages
             |$command invites $dash clears messages with invite links
             |$command attachments $dash clears messages with attachments
             |$command bots $dash clears messages from bots
