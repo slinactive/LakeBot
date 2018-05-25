@@ -26,7 +26,9 @@ import io.iskylake.lakebot.entities.handlers.EventHandler
 import kotlinx.coroutines.experimental.runBlocking
 
 import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.OnlineStatus
 import net.dv8tion.jda.core.entities.Game.streaming
+import net.dv8tion.jda.core.entities.Game.watching
 
 import kotlin.system.exitProcess
 
@@ -43,10 +45,7 @@ val DEFAULT_COMMANDS = listOf(
 lateinit var DISCORD: JDA
 fun main(args: Array<String>) {
     try {
-        runBlocking<Unit> {
-            for (command in DEFAULT_COMMANDS) {
-                CommandHandler += command
-            }
+        runBlocking {
             DISCORD = buildJDA {
                 token {
                     Immutable.BOT_TOKEN
@@ -55,11 +54,19 @@ fun main(args: Array<String>) {
                     EventHandler
                 }
                 game {
-                    streaming("${Immutable.VERSION} | ${Immutable.DEFAULT_PREFIX}help", "https://twitch.tv/raidlier")
+                    watching("loading..")
                 }
+                onlineStatus {
+                    OnlineStatus.DO_NOT_DISTURB
+                }
+            }
+            for (command in DEFAULT_COMMANDS) {
+                CommandHandler += command
             }
             System.setProperty("lakebot.version", Immutable.VERSION)
             System.setProperty("kotlin.version", KotlinVersion.CURRENT.toString())
+            DISCORD.presence.game = streaming("${Immutable.VERSION} | ${Immutable.DEFAULT_PREFIX}help", "https://twitch.tv/raidlier")
+            DISCORD.presence.status = OnlineStatus.ONLINE
         }
     } catch (e: Exception) {
         e.printStackTrace()
