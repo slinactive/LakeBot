@@ -64,12 +64,9 @@ fun String.capitalizeAll(isForce: Boolean = false): String {
     }
     return chars.joinToString("")
 }
-operator fun String.times(num: Int): String {
-    val str: String = this
-    return buildString {
-        repeat(num) {
-            append(str)
-        }
+operator fun String.times(num: Int): String = buildString {
+    repeat(num) {
+        append(this@times)
     }
 }
 fun String.safeSubstring(begin: Int, end: Int = this.count()) = try {
