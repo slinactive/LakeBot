@@ -33,7 +33,7 @@ class PruneCommand : Command {
         val dash = '\u2014'
         """$command $dash clears all messages
             |$command @mention $dash clears messages from specified user
-            |$command embeds $dash clears embed mогessages
+            |$command embeds $dash clears embed messages
             |$command invites $dash clears messages with invite links
             |$command attachments $dash clears messages with attachments
             |$command bots $dash clears messages from bots
