@@ -25,6 +25,7 @@ object Immutable {
     const val DEFAULT_PREFIX = "lb!"
     const val VERSION = "0.3.0"
     const val PERMISSIONS = 2146958591L
+    const val GITHUB_REPOSITORY = "https://github.com/ISkylakeS/LakeBot"
     val LOGGER = LoggerFactory.getLogger("LakeBot")!!
     val EVAL_THREAD_POOL = Executors.newSingleThreadExecutor()!!
     val BOT_TOKEN = System.getenv("BOT_TOKEN")!!
