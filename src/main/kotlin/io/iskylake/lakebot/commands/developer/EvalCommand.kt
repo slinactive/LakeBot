@@ -221,8 +221,10 @@ class EvalCommand : Command {
                     else -> event.sendError("That's not a valid language!").queue()
                 }
             } else {
-                event.sendError("You didn't surround your script with code block!")
+                event.sendError("You didn't surround your script with code block!").queue()
             }
+        } else {
+            event.sendError("You specified no code!").queue()
         }
     }
 }

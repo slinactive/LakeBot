@@ -16,6 +16,7 @@
 
 package io.iskylake.lakebot
 
+import io.iskylake.lakebot.commands.`fun`.*
 import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
 import io.iskylake.lakebot.entities.extensions.*
@@ -30,10 +31,14 @@ import net.dv8tion.jda.core.entities.Game.streaming
 import kotlin.system.exitProcess
 
 val DEFAULT_COMMANDS = listOf(
-        HelpCommand(),
-        UptimeCommand(),
+        // Developer
         EvalCommand(),
-        ShutdownCommand()
+        ShutdownCommand(),
+        // Fun
+        SayCommand(),
+        // General
+        HelpCommand(),
+        UptimeCommand()
 )
 lateinit var DISCORD: JDA
 fun main(args: Array<String>) {

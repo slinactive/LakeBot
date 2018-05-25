@@ -30,8 +30,14 @@ plugins {
     id 'java'
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.iskylake.lakebot.LakeBotKt'
+    }
+}
+
 group 'io.iskylake.lakebot'
-version '0.2.4'
+version '0.2.7'
 
 apply plugin: 'kotlin'
 
@@ -64,9 +70,11 @@ dependencies {
 }
 
 compileKotlin {
+    kotlinOptions.freeCompilerArgs = ["-Xenable-jvm-default"]
     kotlinOptions.jvmTarget = "1.8"
 }
 compileTestKotlin {
+    kotlinOptions.freeCompilerArgs = ["-Xenable-jvm-default"]
     kotlinOptions.jvmTarget = "1.8"
 }
 kotlin {
