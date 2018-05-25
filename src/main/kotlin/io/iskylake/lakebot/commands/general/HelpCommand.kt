@@ -21,6 +21,7 @@ import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.commands.CommandCategory
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
+import net.dv8tion.jda.core.entities.MessageEmbed
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
@@ -53,9 +54,14 @@ class HelpCommand : Command {
                     edit += command
                     categories += category to edit
                 }
+                val commandFields = mutableListOf<MessageEmbed.Field>()
                 for ((category, commands) in categories) {
-                    field(title = "${category().capitalize()} Commands:") {
-                        commands.map { it.name }.joinToString(", ")
+                    val list = commands.map { it.name }.sorted().joinToString(", ")
+                    commandFields += MessageEmbed.Field("${category().capitalize()} Commands:", list, false)
+                }
+                for (field in commandFields) {
+                    field {
+                        field
                     }
                 }
             }

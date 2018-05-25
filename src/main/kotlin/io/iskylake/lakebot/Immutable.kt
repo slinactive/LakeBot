@@ -23,7 +23,7 @@ import java.util.concurrent.Executors
 
 object Immutable {
     const val DEFAULT_PREFIX = "lb!"
-    const val VERSION = "0.2.9"
+    const val VERSION = "0.3.0"
     const val PERMISSIONS = 2146958591L
     val LOGGER = LoggerFactory.getLogger("LakeBot")!!
     val EVAL_THREAD_POOL = Executors.newSingleThreadExecutor()!!

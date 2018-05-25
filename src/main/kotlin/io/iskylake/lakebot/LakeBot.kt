@@ -41,6 +41,7 @@ val DEFAULT_COMMANDS = listOf(
         SayCommand(),
         // General
         HelpCommand(),
+        PingCommand(),
         UptimeCommand(),
         // Moderation
         PruneCommand()
