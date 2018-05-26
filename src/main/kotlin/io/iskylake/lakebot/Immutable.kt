@@ -25,6 +25,7 @@ object Immutable {
     const val VERSION = "0.3.1"
     const val PERMISSIONS = 2146958591L
     const val GITHUB_REPOSITORY = "https://github.com/ISkylakeS/LakeBot"
+    const val SUPPORT_INVITE = "https://discord.gg/QsTevwF"
     val LOGGER = LoggerFactory.getLogger("LakeBot")!!
     val BOT_TOKEN = System.getenv("BOT_TOKEN")!!
     val SUCCESS = Color(232, 66, 102)

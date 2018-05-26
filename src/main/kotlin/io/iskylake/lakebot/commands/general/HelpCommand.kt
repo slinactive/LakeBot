@@ -38,7 +38,7 @@ class HelpCommand : Command {
                     event.selfUser.effectiveAvatarUrl
                 }
                 description {
-                    "**[Support Server](https://discord.gg/QsTevwF)** \u2022 **[Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)** \u2022 **[GitHub Repository](${Immutable.GITHUB_REPOSITORY})**"
+                    "**[Support Server](${Immutable.SUPPORT_INVITE})** \u2022 **[Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)** \u2022 **[GitHub Repository](${Immutable.GITHUB_REPOSITORY})**"
                 }
                 timestamp()
                 footer(event.author.effectiveAvatarUrl) {
