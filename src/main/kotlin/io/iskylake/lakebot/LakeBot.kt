@@ -20,6 +20,7 @@ import io.iskylake.lakebot.commands.`fun`.*
 import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
 import io.iskylake.lakebot.commands.moderation.*
+import io.iskylake.lakebot.commands.utils.*
 import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
@@ -47,7 +48,9 @@ val DEFAULT_COMMANDS = listOf(
         PingCommand(),
         UptimeCommand(),
         // Moderation
-        PruneCommand()
+        PruneCommand(),
+        // Utils
+        QRCommand()
 )
 lateinit var DISCORD: JDA
 fun main(args: Array<String>) {
