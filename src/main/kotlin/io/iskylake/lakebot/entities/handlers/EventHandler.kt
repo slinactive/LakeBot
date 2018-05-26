@@ -18,7 +18,10 @@ package io.iskylake.lakebot.entities.handlers
 
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.entities.extensions.*
+import io.iskylake.lakebot.utils.AudioUtils
 
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMoveEvent
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException
 import net.dv8tion.jda.core.hooks.ListenerAdapter
@@ -66,6 +69,22 @@ object EventHandler : ListenerAdapter() {
                     event.selfUser.effectiveAvatarUrl
                 }
             })
+        }
+    }
+    override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
+        if (event.guild.selfMember.isConnected && event.guild.selfMember.connectedChannel == event.channelLeft) {
+            val members = event.channelLeft.members.filter { !it.user.isBot }
+            if (members.isEmpty()) {
+                AudioUtils.clear(event.guild, AudioUtils[event.guild])
+            }
+        }
+    }
+    override fun onGuildVoiceMove(event: GuildVoiceMoveEvent) {
+        if (event.guild.selfMember.isConnected && event.guild.selfMember.connectedChannel == event.channelLeft) {
+            val members = event.channelLeft.members.filter { !it.user.isBot }
+            if (members.isEmpty()) {
+                AudioUtils.clear(event.guild, AudioUtils[event.guild])
+            }
         }
     }
 }
