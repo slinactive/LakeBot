@@ -19,13 +19,19 @@ package io.iskylake.lakebot.entities.handlers
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.sendError
+
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.newFixedThreadPoolContext
+
 import net.dv8tion.jda.core.entities.MessageType
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 
-object CommandHandler {
+import kotlin.coroutines.experimental.CoroutineContext
+
+object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Command-Thread") {
     val registeredCommands = mutableListOf<Command>()
     private val cooldowns = mutableMapOf<String, OffsetDateTime>()
     operator fun iterator() = registeredCommands.iterator()
@@ -55,14 +61,23 @@ object CommandHandler {
                     if (command.isDeveloper && event.author.idLong !in Immutable.DEVELOPERS) {
                         event.sendError("You don't have permissions to execute this command!").queue()
                     } else {
-                        if (command.cooldown > 0) {
-                            val key = "${command.name}|${event.author.id}"
-                            val time = getRemainingCooldown(key)
-                            if (time > 0) {
-                                val error: String? = getCooldownError(time)
-                                if (error !== null) {
-                                    event.channel.sendError(error).queue()
+                        launch(this) {
+                            if (command.cooldown > 0) {
+                                val key = "${command.name}|${event.author.id}"
+                                val time = getRemainingCooldown(key)
+                                if (time > 0) {
+                                    val error: String? = getCooldownError(time)
+                                    if (error !== null) {
+                                        event.channel.sendError(error).queue()
+                                    } else {
+                                        if (args.size > 1) {
+                                            command(event, args[1].split("\\s+".toRegex()).toTypedArray())
+                                        } else {
+                                            command(event, emptyArray())
+                                        }
+                                    }
                                 } else {
+                                    applyCooldown(key, command.cooldown)
                                     if (args.size > 1) {
                                         command(event, args[1].split("\\s+".toRegex()).toTypedArray())
                                     } else {
@@ -70,18 +85,11 @@ object CommandHandler {
                                     }
                                 }
                             } else {
-                                applyCooldown(key, command.cooldown)
                                 if (args.size > 1) {
                                     command(event, args[1].split("\\s+".toRegex()).toTypedArray())
                                 } else {
                                     command(event, emptyArray())
                                 }
-                            }
-                        } else {
-                            if (args.size > 1) {
-                                command(event, args[1].split("\\s+".toRegex()).toTypedArray())
-                            } else {
-                                command(event, emptyArray())
                             }
                         }
                     }

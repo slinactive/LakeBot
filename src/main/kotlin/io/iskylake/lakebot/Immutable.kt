@@ -19,7 +19,6 @@ package io.iskylake.lakebot
 import org.slf4j.LoggerFactory
 
 import java.awt.Color
-import java.util.concurrent.Executors
 
 object Immutable {
     const val DEFAULT_PREFIX = "lb!"
@@ -27,7 +26,6 @@ object Immutable {
     const val PERMISSIONS = 2146958591L
     const val GITHUB_REPOSITORY = "https://github.com/ISkylakeS/LakeBot"
     val LOGGER = LoggerFactory.getLogger("LakeBot")!!
-    val EVAL_THREAD_POOL = Executors.newSingleThreadExecutor()!!
     val BOT_TOKEN = System.getenv("BOT_TOKEN")!!
     val SUCCESS = Color(232, 66, 102)
     val FAILURE = Color(239, 67, 63)

@@ -134,38 +134,36 @@ class EvalCommand : Command {
                             }
                         }
                         val script = "$scriptPrefix\n$scr"
-                        Immutable.EVAL_THREAD_POOL.submit {
-                            try {
-                                val evaluated: Any? = engine.eval(script)
-                                if (evaluated !== null) {
-                                    when (evaluated) {
-                                        is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                                        is MessageEmbed -> event.channel.sendMessage(evaluated).queue()
-                                        is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                                        is Message -> event.channel.sendMessage(evaluated).queue()
-                                        is RestAction<*> -> evaluated.queue()
-                                        is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
-                                        else -> event.channel.sendMessage("$evaluated").queue()
-                                    }
+                        try {
+                            val evaluated: Any? = engine.eval(script)
+                            if (evaluated !== null) {
+                                when (evaluated) {
+                                    is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
+                                    is MessageEmbed -> event.channel.sendMessage(evaluated).queue()
+                                    is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
+                                    is Message -> event.channel.sendMessage(evaluated).queue()
+                                    is RestAction<*> -> evaluated.queue()
+                                    is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
+                                    else -> event.channel.sendMessage("$evaluated").queue()
                                 }
-                            } catch (t: Throwable) {
-                                event.sendMessage(buildEmbed {
-                                    color {
-                                        Immutable.FAILURE
-                                    }
-                                    author {
-                                        "An error has occured:"
-                                    }
-                                    description {
-                                        """```kotlin
+                            }
+                        } catch (t: Throwable) {
+                            event.sendMessage(buildEmbed {
+                                color {
+                                    Immutable.FAILURE
+                                }
+                                author {
+                                    "An error has occured:"
+                                }
+                                description {
+                                    """```kotlin
                                             |${t::class.qualifiedName ?: t.javaClass.name}
                                             |
                                             |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
-                                    }
-                                    timestamp()
-                                }).queue()
-                            }
-                        }.get()
+                                }
+                                timestamp()
+                            }).queue()
+                        }
                     }
                     content.startsWith("groovy", true) -> {
                         val script = buildString {
@@ -185,38 +183,36 @@ class EvalCommand : Command {
                         engine.setVariable("member", event.member)
                         engine.setVariable("selfUser", event.jda.selfUser)
                         engine.setVariable("selfMember", event.guild.selfMember)
-                        Immutable.EVAL_THREAD_POOL.submit {
-                            try {
-                                val evaluated: Any? = engine.evaluate(script)
-                                if (evaluated !== null) {
-                                    when (evaluated) {
-                                        is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                                        is MessageEmbed -> event.channel.sendMessage(evaluated).queue()
-                                        is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                                        is Message -> event.channel.sendMessage(evaluated).queue()
-                                        is RestAction<*> -> evaluated.queue()
-                                        is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
-                                        else -> event.channel.sendMessage("$evaluated").queue()
-                                    }
+                        try {
+                            val evaluated: Any? = engine.evaluate(script)
+                            if (evaluated !== null) {
+                                when (evaluated) {
+                                    is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
+                                    is MessageEmbed -> event.channel.sendMessage(evaluated).queue()
+                                    is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
+                                    is Message -> event.channel.sendMessage(evaluated).queue()
+                                    is RestAction<*> -> evaluated.queue()
+                                    is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
+                                    else -> event.channel.sendMessage("$evaluated").queue()
                                 }
-                            } catch (t: Throwable) {
-                                event.sendMessage(buildEmbed {
-                                    color {
-                                        Immutable.FAILURE
-                                    }
-                                    author {
-                                        "An error has occured:"
-                                    }
-                                    description {
-                                        """```groovy
+                            }
+                        } catch (t: Throwable) {
+                            event.sendMessage(buildEmbed {
+                                color {
+                                    Immutable.FAILURE
+                                }
+                                author {
+                                    "An error has occured:"
+                                }
+                                description {
+                                    """```groovy
                                             |${t::class.qualifiedName ?: t.javaClass.name}
                                             |
                                             |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
-                                    }
-                                    timestamp()
-                                }).queue()
-                            }
-                        }.get()
+                                }
+                                timestamp()
+                            }).queue()
+                        }
                     }
                     else -> event.sendError("That's not a valid language!").queue()
                 }
