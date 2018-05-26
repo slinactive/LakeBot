@@ -27,7 +27,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 class LoopCommand : Command {
     override val name = "loop"
     override val aliases = listOf("repeat")
-    override val description = "N/A"
+    override val description = "The command that enables or disables song looping"
     override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()

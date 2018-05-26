@@ -28,7 +28,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 class PlayingCommand : Command {
     override val name = "playing"
     override val aliases = listOf("now", "np")
-    override val description = "N/A"
+    override val description = "The command that sends info about the song that is currently playing"
     override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()

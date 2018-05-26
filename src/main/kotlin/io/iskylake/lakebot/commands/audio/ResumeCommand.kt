@@ -27,7 +27,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 class ResumeCommand : Command {
     override val name = "resume"
     override val aliases = listOf("continue")
-    override val description = "N/A"
+    override val description = "The command that continues the song after the pause"
     override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()

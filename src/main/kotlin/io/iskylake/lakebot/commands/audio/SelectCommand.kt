@@ -25,7 +25,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 class SelectCommand : Command {
     override val name = "select"
     override val aliases = listOf("playat", "skipto")
-    override val description = "N/A"
+    override val description = "The command that plays the specified song from the queue by the index"
     override val usage: (String) -> String = { "${super.usage(it)} <index>" }
     override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {

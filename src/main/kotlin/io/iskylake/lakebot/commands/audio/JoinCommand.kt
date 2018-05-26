@@ -23,6 +23,6 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 class JoinCommand : Command {
     override val name = "join"
-    override val description = "N/A"
+    override val description = "The command, after which the bot joins your voice channel"
     override fun invoke(event: MessageReceivedEvent, args: Array<String>) = AudioUtils.joinChannel { event }
 }
