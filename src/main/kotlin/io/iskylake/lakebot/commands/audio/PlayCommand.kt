@@ -25,10 +25,10 @@ import io.iskylake.lakebot.utils.AudioUtils
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
-class PlayCommand : Command {
+open class PlayCommand internal constructor() : Command {
     override val name = "play"
     override val description = "N/A"
-    override val usage: (String) -> String = { "${super.usage(it)} <link>" }
+    override val usage: (String) -> String = { "${super.usage(it)} <query/link>" }
     override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member.isConnected) {

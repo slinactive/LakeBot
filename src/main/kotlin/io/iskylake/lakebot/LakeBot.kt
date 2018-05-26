@@ -52,6 +52,7 @@ val DEFAULT_COMMANDS = listOf(
         SelectCommand(),
         SkipCommand(),
         StopCommand(),
+        YouTubePlayCommand(),
         // Developer
         EvalCommand(),
         ShutdownCommand(),
