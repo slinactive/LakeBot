@@ -26,9 +26,10 @@ import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageEmbed
-
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.requests.RestAction
+
+import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 
 import javax.script.ScriptContext
 import javax.script.ScriptEngineManager
@@ -94,6 +95,12 @@ class EvalCommand : Command {
                 "kotlin.properties"
         )
         val IMPORT_REGEX = "(\")?(import\\s+(\\w+|\\d+|_|\\*|\\.)+(?:\\s+(as)\\s+(\\w+|\\d+|_))?;?)(\")?".toRegex()
+    }
+    init {
+        val os = System.getProperty("os.name")?.toLowerCase()
+        if (os?.startsWith("win") == true) {
+            setIdeaIoUseFallback()
+        }
     }
     override val name = "eval"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <code>"
