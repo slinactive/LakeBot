@@ -56,7 +56,7 @@ class HelpCommand : Command {
                 }
                 val commandFields = mutableListOf<MessageEmbed.Field>()
                 for ((category, commands) in categories) {
-                    val list = commands.map { it.name }.sorted().joinToString(", ")
+                    val list = commands.map { it.name }.sorted().joinToString()
                     commandFields += MessageEmbed.Field("${category().capitalize()} Commands:", list, false)
                 }
                 for (field in commandFields) {
@@ -85,7 +85,7 @@ class HelpCommand : Command {
                         }
                         if (command.aliases.isNotEmpty()) {
                             field(title = "Aliases:") {
-                                "`${command.aliases.joinToString("`, `")}`"
+                                command.aliases.joinToString()
                             }
                         }
                         field(title = "Usage:") {
