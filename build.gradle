@@ -37,7 +37,7 @@ jar {
 }
 
 group 'io.iskylake.lakebot'
-version '0.3.1'
+version '0.3.2'
 
 apply plugin: 'kotlin'
 
