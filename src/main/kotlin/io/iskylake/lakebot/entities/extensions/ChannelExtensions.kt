@@ -19,7 +19,11 @@ package io.iskylake.lakebot.entities.extensions
 import net.dv8tion.jda.core.entities.MessageChannel
 
 import io.iskylake.lakebot.Immutable
+import io.iskylake.lakebot.entities.EventWaiter
 
+import net.dv8tion.jda.core.entities.User
+
+fun MessageChannel.awaitMessage(user: User) = EventWaiter.awaitMessage(user, this)
 fun MessageChannel.sendSuccess(text: String) = this.sendMessage(buildEmbed {
     color { Immutable.SUCCESS }
     author { "Successfully!" }

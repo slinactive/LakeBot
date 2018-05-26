@@ -16,10 +16,10 @@
 
 package io.iskylake.lakebot.entities.extensions
 
-import net.dv8tion.jda.core.entities.PrivateChannel
+import io.iskylake.lakebot.entities.EventWaiter
+
+import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.User
 
-val User.privateChannel: PrivateChannel
-    get() = this.openPrivateChannel().complete()
-val User.tag: String
-    get() = "${this.name}#${this.discriminator}"
+fun Message.awaitConfirmation(user: User) = EventWaiter.awaitConfirmation(this, user)
+fun Message.awaitNullableConfirmation(user: User) = EventWaiter.awaitNullableConfirmation(this, user)

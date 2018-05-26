@@ -18,11 +18,7 @@ package io.iskylake.lakebot.commands.developer
 
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
-import io.iskylake.lakebot.entities.EventWaiter
-import io.iskylake.lakebot.entities.extensions.selfUser
-import io.iskylake.lakebot.entities.extensions.sendConfirmation
-import io.iskylake.lakebot.entities.extensions.sendError
-import io.iskylake.lakebot.entities.extensions.sendSuccess
+import io.iskylake.lakebot.entities.extensions.*
 
 import kotlin.system.exitProcess
 
@@ -33,7 +29,7 @@ class ShutdownCommand : Command {
     override val description = "The command that shutdowns LakeBot"
     override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         event.sendConfirmation("Are you sure want to shutdown ${event.selfUser.name}?").queue {
-            val confirmation = EventWaiter.awaitNullableConfirmation(it, event.author)
+            val confirmation = it.awaitNullableConfirmation(event.author)
             if (confirmation !== null) {
                 if (confirmation) {
                     Immutable.LOGGER.info("LakeBot is going offline!")

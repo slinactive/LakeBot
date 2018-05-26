@@ -16,10 +16,41 @@
 
 package io.iskylake.lakebot.entities.extensions
 
-import net.dv8tion.jda.core.entities.PrivateChannel
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.EmbedBuilder
+import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.core.requests.restaction.MessageAction
 
-val User.privateChannel: PrivateChannel
-    get() = this.openPrivateChannel().complete()
-val User.tag: String
-    get() = "${this.name}#${this.discriminator}"
+fun MessageReceivedEvent.awaitMessage(user: User) = channel.awaitMessage(user)
+val MessageReceivedEvent.selfUser: SelfUser
+    get() = this.jda.selfUser
+val MessageReceivedEvent.selfMember: Member?
+    get() = try {
+        guild.selfMember
+    } catch (e: Exception) {
+        null
+    }
+val MessageReceivedEvent.argsRaw: String?
+    get() = try {
+        message.contentRaw.split("\\s+".toRegex(), 2)[1]
+    } catch (e: Exception) {
+        null
+    }
+val MessageReceivedEvent.argsDisplay: String?
+    get() = try {
+        message.contentDisplay.split("\\s+".toRegex(), 2)[1]
+    } catch (e: Exception) {
+        null
+    }
+val MessageReceivedEvent.argsStripped: String?
+    get() = try {
+        message.contentStripped.split("\\s+".toRegex(), 2)[1]
+    } catch (e: Exception) {
+        null
+    }
+fun MessageReceivedEvent.sendMessage(text: String): MessageAction = this.channel.sendMessage(text)
+fun MessageReceivedEvent.sendMessage(embed: MessageEmbed): MessageAction = this.channel.sendMessage(embed)
+fun MessageReceivedEvent.sendMessage(builder: EmbedBuilder): MessageAction = this.channel.sendMessage(builder.build())
+fun MessageReceivedEvent.sendSuccess(text: String): MessageAction = this.channel.sendSuccess(text)
+fun MessageReceivedEvent.sendError(text: String): MessageAction = this.channel.sendError(text)
+fun MessageReceivedEvent.sendConfirmation(text: String): MessageAction = this.channel.sendConfirmation(text)
