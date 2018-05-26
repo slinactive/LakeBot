@@ -46,10 +46,10 @@ class PlayingCommand : Command {
                     Immutable.SUCCESS
                 }
                 author("LakePlayer") {
-                    event.author.effectiveAvatarUrl
+                    event.selfUser.effectiveAvatarUrl
                 }
                 thumbnail {
-                    event.author.effectiveAvatarUrl
+                    event.selfUser.effectiveAvatarUrl
                 }
                 field(title = "Now Playing:") {
                     "**[$title]($url)**"
