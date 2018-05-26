@@ -16,6 +16,7 @@
 
 package io.iskylake.lakebot.utils
 
+import io.iskylake.lakebot.Immutable
 import net.glxn.qrgen.core.image.ImageType
 import net.glxn.qrgen.javase.QRCode
 import java.awt.Color
@@ -57,7 +58,7 @@ object ImageUtils {
     fun bytesToImage(bytes: ByteArray) = ImageIO.read(ByteArrayInputStream(bytes))
     fun urlToBytes(url: URL): ByteArray {
         val connection = url.openConnection() as HttpURLConnection
-        connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3416.0 Safari/537.36")
+        connection.addRequestProperty("User-Agent", Immutable.USER_AGENT)
         return connection.inputStream.readBytes()
     }
     fun getColorImage(c: Color, width: Int = 150, height: Int = 150): ByteArray {
