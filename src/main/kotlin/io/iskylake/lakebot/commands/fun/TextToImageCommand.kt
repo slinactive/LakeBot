@@ -17,22 +17,22 @@
 package io.iskylake.lakebot.commands.utils
 
 import io.iskylake.lakebot.commands.Command
-import io.iskylake.lakebot.entities.extensions.argsRaw
+import io.iskylake.lakebot.entities.extensions.argsStripped
 import io.iskylake.lakebot.entities.extensions.sendError
 import io.iskylake.lakebot.utils.ImageUtils
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
-class QRCommand : Command {
-    override val name = "qr"
-    override val aliases = listOf("qrcode", "makeqr")
-    override val description = "The command that creates an image with QR code from the given text"
+class TextToImageCommand : Command {
+    override val name = "tti"
+    override val aliases = listOf("texttoimage")
+    override val description = "The command that turns your text into an image"
     override val usage: (String) -> String = { "${super.usage(it)} <text>" }
-    override val cooldown = 2L
+    override val cooldown = 3L
     override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        if (event.argsRaw !== null) {
+        if (event.argsStripped !== null) {
             try {
-                event.channel.sendFile(ImageUtils.getQRCode(event.argsRaw!!), "qr.png").queue()
+                event.channel.sendFile(ImageUtils.getImagedText(event.argsStripped!!.split("\n")), "tti.png").queue()
             } catch (e: Exception) {
                 event.sendError("Something went wrong!").queue()
             }

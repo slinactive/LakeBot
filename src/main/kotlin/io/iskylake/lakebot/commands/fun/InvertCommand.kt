@@ -30,6 +30,7 @@ class InvertCommand : Command {
     override val name = "invert"
     override val description = "The command that inverts attached image or avatar of specified user"
     override val aliases = listOf("negative", "negate")
+    override val cooldown = 3L
     override val usage: (String) -> String = {
         val command = super.usage(it)
         """$command (without attachments) -> inverts your avatar

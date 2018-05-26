@@ -42,6 +42,7 @@ val DEFAULT_COMMANDS = listOf(
         // Fun
         InvertCommand(),
         SayCommand(),
+        TextToImageCommand(),
         // General
         AboutCommand(),
         HelpCommand(),
