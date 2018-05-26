@@ -16,10 +16,12 @@
 
 package io.iskylake.lakebot
 
+import io.iskylake.lakebot.commands.TestCommand
 import io.iskylake.lakebot.commands.`fun`.*
 import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
 import io.iskylake.lakebot.commands.moderation.*
+import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
 import io.iskylake.lakebot.entities.handlers.EventHandler
@@ -34,6 +36,7 @@ import net.dv8tion.jda.core.entities.Game.watching
 import kotlin.system.exitProcess
 
 val DEFAULT_COMMANDS = listOf(
+        TestCommand,
         // Developer
         EvalCommand(),
         ShutdownCommand(),
@@ -56,6 +59,9 @@ fun main(args: Array<String>) {
                 }
                 eventListener {
                     EventHandler
+                }
+                eventListener {
+                    EventWaiter
                 }
                 game {
                     watching("loading..")
