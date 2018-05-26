@@ -26,11 +26,11 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 
 import io.iskylake.lakebot.audio.GuildMusicManager
-import io.iskylake.lakebot.entities.extensions.sendError
-import io.iskylake.lakebot.entities.extensions.sendSuccess
+import io.iskylake.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 object AudioUtils {
     @JvmField
@@ -74,5 +74,48 @@ object AudioUtils {
             override fun noMatches() = channel.sendError("Nothing found by $trackUrl!").queue()
             override fun loadFailed(exception: FriendlyException) = channel.sendError("This track can't be played!").queue()
         })
+    }
+    inline fun skipTrack(crossinline g: () -> Guild) {
+        val manager = this[g()]
+        manager.trackScheduler.queue -= manager.audioPlayer.playingTrack
+        if (manager.trackScheduler.queue.isNotEmpty()) {
+            manager.audioPlayer.startTrack(manager.trackScheduler.queue.poll(), false)
+        } else {
+            manager.audioPlayer.destroy()
+        }
+    }
+    inline fun joinChannel(crossinline e: () -> MessageReceivedEvent) {
+        val event = e()
+        when {
+            !event.member.isConnected -> event.sendError("You're not in the voice channel!").queue()
+            event.guild.selfMember.isConnected && event.member.connectedChannel == event.guild.selfMember.connectedChannel -> event.sendError("I'm already in this voice channel!").queue()
+            else -> {
+                event.guild.audioManager.openAudioConnection(event.member.connectedChannel)
+                event.channel.sendSuccess("Joined the voice channel!").queue()
+            }
+        }
+    }
+    fun clear(manager: GuildMusicManager) {
+        manager.audioPlayer.isPaused = false
+        manager.audioPlayer.playingTrack?.stop()
+        manager.audioPlayer.destroy()
+        manager.trackScheduler.isLoop = false
+        manager.trackScheduler.clearQueue()
+    }
+    fun clear(guild: Guild) = clear(this[guild])
+    fun clear(guild: Guild, manager: GuildMusicManager) {
+        clear(manager)
+        guild.audioManager.closeAudioConnection()
+    }
+    inline fun leaveChannel(crossinline e: () -> MessageReceivedEvent) {
+        val event = e()
+        when {
+            !event.member.isConnected -> event.sendError("You're not in the voice channel!").queue()
+            !event.selfMember!!.isConnected -> event.sendError("I'm not in the voice channel!").queue()
+            else -> {
+                clear(event.guild, this[event.guild])
+                event.channel.sendSuccess("Left the voice channel!").queue()
+            }
+        }
     }
 }

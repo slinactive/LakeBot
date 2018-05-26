@@ -26,7 +26,6 @@ import java.util.concurrent.LinkedBlockingQueue
 
 class TrackScheduler(private val player: AudioPlayer) : AudioEventAdapter() {
     val queue: Queue<AudioTrack> = LinkedBlockingQueue()
-    val queuedTracks = LinkedHashSet(queue)
     var isLoop = false
     operator fun plusAssign(track: AudioTrack) {
         if (!player.startTrack(track, true)) {

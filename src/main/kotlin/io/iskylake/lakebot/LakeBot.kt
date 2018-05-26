@@ -17,6 +17,7 @@
 package io.iskylake.lakebot
 
 import io.iskylake.lakebot.commands.`fun`.*
+import io.iskylake.lakebot.commands.audio.*
 import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
 import io.iskylake.lakebot.commands.moderation.*
@@ -32,10 +33,23 @@ import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.OnlineStatus
 import net.dv8tion.jda.core.entities.Game.streaming
 import net.dv8tion.jda.core.entities.Game.watching
+import net.dv8tion.jda.core.entities.User
 
 import kotlin.system.exitProcess
 
 val DEFAULT_COMMANDS = listOf(
+        // Audio
+        JoinCommand(),
+        LeaveCommand(),
+        LoopCommand(),
+        PauseCommand(),
+        PlayCommand(),
+        QueueCommand(),
+        RestartCommand(),
+        ResumeCommand(),
+        SelectCommand(),
+        SkipCommand(),
+        StopCommand(),
         // Developer
         EvalCommand(),
         ShutdownCommand(),
@@ -53,6 +67,7 @@ val DEFAULT_COMMANDS = listOf(
         // Utils
         QRCommand()
 )
+val USERS_WITH_PROCESSES = mutableListOf<User>()
 lateinit var DISCORD: JDA
 fun main(args: Array<String>) {
     try {
