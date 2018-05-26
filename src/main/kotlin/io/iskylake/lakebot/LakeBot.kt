@@ -16,7 +16,6 @@
 
 package io.iskylake.lakebot
 
-import io.iskylake.lakebot.commands.TestCommand
 import io.iskylake.lakebot.commands.`fun`.*
 import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
@@ -36,7 +35,6 @@ import net.dv8tion.jda.core.entities.Game.watching
 import kotlin.system.exitProcess
 
 val DEFAULT_COMMANDS = listOf(
-        TestCommand,
         // Developer
         EvalCommand(),
         ShutdownCommand(),
