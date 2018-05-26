@@ -18,9 +18,11 @@ package io.iskylake.lakebot.commands.developer
 
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
-
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
+import io.iskylake.lakebot.entities.EventWaiter
+import io.iskylake.lakebot.entities.extensions.selfUser
+import io.iskylake.lakebot.entities.extensions.sendConfirmation
+import io.iskylake.lakebot.entities.extensions.sendError
+import io.iskylake.lakebot.entities.extensions.sendSuccess
 
 import kotlin.system.exitProcess
 
@@ -30,14 +32,28 @@ class ShutdownCommand : Command {
     override val name = "shutdown"
     override val description = "The command that shutdowns LakeBot"
     override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        runBlocking {
-            Immutable.LOGGER.info("LakeBot is going offline!")
-            delay(1000)
-            event.message.addReaction(event.jda.getEmoteById(397757496447729664)).queue()
-            delay(1000)
-            event.jda.shutdownNow()
-            delay(1000)
-            exitProcess(0)
+        event.sendConfirmation("Are you sure want to shutdown ${event.selfUser.name}?").queue {
+            val confirmation = EventWaiter.awaitNullableConfirmation(it, event.author)
+            if (confirmation !== null) {
+                if (confirmation) {
+                    Immutable.LOGGER.info("LakeBot is going offline!")
+                    event.channel.sendSuccess("Successfully disconnected!").queue { _ ->
+                        it.delete().queue({
+                            event.jda.shutdownNow()
+                            exitProcess(0)
+                        }) {
+                            event.jda.shutdownNow()
+                            exitProcess(0)
+                        }
+                    }
+                } else {
+                    it.delete().queue()
+                    event.sendSuccess("Successfully cancelled!").queue()
+                }
+            } else {
+                it.delete().queue()
+                event.sendError("Time is up!").queue()
+            }
         }
     }
 }
