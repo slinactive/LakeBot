@@ -41,6 +41,7 @@ val DEFAULT_COMMANDS = listOf(
         // Fun
         SayCommand(),
         // General
+        AboutCommand(),
         HelpCommand(),
         PingCommand(),
         UptimeCommand(),
