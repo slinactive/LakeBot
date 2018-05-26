@@ -39,6 +39,7 @@ val DEFAULT_COMMANDS = listOf(
         EvalCommand(),
         ShutdownCommand(),
         // Fun
+        InvertCommand(),
         SayCommand(),
         // General
         AboutCommand(),

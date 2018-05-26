@@ -12,4 +12,4 @@ As the development has just begun, help from Kotlin programmers (with experience
 * [JDA](https://github.com/DV8FromTheWorld/JDA)
 * [Simple Logging Facade for Java (SLF4J)](https://www.slf4j.org/)
 * [Groovy](https://github.com/apache/groovy)
-* [JSON](http://json.org)
+* [QRGen](https://github.com/kenglxn/QRGen)
