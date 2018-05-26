@@ -53,7 +53,7 @@ class TrackScheduler(private val player: AudioPlayer) : AudioEventAdapter() {
         }
     }
     fun clearQueue() = queue.clear()
-    inline fun receiveQueue(block: (List<AudioTrack>) -> Unit) {
+    inline fun receiveQueue(block: (MutableList<AudioTrack>) -> Unit) {
         val temp = ArrayList(queue)
         block(temp)
         clearQueue()
