@@ -40,6 +40,9 @@ import kotlin.system.exitProcess
 val DEFAULT_COMMANDS = listOf(
         // Audio
         JoinCommand(),
+        JumpCommand(),
+        JumpBackCommand(),
+        JumpForwardCommand(),
         LeaveCommand(),
         LoopCommand(),
         PauseCommand(),

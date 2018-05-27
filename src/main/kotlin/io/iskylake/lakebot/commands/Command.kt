@@ -22,6 +22,8 @@ interface Command {
     val name: String
     val aliases: List<String>
         get() = emptyList()
+    val examples: (String) -> Map<String, String>
+        get() = { _ -> emptyMap() }
     val category: CommandCategory
         get() {
             val args = this.javaClass.`package`.name.split("\\.".toRegex())

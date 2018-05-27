@@ -91,6 +91,15 @@ class HelpCommand : Command {
                         field(title = "Usage:") {
                             command.usage(Immutable.DEFAULT_PREFIX)
                         }
+                        if (command.examples(Immutable.DEFAULT_PREFIX).isNotEmpty()) {
+                            field(title = "Examples:") {
+                                buildString {
+                                    for ((example, description) in command.examples(Immutable.DEFAULT_PREFIX)) {
+                                        appendln("$example \u2014 $description")
+                                    }
+                                }
+                            }
+                        }
                         timestamp()
                         footer(event.author.effectiveAvatarUrl) {
                             "Requested by ${event.author.tag}"
