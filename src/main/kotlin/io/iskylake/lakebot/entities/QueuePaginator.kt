@@ -29,7 +29,6 @@ import kotlinx.coroutines.experimental.async
 
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageChannel
-import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.core.requests.RestAction
@@ -37,11 +36,11 @@ import net.dv8tion.jda.core.requests.RestAction
 import java.util.concurrent.TimeUnit
 
 data class QueuePaginator(
-        private val list: List<AudioTrack>,
+        private val tracks: List<AudioTrack>,
         private val event: MessageReceivedEvent,
         private val action: (Message) -> Unit = {
             try {
-                it.clearReactions().queue()
+                it.clearReactions().queue(null) { _ -> }
             } catch (ignored: Exception) {
             }
         }
@@ -53,7 +52,7 @@ data class QueuePaginator(
         const val RIGHT = "\u25B6"
         const val BIG_RIGHT = "\u23E9"
     }
-    val pages = Lists.partition(list, 10)
+    private val pages: List<List<AudioTrack>> = Lists.partition(tracks, 10)
     operator fun invoke(channel: MessageChannel = event.channel, page: Int = 1) = accept(channel.sendMessage(this[page]), page)
     private fun accept(rest: RestAction<Message>, pageNum: Int) = rest.queue { m ->
         if (pages.size > 1) {
@@ -68,76 +67,72 @@ data class QueuePaginator(
             action(m)
         }
     }
-    private fun waiter(msg: Message, num: Int = 1) {
-        async(EventWaiter) {
-            val e = EventWaiter.receiveEvent<MessageReactionAddEvent>(1, TimeUnit.MINUTES) {
-                val isValidEmote = BIG_LEFT == it.reactionEmote.name || BIG_RIGHT == it.reactionEmote.name || LEFT == it.reactionEmote.name || STOP == it.reactionEmote.name || RIGHT == it.reactionEmote.name
-                it.messageId == msg.id && isValidEmote && event.author == it.user
-            }.await()
-            if (e != null) {
-                var newPageNum = num
-                when (e.reactionEmote.name) {
-                    BIG_LEFT -> newPageNum = 1
-                    LEFT -> {
-                        if (newPageNum > 1) {
-                            newPageNum--
-                        }
-                    }
-                    RIGHT -> {
-                        if (newPageNum < pages.size) {
-                            newPageNum++
-                        }
-                    }
-                    BIG_RIGHT -> newPageNum = pages.size
-                    STOP -> {
-                        action(msg)
-                        return@async
+    private fun waiter(msg: Message, num: Int = 1) = async(EventWaiter) {
+        val e = EventWaiter.receiveEvent<MessageReactionAddEvent>(1, TimeUnit.MINUTES) {
+            val isValidEmote = BIG_LEFT == it.reactionEmote.name || BIG_RIGHT == it.reactionEmote.name || LEFT == it.reactionEmote.name || STOP == it.reactionEmote.name || RIGHT == it.reactionEmote.name
+            it.messageId == msg.id && isValidEmote && event.author == it.user
+        }.await()
+        if (e != null) {
+            var newPageNum = num
+            when (e.reactionEmote.name) {
+                BIG_LEFT -> newPageNum = 1
+                LEFT -> {
+                    if (newPageNum > 1) {
+                        newPageNum--
                     }
                 }
-                try {
-                    e.reaction.removeReaction(e.user).queue()
-                } catch (ignored: Exception) {
+                RIGHT -> {
+                    if (newPageNum < pages.size) {
+                        newPageNum++
+                    }
                 }
-                msg.editMessage(this@QueuePaginator[newPageNum]).queue { msg -> waiter(msg, newPageNum) }
-            } else {
-                action(msg)
+                BIG_RIGHT -> newPageNum = pages.size
+                STOP -> {
+                    action(msg)
+                    return@async
+                }
             }
+            try {
+                e.reaction.removeReaction(e.user).queue()
+            } catch (ignored: Exception) {
+            }
+            msg.editMessage(this@QueuePaginator[newPageNum]).queue { msg -> waiter(msg, newPageNum) }
+        } else {
+            action(msg)
         }
     }
-    private operator fun get(num: Int = 1): MessageEmbed {
+    private operator fun get(num: Int = 1) = buildEmbed {
         val page = when {
             num >= pages.size -> pages.size
             num <= 0 -> 1
             else -> num
         }
         val trackPage = pages[page - 1]
-        return buildEmbed {
-            for (track in trackPage) {
-                appendln {
-                    "**${list.indexOf(track) + 1}. [${track.info.title}](${track.info.uri}) (${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})**"
-                }
+        for (track in trackPage) {
+            appendln {
+                "**${tracks.indexOf(track) + 1}. [${track.info.title}](${track.info.uri}) (${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})**"
             }
-            color {
-                Immutable.SUCCESS
-            }
-            author("LakePlayer") {
-                event.selfUser.effectiveAvatarUrl
-            }
-            field(title = "Total Songs:") {
-                "${AudioUtils[event.guild].trackScheduler.queue.size + 1} songs"
-            }
-            field(title = "Total Duration:") {
-                TimeUtils.asDuration(AudioUtils[event.guild].trackScheduler.queue.map { it.duration }.filter { it != Long.MAX_VALUE }.sum())
-            }
-            field(title = "Looping:") {
-                if (AudioUtils[event.guild].trackScheduler.isLoop) "Enabled" else "Disabled"
-            }
-            field(title = "Now Playing:") {
-                "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
-            }
-            footer(event.author.effectiveAvatarUrl) {
-                "Page $page/${pages.size} | Requested by ${event.author.tag}"
-            }
+        }
+        color {
+            Immutable.SUCCESS
+        }
+        author("LakePlayer") {
+            event.selfUser.effectiveAvatarUrl
+        }
+        field(title = "Total Songs:") {
+            "${AudioUtils[event.guild].trackScheduler.queue.size + 1} songs"
+        }
+        field(title = "Total Duration:") {
+            TimeUtils.asDuration(AudioUtils[event.guild].trackScheduler.queue.map { it.duration }.filter { it != Long.MAX_VALUE }.sum())
+        }
+        field(title = "Looping:") {
+            if (AudioUtils[event.guild].trackScheduler.isLoop) "Enabled" else "Disabled"
+        }
+        field(title = "Now Playing:") {
+            "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
+        }
+        footer(event.author.effectiveAvatarUrl) {
+            "Page $page/${pages.size} | Requested by ${event.author.tag}"
         }
     }
 }
