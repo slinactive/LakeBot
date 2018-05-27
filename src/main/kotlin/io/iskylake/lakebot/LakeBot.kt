@@ -71,7 +71,8 @@ val DEFAULT_COMMANDS = listOf(
         // Moderation
         PruneCommand(),
         // Utils
-        QRCommand()
+        QRCommand(),
+        YouTubeCommand()
 )
 val USERS_WITH_PROCESSES = mutableListOf<User>()
 lateinit var DISCORD: JDA

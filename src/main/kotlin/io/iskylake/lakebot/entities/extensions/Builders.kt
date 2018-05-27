@@ -54,9 +54,9 @@ inline infix fun EmbedBuilder.appendln(crossinline lazy: () -> CharSequence) = t
 inline infix fun EmbedBuilder.field(crossinline lazy: () -> MessageEmbed.Field) = this.addField(lazy())
 inline infix fun EmbedBuilder.color(crossinline lazy: () -> Color) = this.setColor(lazy())
 inline infix fun EmbedBuilder.thumbnail(crossinline lazy: () -> String) = this.setThumbnail(lazy())
-inline infix fun EmbedBuilder.image(crossinline lazy: () -> String) = this.setImage(lazy())
-inline infix fun EmbedBuilder.author(crossinline name: () -> String) = this.setAuthor(name())
-inline fun EmbedBuilder.author(name: String, link: String? = null, crossinline picture: () -> String): EmbedBuilder {
+inline infix fun EmbedBuilder.image(crossinline lazy: () -> String?) = this.setImage(lazy())
+inline infix fun EmbedBuilder.author(crossinline name: () -> String?) = this.setAuthor(name())
+inline fun EmbedBuilder.author(name: String, link: String? = null, crossinline picture: () -> String?): EmbedBuilder {
     return this.setAuthor(name, link, picture())
 }
 inline fun EmbedBuilder.title(url: String? = null, crossinline lazy: () -> String) = this.setTitle(lazy(), url)
