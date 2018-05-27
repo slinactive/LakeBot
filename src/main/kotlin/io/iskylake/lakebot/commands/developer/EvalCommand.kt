@@ -30,6 +30,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.requests.RestAction
 
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
+import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngine
 
 import javax.script.ScriptContext
 import javax.script.ScriptEngineManager
@@ -72,10 +73,16 @@ class EvalCommand : Command {
                 "net.dv8tion.jda.bot.utils.cache",
                 "net.dv8tion.jda.webhook",
                 "io.iskylake.lakebot",
+                "io.iskylake.lakebot.audio",
                 "io.iskylake.lakebot.commands",
+                "io.iskylake.lakebot.commands.audio",
                 "io.iskylake.lakebot.commands.developer",
+                "io.iskylake.lakebot.commands.`fun`",
                 "io.iskylake.lakebot.commands.general",
+                "io.iskylake.lakebot.commands.moderation",
+                "io.iskylake.lakebot.commands.utils",
                 "io.iskylake.lakebot.entities",
+                "io.iskylake.lakebot.entities.annotations",
                 "io.iskylake.lakebot.entities.extensions",
                 "io.iskylake.lakebot.entities.handlers",
                 "io.iskylake.lakebot.utils",
@@ -113,13 +120,13 @@ class EvalCommand : Command {
                 val content = arguments.removeSurrounding("```")
                 when {
                     content.startsWith("kotlin", true) -> {
+                        val engine = ScriptEngineManager().getEngineByExtension("kts") as KotlinJsr223JvmLocalScriptEngine
                         var scr = content.substring(6)
                         val commandImports = mutableListOf<String>()
                         for (result in IMPORT_REGEX.findAll(content).filter { !it.value.contains("\"") }) {
                             commandImports += result.value
                             scr = scr.replace(result.value, "")
                         }
-                        val engine = ScriptEngineManager().getEngineByExtension("kts")
                         engine.put("event", event)
                         engine.put("message", event.message)
                         engine.put("textChannel", event.textChannel)
@@ -138,14 +145,16 @@ class EvalCommand : Command {
                                 appendln(import)
                             }
                             for ((key, value) in engine.getBindings(ScriptContext.ENGINE_SCOPE)) {
-                                val name: String = value::class.qualifiedName!!
-                                val bind = """val $key = bindings["$key"] as $name"""
-                                appendln(bind)
+                                if ("." !in key) {
+                                    val name: String = value::class.qualifiedName!!
+                                    val bind = """val $key = bindings["$key"] as $name"""
+                                    appendln(bind)
+                                }
                             }
                         }
                         val script = "$scriptPrefix\n$scr"
                         try {
-                            val evaluated: Any? = engine.eval(script)
+                            val evaluated: Any? = engine.compileAndEval(script, engine.context)
                             if (evaluated !== null) {
                                 when (evaluated) {
                                     is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
