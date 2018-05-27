@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.iskylake.lakebot.commands.utils
+package io.iskylake.lakebot.commands.`fun`
 
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.argsStripped
