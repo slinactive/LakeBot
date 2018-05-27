@@ -72,6 +72,7 @@ val DEFAULT_COMMANDS = listOf(
         PruneCommand(),
         // Utils
         QRCommand(),
+        WeatherCommand(),
         YouTubeCommand()
 )
 val USERS_WITH_PROCESSES = mutableListOf<User>()

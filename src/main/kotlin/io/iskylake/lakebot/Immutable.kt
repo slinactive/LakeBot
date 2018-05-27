@@ -30,6 +30,7 @@ object Immutable {
     val LOGGER = LoggerFactory.getLogger("LakeBot")!!
     val BOT_TOKEN = System.getenv("BOT_TOKEN")!!
     val YOUTUBE_API_KEY = System.getenv("YOUTUBE_API_KEY")!!
+    val WEATHER_API_KEY = System.getenv("WEATHER_API_KEY")!!
     val SUCCESS = Color(232, 66, 102)
     val FAILURE = Color(239, 67, 63)
     val CONFIRMATION = Color(118, 255, 3)
