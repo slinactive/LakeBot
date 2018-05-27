@@ -30,7 +30,6 @@ import kotlinx.coroutines.experimental.async
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageChannel
 import net.dv8tion.jda.core.entities.MessageEmbed
-import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.core.requests.RestAction
@@ -38,55 +37,54 @@ import net.dv8tion.jda.core.requests.RestAction
 import java.util.concurrent.TimeUnit
 
 data class QueuePaginator(
-        val list: List<AudioTrack>,
-        val users: List<User>,
-        val event: MessageReceivedEvent,
-        val action: (Message) -> Unit = {
+        private val list: List<AudioTrack>,
+        private val event: MessageReceivedEvent,
+        private val action: (Message) -> Unit = {
             try {
                 it.clearReactions().queue()
             } catch (ignored: Exception) {
             }
         }
 ) {
-    val left: String = "\u25C0"
-    val stop: String = "\u23FA"
-    val right: String = "\u25B6"
+    companion object {
+        const val LEFT = "\u25C0"
+        const val STOP = "\u23FA"
+        const val RIGHT = "\u25B6"
+    }
     val pages = Lists.partition(list, 10)
-    private fun isValidUser(user: User): Boolean = (!user.isBot && user in users) || users.isEmpty()
+    fun paginate(ch: MessageChannel = event.channel, pageNum: Int = 1) = accept(ch.sendMessage(this[pageNum]), pageNum)
     private fun accept(rest: RestAction<Message>, pageNum: Int) {
         rest.queue { m ->
             if (pages.size > 1) {
-                m.addReaction(left).queue()
-                m.addReaction(stop).queue()
-                m.addReaction(right).queue({ waiter(m, pageNum) }) {
+                m.addReaction(LEFT).queue()
+                m.addReaction(STOP).queue()
+                m.addReaction(RIGHT).queue({ waiter(m, pageNum) }) {
                     waiter(m, pageNum)
                 }
-            }
-            else {
+            } else {
                 action(m)
             }
         }
     }
-    fun paginate(ch: MessageChannel, pageNum: Int = 1) = accept(ch.sendMessage(getPage(pageNum)), pageNum)
     private fun waiter(msg: Message, num: Int = 1) {
         async(EventWaiter) {
             val e = EventWaiter.receiveEvent<MessageReactionAddEvent>(1, TimeUnit.MINUTES) {
-                it.messageId == msg.id && (left == it.reactionEmote.name || stop == it.reactionEmote.name || right == it.reactionEmote.name) && isValidUser(it.user)
+                it.messageId == msg.id && (LEFT == it.reactionEmote.name || STOP == it.reactionEmote.name || RIGHT == it.reactionEmote.name) && event.author == it.user
             }.await()
             if (e != null) {
                 var newPageNum = num
                 when (e.reactionEmote.name) {
-                    left -> {
+                    LEFT -> {
                         if (newPageNum > 1) {
                             newPageNum--
                         }
                     }
-                    right -> {
+                    RIGHT -> {
                         if (newPageNum < pages.size) {
                             newPageNum++
                         }
                     }
-                    stop -> {
+                    STOP -> {
                         action(msg)
                         return@async
                     }
@@ -95,13 +93,13 @@ data class QueuePaginator(
                     e.reaction.removeReaction(e.user).queue()
                 } catch (ignored: Exception) {
                 }
-                msg.editMessage(getPage(newPageNum)).queue { msg -> waiter(msg, newPageNum) }
+                msg.editMessage(this@QueuePaginator[newPageNum]).queue { msg -> waiter(msg, newPageNum) }
             } else {
                 action(msg)
             }
         }
     }
-    private fun getPage(num: Int = 1): MessageEmbed {
+    private operator fun get(num: Int = 1): MessageEmbed {
         var page = num
         if (page >= pages.size) page = pages.size
         else if (page <= 0) page = 1

@@ -105,8 +105,8 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         }
     }
     @Author("ISkylake")
-    fun awaitConfirmationAsync(msg: Message, author: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES, action: (Boolean) -> Unit) {
-        async(this) {
+    fun awaitConfirmationAsync(msg: Message, author: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES, action: (Boolean) -> Unit): Deferred<Boolean> {
+        return async(this) {
             msg.addReaction("\u2705").complete()
             msg.addReaction("\u274E").complete()
             val bool = this@EventWaiter.receiveEvent<MessageReactionAddEvent>(delay, unit) {
@@ -114,6 +114,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
                 it.user == author && it.messageIdLong == msg.idLong && (emote == "\u2705" || emote == "\u274E")
             }.await()?.reactionEmote?.name == "\u2705"
             action(bool)
+            bool
         }
     }
     /**
@@ -139,8 +140,8 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         }
     }
     @Author("ISkylake")
-    fun awaitNullableConfirmationAsync(msg: Message, author: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES, action: (Boolean?) -> Unit) {
-        async(this) {
+    fun awaitNullableConfirmationAsync(msg: Message, author: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES, action: (Boolean?) -> Unit): Deferred<Boolean?> {
+        return async(this) {
             msg.addReaction("\u2705").complete()
             msg.addReaction("\u274E").complete()
             val name = this@EventWaiter.receiveEvent<MessageReactionAddEvent>(delay, unit) {
@@ -149,6 +150,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
             }.await()?.reactionEmote?.name
             val bool = if (name != null) name == "\u2705" else null
             action(bool)
+            bool
         }
     }
     /**
@@ -169,11 +171,13 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         }
     }
     @Author("ISkylake")
-    fun awaitMessageAsync(user: User, channel: MessageChannel, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES, action: (Message?) -> Unit) {
-        async(this) {
-            action(this@EventWaiter.receiveEvent<MessageReceivedEvent>(delay, unit) {
+    fun awaitMessageAsync(user: User, channel: MessageChannel, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES, action: (Message?) -> Unit): Deferred<Message?> {
+        return async(this) {
+            val msg = this@EventWaiter.receiveEvent<MessageReceivedEvent>(delay, unit) {
                 it.author == user && it.channel == channel
-            }.await()?.message)
+            }.await()?.message
+            action(msg)
+            msg
         }
     }
     override fun onEvent(event: Event) {
