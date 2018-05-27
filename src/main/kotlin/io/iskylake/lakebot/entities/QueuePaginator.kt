@@ -47,18 +47,22 @@ data class QueuePaginator(
         }
 ) {
     companion object {
+        const val BIG_LEFT = "\u23EA"
         const val LEFT = "\u25C0"
         const val STOP = "\u23FA"
         const val RIGHT = "\u25B6"
+        const val BIG_RIGHT = "\u23E9"
     }
     val pages = Lists.partition(list, 10)
-    fun paginate(ch: MessageChannel = event.channel, pageNum: Int = 1) = accept(ch.sendMessage(this[pageNum]), pageNum)
+    operator fun invoke(ch: MessageChannel = event.channel, pageNum: Int = 1) = accept(ch.sendMessage(this[pageNum]), pageNum)
     private fun accept(rest: RestAction<Message>, pageNum: Int) {
         rest.queue { m ->
             if (pages.size > 1) {
+                m.addReaction(BIG_LEFT).queue()
                 m.addReaction(LEFT).queue()
                 m.addReaction(STOP).queue()
-                m.addReaction(RIGHT).queue({ waiter(m, pageNum) }) {
+                m.addReaction(RIGHT).queue()
+                m.addReaction(BIG_RIGHT).queue({ waiter(m, pageNum) }) {
                     waiter(m, pageNum)
                 }
             } else {
@@ -69,11 +73,14 @@ data class QueuePaginator(
     private fun waiter(msg: Message, num: Int = 1) {
         async(EventWaiter) {
             val e = EventWaiter.receiveEvent<MessageReactionAddEvent>(1, TimeUnit.MINUTES) {
-                it.messageId == msg.id && (LEFT == it.reactionEmote.name || STOP == it.reactionEmote.name || RIGHT == it.reactionEmote.name) && event.author == it.user
+                it.messageId == msg.id && (BIG_LEFT == it.reactionEmote.name || BIG_RIGHT == it.reactionEmote.name || LEFT == it.reactionEmote.name || STOP == it.reactionEmote.name || RIGHT == it.reactionEmote.name) && event.author == it.user
             }.await()
             if (e != null) {
                 var newPageNum = num
                 when (e.reactionEmote.name) {
+                    BIG_LEFT -> {
+                        newPageNum = 1
+                    }
                     LEFT -> {
                         if (newPageNum > 1) {
                             newPageNum--
@@ -83,6 +90,9 @@ data class QueuePaginator(
                         if (newPageNum < pages.size) {
                             newPageNum++
                         }
+                    }
+                    BIG_RIGHT -> {
+                        newPageNum = pages.size
                     }
                     STOP -> {
                         action(msg)
@@ -117,7 +127,7 @@ data class QueuePaginator(
                 event.selfUser.effectiveAvatarUrl
             }
             field(title = "Total Songs:") {
-                "${AudioUtils[event.guild].trackScheduler.queue.size + 1}"
+                "${AudioUtils[event.guild].trackScheduler.queue.size + 1} songs"
             }
             field(title = "Total Duration:") {
                 TimeUtils.asDuration(AudioUtils[event.guild].trackScheduler.queue.map { it.duration }.filter { it != Long.MAX_VALUE }.sum())

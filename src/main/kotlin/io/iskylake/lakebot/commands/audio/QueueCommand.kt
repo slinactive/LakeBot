@@ -36,7 +36,7 @@ class QueueCommand : Command {
             val queue = AudioUtils[event.guild].trackScheduler.queue
             queue -= AudioUtils[event.guild].audioPlayer.playingTrack
             if (queue.isNotEmpty()) {
-                QueuePaginator(queue.toList(), event).paginate()
+                QueuePaginator(queue.toList(), event)()
             } else {
                 val embed = buildEmbed {
                     field(title = "Looping:") {
