@@ -51,6 +51,7 @@ import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
 @Author("ISkylake", "TheMonitorLizard (LaxusBot implementation)")
 object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContext(3, "EventWaiter"), AutoCloseable by newFixedThreadPoolContext(3, "EventWaiter") {
     val tasks = ConcurrentHashMap<KClass<*>, MutableSet<AwaitableTask<*>>>()
+    inline fun <reified E: Event> receiveTask() = tasks[E::class]
     inline fun <reified E: Event> receiveEvent(
         delay: Long = -1,
         unit: TimeUnit = TimeUnit.SECONDS,
@@ -210,8 +211,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
             if (condition(event)) {
                 completion.complete(event)
                 true
-            }
-            else {
+            } else {
                 false
             }
         } catch (t: Throwable) {
