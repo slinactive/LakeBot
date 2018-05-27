@@ -77,7 +77,7 @@ class EvalCommand : Command {
                 "io.iskylake.lakebot.commands",
                 "io.iskylake.lakebot.commands.audio",
                 "io.iskylake.lakebot.commands.developer",
-                "io.iskylake.lakebot.commands.`fun`",
+                "io.iskylake.lakebot.commands.fun",
                 "io.iskylake.lakebot.commands.general",
                 "io.iskylake.lakebot.commands.moderation",
                 "io.iskylake.lakebot.commands.utils",
@@ -89,7 +89,8 @@ class EvalCommand : Command {
                 "org.slf4j",
                 "org.json"
         )
-        val KOTLIN_PACKAGES = PACKAGES - "java.util" + mutableListOf(
+        val KOTLIN_PACKAGES = PACKAGES - listOf("io.iskylake.lakebot.commands.fun", "java.util") + listOf(
+                "io.iskylake.lakebot.commands.`fun`",
                 "kotlinx.coroutines.experimental",
                 "kotlin.reflect",
                 "kotlin.reflect.jvm",
