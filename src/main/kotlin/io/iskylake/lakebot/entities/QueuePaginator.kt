@@ -54,33 +54,30 @@ data class QueuePaginator(
         const val BIG_RIGHT = "\u23E9"
     }
     val pages = Lists.partition(list, 10)
-    operator fun invoke(ch: MessageChannel = event.channel, pageNum: Int = 1) = accept(ch.sendMessage(this[pageNum]), pageNum)
-    private fun accept(rest: RestAction<Message>, pageNum: Int) {
-        rest.queue { m ->
-            if (pages.size > 1) {
-                m.addReaction(BIG_LEFT).queue()
-                m.addReaction(LEFT).queue()
-                m.addReaction(STOP).queue()
-                m.addReaction(RIGHT).queue()
-                m.addReaction(BIG_RIGHT).queue({ waiter(m, pageNum) }) {
-                    waiter(m, pageNum)
-                }
-            } else {
-                action(m)
+    operator fun invoke(channel: MessageChannel = event.channel, page: Int = 1) = accept(channel.sendMessage(this[page]), page)
+    private fun accept(rest: RestAction<Message>, pageNum: Int) = rest.queue { m ->
+        if (pages.size > 1) {
+            m.addReaction(BIG_LEFT).queue()
+            m.addReaction(LEFT).queue()
+            m.addReaction(STOP).queue()
+            m.addReaction(RIGHT).queue()
+            m.addReaction(BIG_RIGHT).queue({ waiter(m, pageNum) }) {
+                waiter(m, pageNum)
             }
+        } else {
+            action(m)
         }
     }
     private fun waiter(msg: Message, num: Int = 1) {
         async(EventWaiter) {
             val e = EventWaiter.receiveEvent<MessageReactionAddEvent>(1, TimeUnit.MINUTES) {
-                it.messageId == msg.id && (BIG_LEFT == it.reactionEmote.name || BIG_RIGHT == it.reactionEmote.name || LEFT == it.reactionEmote.name || STOP == it.reactionEmote.name || RIGHT == it.reactionEmote.name) && event.author == it.user
+                val isValidEmote = BIG_LEFT == it.reactionEmote.name || BIG_RIGHT == it.reactionEmote.name || LEFT == it.reactionEmote.name || STOP == it.reactionEmote.name || RIGHT == it.reactionEmote.name
+                it.messageId == msg.id && isValidEmote && event.author == it.user
             }.await()
             if (e != null) {
                 var newPageNum = num
                 when (e.reactionEmote.name) {
-                    BIG_LEFT -> {
-                        newPageNum = 1
-                    }
+                    BIG_LEFT -> newPageNum = 1
                     LEFT -> {
                         if (newPageNum > 1) {
                             newPageNum--
@@ -91,9 +88,7 @@ data class QueuePaginator(
                             newPageNum++
                         }
                     }
-                    BIG_RIGHT -> {
-                        newPageNum = pages.size
-                    }
+                    BIG_RIGHT -> newPageNum = pages.size
                     STOP -> {
                         action(msg)
                         return@async
@@ -110,9 +105,11 @@ data class QueuePaginator(
         }
     }
     private operator fun get(num: Int = 1): MessageEmbed {
-        var page = num
-        if (page >= pages.size) page = pages.size
-        else if (page <= 0) page = 1
+        val page = when {
+            num >= pages.size -> pages.size
+            num <= 0 -> 1
+            else -> num
+        }
         val trackPage = pages[page - 1]
         return buildEmbed {
             for (track in trackPage) {
