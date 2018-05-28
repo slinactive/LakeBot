@@ -7,7 +7,7 @@ As the development has just begun, help from Kotlin programmers (with experience
 ## Support Server
 [![Support Server](https://discordapp.com/api/guilds/346332300385976321/embed.png?style=banner4)](https://discord.gg/QsTevwF)
 ## Libraries and APIs
-* **[Kotlin Compiler](https://github.com/JetBrains/kotlin)** - the programming language LakeBot uses
+* **[Kotlin](https://github.com/JetBrains/kotlin)** - the programming language LakeBot uses
 * **[Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines)** - library support for Kotlin coroutines
 * **[JDA](https://github.com/DV8FromTheWorld/JDA)** - Java wrapper for Discord API
 * **[LavaPlayer](https://github.com/sedmelluq/lavaplayer)** - Discord audio player library
