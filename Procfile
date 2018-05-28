@@ -1,1 +1,0 @@
-worker: java -jar LakeBot-0.3.7.jar
