@@ -22,7 +22,7 @@ import java.awt.Color
 
 object Immutable {
     const val DEFAULT_PREFIX = "lb!"
-    const val VERSION = "0.3.6"
+    const val VERSION = "0.3.7"
     const val PERMISSIONS = 2146958591L
     const val GITHUB_REPOSITORY = "https://github.com/ISkylakeS/LakeBot"
     const val SUPPORT_INVITE = "https://discord.gg/QsTevwF"
