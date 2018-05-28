@@ -57,7 +57,7 @@ class YouTubeCommand : Command {
                             }
                         }
                     }
-                    event.channel.sendMessage(embed).queue {
+                    event.channel.sendMessage(embed).await {
                         USERS_WITH_PROCESSES += event.author
                         awaitInt(event, videos, it)
                     }
@@ -71,62 +71,60 @@ class YouTubeCommand : Command {
             event.sendError("You specified no query!").queue()
         }
     }
-    private fun awaitInt(event: MessageReceivedEvent, videos: List<Video>, msg: Message) {
-        EventWaiter.awaitMessageAsync(event.author, event.channel) {
-            val c = it?.contentRaw
-            if (c !== null) {
-                if (c.isInt) {
-                    if (c.toInt() in 1..videos.size) {
-                        msg.delete().queue()
-                        val index: Int = c.toInt() - 1
-                        val video: Video = videos[index]
-                        buildEmbed {
-                            val thumbs = video.snippet.thumbnails
-                            val thumbnail = when {
-                                thumbs.maxres != null -> thumbs.maxres
-                                thumbs.high != null -> thumbs.high
-                                thumbs.medium != null -> thumbs.medium
-                                thumbs.default != null -> thumbs.default
-                                thumbs.standard != null -> thumbs.standard
-                                else -> null
-                            }
-                            color {
-                                Immutable.SUCCESS
-                            }
-                            setAuthor(video.snippet.channelTitle, "https://www.youtube.com/channel/${video.snippet.channelId}")
-                            title("https://youtu.be/${video.id}") {
-                                video.snippet.title
-                            }
-                            field(title ="Description:") {
-                                when {
-                                    video.snippet.description.isNullOrEmpty() -> "No description provided"
-                                    video.snippet.description.count() > 1024 -> video.snippet.description.substring(0, 1021) + "..."
-                                    else -> video.snippet.description
-                                }
-                            }
-                            field(true, "Duration:") {
-                                TimeUtils.asDuration(YouTubeUtils.getDuration(video))
-                            }
-                            image {
-                                thumbnail?.url
-                            }
-                        }.let { event.sendMessage(it).queue() }
-                        USERS_WITH_PROCESSES -= event.author
-                    } else {
-                        event.sendError("Try again!").queue { awaitInt(event, videos, msg) }
-                    }
-                } else if (c.toLowerCase() == "exit") {
+    private suspend fun awaitInt(event: MessageReceivedEvent, videos: List<Video>, msg: Message) {
+        val c = event.channel.awaitMessage(event.author)?.contentRaw
+        if (c !== null) {
+            if (c.isInt) {
+                if (c.toInt() in 1..videos.size) {
                     msg.delete().queue()
+                    val index: Int = c.toInt() - 1
+                    val video: Video = videos[index]
+                    buildEmbed {
+                        val thumbs = video.snippet.thumbnails
+                        val thumbnail = when {
+                            thumbs.maxres != null -> thumbs.maxres
+                            thumbs.high != null -> thumbs.high
+                            thumbs.medium != null -> thumbs.medium
+                            thumbs.default != null -> thumbs.default
+                            thumbs.standard != null -> thumbs.standard
+                            else -> null
+                        }
+                        color {
+                            Immutable.SUCCESS
+                        }
+                        setAuthor(video.snippet.channelTitle, "https://www.youtube.com/channel/${video.snippet.channelId}")
+                        title("https://youtu.be/${video.id}") {
+                            video.snippet.title
+                        }
+                        field(title ="Description:") {
+                            when {
+                                video.snippet.description.isNullOrEmpty() -> "No description provided"
+                                video.snippet.description.count() > 1024 -> video.snippet.description.substring(0, 1021) + "..."
+                                else -> video.snippet.description
+                            }
+                        }
+                        field(true, "Duration:") {
+                            TimeUtils.asDuration(YouTubeUtils.getDuration(video))
+                        }
+                        image {
+                            thumbnail?.url
+                        }
+                    }.let { event.sendMessage(it).queue() }
                     USERS_WITH_PROCESSES -= event.author
-                    event.sendSuccess("Process successfully stopped!").queue()
                 } else {
-                    event.sendError("Try again!").queue { awaitInt(event, videos, msg) }
+                    event.sendError("Try again!").await { awaitInt(event, videos, msg) }
                 }
-            } else {
+            } else if (c.toLowerCase() == "exit") {
                 msg.delete().queue()
                 USERS_WITH_PROCESSES -= event.author
-                event.sendError("Time is up!").queue()
+                event.sendSuccess("Process successfully stopped!").queue()
+            } else {
+                event.sendError("Try again!").await { awaitInt(event, videos, msg) }
             }
+        } else {
+            msg.delete().queue()
+            USERS_WITH_PROCESSES -= event.author
+            event.sendError("Time is up!").queue()
         }
     }
 }

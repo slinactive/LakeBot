@@ -64,7 +64,7 @@ class YouTubePlayCommand : PlayCommand() {
                                 field(title = "YouTube Results For ${event.argsRaw}:") {
                                     description
                                 }
-                            }).queue {
+                            }).await {
                                 try {
                                     this.awaitInt(event, videos, it)
                                     USERS_WITH_PROCESSES += event.author
@@ -86,33 +86,31 @@ class YouTubePlayCommand : PlayCommand() {
             event.sendError("You specified no link/query!").queue()
         }
     }
-    private fun awaitInt(event: MessageReceivedEvent, videos: List<Video>, msg: Message) {
-        EventWaiter.awaitMessageAsync(event.author, event.channel) {
-            val c = it?.contentRaw
-            if (c !== null) {
-                if (c.isInt) {
-                    if (c.toInt() in 1..videos.size) {
-                        msg.delete().queue()
-                        val index: Int = c.toInt() - 1
-                        val video = videos[index]
-                        val link = "https://youtu.be/${video.id}"
-                        AudioUtils.loadAndPlay(event.guild, event.textChannel, link)
-                        USERS_WITH_PROCESSES -= event.author
-                    } else {
-                        event.sendError("Try again!").queue { awaitInt(event, videos, msg) }
-                    }
-                } else if (c.toLowerCase() == "exit") {
+    private suspend fun awaitInt(event: MessageReceivedEvent, videos: List<Video>, msg: Message) {
+        val c = event.channel.awaitMessage(event.author)?.contentRaw
+        if (c !== null) {
+            if (c.isInt) {
+                if (c.toInt() in 1..videos.size) {
                     msg.delete().queue()
+                    val index: Int = c.toInt() - 1
+                    val video = videos[index]
+                    val link = "https://youtu.be/${video.id}"
+                    AudioUtils.loadAndPlay(event.guild, event.textChannel, link)
                     USERS_WITH_PROCESSES -= event.author
-                    event.sendSuccess("Process successfully stopped!").queue()
                 } else {
-                    event.sendError("Try again!").queue { awaitInt(event, videos, msg) }
+                    event.sendError("Try again!").await { awaitInt(event, videos, msg) }
                 }
-            } else {
+            } else if (c.toLowerCase() == "exit") {
                 msg.delete().queue()
                 USERS_WITH_PROCESSES -= event.author
-                event.sendError("Time is up!").queue()
+                event.sendSuccess("Process successfully stopped!").queue()
+            } else {
+                event.sendError("Try again!").await { awaitInt(event, videos, msg) }
             }
+        } else {
+            msg.delete().queue()
+            USERS_WITH_PROCESSES -= event.author
+            event.sendError("Time is up!").queue()
         }
     }
 }

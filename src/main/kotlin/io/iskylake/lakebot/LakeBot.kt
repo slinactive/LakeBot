@@ -72,6 +72,7 @@ val DEFAULT_COMMANDS = listOf(
         PruneCommand(),
         // Utils
         QRCommand(),
+        UrbanCommand(),
         WeatherCommand(),
         YouTubeCommand()
 )
