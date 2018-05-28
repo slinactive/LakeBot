@@ -7,9 +7,20 @@ As the development has just begun, help from Kotlin programmers (with experience
 ## Support Server
 [![Support Server](https://discordapp.com/api/guilds/346332300385976321/embed.png?style=banner4)](https://discord.gg/QsTevwF)
 ## Libraries and APIs
-* [Kotlin Compiler](https://github.com/JetBrains/kotlin)
-* [Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines)
-* [JDA](https://github.com/DV8FromTheWorld/JDA)
-* [Simple Logging Facade for Java (SLF4J)](https://www.slf4j.org/)
-* [Groovy](https://github.com/apache/groovy)
-* [QRGen](https://github.com/kenglxn/QRGen)
+* **[Kotlin Compiler](https://github.com/JetBrains/kotlin)** - the programming language LakeBot uses
+* **[Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines)** - library support for Kotlin coroutines
+* **[JDA](https://github.com/DV8FromTheWorld/JDA)** - Java wrapper for Discord API
+* **[LavaPlayer](https://github.com/sedmelluq/lavaplayer)** - Discord audio player library
+* **[KHttp](https://github.com/jkcclemens/khttp)** - simple library for HTTP requests in Kotlin
+* **[YouTube API Wrapper](https://developers.google.com/api-client-library/java/apis/youtube/v3)** - Java wrapper for YouTube API
+* **[Simple Logging Facade for Java (SLF4J)](https://www.slf4j.org/)** - logger implementation
+* **[Groovy](https://github.com/apache/groovy)** - the JVM programming language LakeBot uses as script engine
+* **[QRGen](https://github.com/kenglxn/QRGen)** - library for QR code generation
+* **[Guava](https://github.com/google/guava)** - set of core libraries that includes a lot of useful stuff
+## Kotlin Modules
+* `kotlin-stdlib-jdk8` - standard library
+* `kotlinx-coroutines` - library support for Kotlin coroutines
+* `kotlin-reflect` - Kotlin reflection (standard and advanced)
+* `kotlin-compiler` - Kotlin compiler
+* `kotlin-compiler-embeddable` - Embeddable Kotlin compiler LakeBot uses for eval based on Kotlin JSR-223
+* `kotlin-script-util`/`kotlin-script-runtime` - Kotlin scripting support utilities
