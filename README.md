@@ -13,6 +13,8 @@ As the development has just begun, help from Kotlin programmers (with experience
 * **[LavaPlayer](https://github.com/sedmelluq/lavaplayer)** - Discord audio player library
 * **[KHttp](https://github.com/jkcclemens/khttp)** - simple library for HTTP requests in Kotlin
 * **[YouTube API Wrapper](https://developers.google.com/api-client-library/java/apis/youtube/v3)** - Java wrapper for YouTube API
+* **[OpenWeatherMap API](https://www.openweathermap.org/api)** - clear current weather data API 
+* **[Urban Dictionary API](https://www.urbandictionary.com/)** - popular modern dictionary API
 * **[Simple Logging Facade for Java (SLF4J)](https://www.slf4j.org/)** - logger implementation
 * **[Groovy](https://github.com/apache/groovy)** - the JVM programming language LakeBot uses as script engine
 * **[QRGen](https://github.com/kenglxn/QRGen)** - library for QR code generation
