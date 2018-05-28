@@ -18,8 +18,8 @@ package io.iskylake.lakebot.commands.info
 
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
-import net.dv8tion.jda.core.entities.MessageEmbed
 
+import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 class AvatarCommand : Command {
