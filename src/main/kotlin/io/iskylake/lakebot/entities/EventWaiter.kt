@@ -50,7 +50,9 @@ import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
  */
 @Author("ISkylake", "TheMonitorLizard (LaxusBot implementation)")
 object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContext(3, "EventWaiter"), AutoCloseable by newFixedThreadPoolContext(3, "EventWaiter") {
-    val tasks = ConcurrentHashMap<KClass<*>, MutableSet<AwaitableTask<*>>>()
+    val tasks by lazy {
+        ConcurrentHashMap<KClass<*>, MutableSet<AwaitableTask<*>>>()
+    }
     inline fun <reified E: Event> receiveTask() = tasks[E::class]
     inline fun <reified E: Event> receiveEvent(
         delay: Long = -1,
