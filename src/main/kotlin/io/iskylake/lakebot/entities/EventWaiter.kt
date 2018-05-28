@@ -59,6 +59,12 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         unit: TimeUnit = TimeUnit.SECONDS,
         noinline condition: suspend (E) -> Boolean
     ): Deferred<E?> = receiveEvent(E::class, condition, delay, unit)
+    @Author("ISkylake")
+    suspend inline fun <reified E: Event> receiveRawEvent(
+            delay: Long = -1,
+            unit: TimeUnit = TimeUnit.SECONDS,
+            noinline check: suspend (E) -> Boolean
+    ): E? = receiveRawEvent(E::class, check, delay, unit)
     /**
      * Waits a predetermined amount of time for an {@link net.dv8tion.jda.core.events.Event event},
      * receives and returns it
@@ -86,6 +92,13 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         }
         return deferred
     }
+    @Author("ISkylake")
+    suspend fun <E: Event> receiveRawEvent(
+            type: KClass<E>,
+            check: suspend (E) -> Boolean,
+            delay: Long = -1,
+            unit: TimeUnit = TimeUnit.SECONDS
+    ): E? = receiveEvent(type, check, delay, unit).await()
     /**
      * Waits for a reaction for {@link net.dv8tion.jda.core.entities.Message message}
      *
