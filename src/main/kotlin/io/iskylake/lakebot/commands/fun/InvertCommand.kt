@@ -38,7 +38,7 @@ class InvertCommand : Command {
             |$command <user mention> -> inverts an avatar of specified user
             |$command <url> -> inverts an image from the link""".trimMargin()
     }
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (args.isNotEmpty()) {
             try {
                 ImageUtils.urlToBytes(URL(event.argsRaw!!)).let {

@@ -27,7 +27,7 @@ class SayCommand : Command {
     override val aliases = listOf("announce")
     override val description = "The command that sends your message on behalf of the bot"
     override val usage: (String) -> (String) = { "${super.usage(it)} <content>" }
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (event.message.attachments.none { it.isImage }) {
                 buildEmbed {

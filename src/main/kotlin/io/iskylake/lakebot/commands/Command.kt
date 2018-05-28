@@ -36,5 +36,5 @@ interface Command {
     val description: String
     val usage: (String) -> String
         get() = { "$it$name" }
-    operator fun invoke(event: MessageReceivedEvent, args: Array<String>)
+    suspend operator fun invoke(event: MessageReceivedEvent, args: Array<String>)
 }

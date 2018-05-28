@@ -40,7 +40,7 @@ class PruneCommand : Command {
         """.trimMargin()
     }
     override val description = "The command that deletes a specified amount of messages (from 1 to 100)"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         when {
             !event.selfMember!!.hasPermission(Permission.MESSAGE_MANAGE) -> event.sendError("I don't have permissions for that!").queue()
             !event.member.hasPermission(Permission.MESSAGE_MANAGE) -> event.sendError("You don't have permissions for that!").queue()

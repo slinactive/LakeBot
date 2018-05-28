@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package io.iskylake.lakebot.commands.audio
+package io.iskylake.lakebot.entities.extensions
 
-import io.iskylake.lakebot.commands.Command
-import io.iskylake.lakebot.utils.AudioUtils
+import io.iskylake.lakebot.entities.handlers.CommandHandler
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import kotlinx.coroutines.experimental.async
 
-class JoinCommand : Command {
-    override val name = "join"
-    override val description = "The command, after which the bot joins your voice channel"
-    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = AudioUtils.joinChannel { event }
+import net.dv8tion.jda.core.requests.RestAction
+
+import kotlin.coroutines.experimental.CoroutineContext
+
+suspend inline fun <reified T> RestAction<T>.await(context: CoroutineContext = CommandHandler, crossinline func: suspend (T) -> Unit) = queue { rest ->
+    async(context) {
+        func(rest)
+    }
 }

@@ -28,7 +28,7 @@ class LoopCommand : Command {
     override val name = "loop"
     override val aliases = listOf("repeat")
     override val description = "The command that enables or disables song looping"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()
         } else {

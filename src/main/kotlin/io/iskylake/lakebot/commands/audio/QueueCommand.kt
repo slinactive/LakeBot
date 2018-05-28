@@ -29,7 +29,7 @@ class QueueCommand : Command {
     override val name = "queue"
     override val aliases = listOf("playlist")
     override val description = "The command that sends the current queue (playlist)"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null && AudioUtils[event.guild].trackScheduler.queue.isEmpty()) {
             event.sendError("Queue is empty!").queue()
         } else {

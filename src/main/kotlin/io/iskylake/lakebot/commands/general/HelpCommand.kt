@@ -28,7 +28,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 class HelpCommand : Command {
     override val name = "help"
     override val description = "N/A"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (args.isEmpty()) {
             val embed = buildEmbed {
                 color {

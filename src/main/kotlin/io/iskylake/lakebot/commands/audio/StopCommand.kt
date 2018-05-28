@@ -25,7 +25,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 class StopCommand : Command {
     override val name = "stop"
     override val description = "The command that stops the song that is currently playing"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         when {
             !event.member.isConnected -> event.sendError("You're not in the voice channel!").queue()
             !event.guild.selfMember.isConnected -> event.sendError("I'm not in the voice channel!").queue()

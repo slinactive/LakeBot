@@ -33,7 +33,7 @@ class YouTubePlayCommand : PlayCommand() {
     override val name = "ytplay"
     override val aliases = listOf("yplay", "youtubeplay", "yp", "ytp")
     override val description = "The command that plays song from YouTube by the specified query"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member.isConnected) {
                 event.sendError("You're not in the voice channel!").queue()

@@ -35,7 +35,7 @@ class YouTubeCommand : Command {
     override val description = "The command that searches videos on YouTube by the specified query"
     override val cooldown = 5L
     override val usage = { it: String -> "${super.usage(it)} <query>" }
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
             try {

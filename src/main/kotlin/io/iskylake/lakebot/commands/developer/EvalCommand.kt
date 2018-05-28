@@ -114,133 +114,134 @@ class EvalCommand : Command {
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <code>"
     override val aliases = listOf("evaluate", "exec", "execute")
     override val description = "The command that evaluates Groovy/Kotlin script"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
+            val engine = ScriptEngineManager().getEngineByExtension("kts") as KotlinJsr223JvmLocalScriptEngine
             if (arguments.startsWith("```")) {
                 val content = arguments.removeSurrounding("```")
                 when {
-                    content.startsWith("kotlin", true) -> {
-                        val engine = ScriptEngineManager().getEngineByExtension("kts") as KotlinJsr223JvmLocalScriptEngine
-                        var scr = content.substring(6)
-                        val commandImports = mutableListOf<String>()
-                        for (result in IMPORT_REGEX.findAll(content).filter { !it.value.contains("\"") }) {
-                            commandImports += result.value
-                            scr = scr.replace(result.value, "")
-                        }
-                        engine.put("event", event)
-                        engine.put("message", event.message)
-                        engine.put("textChannel", event.textChannel)
-                        engine.put("channel", event.channel)
-                        engine.put("author", event.author)
-                        engine.put("jda", event.jda)
-                        engine.put("guild", event.guild)
-                        engine.put("member", event.member)
-                        engine.put("selfUser", event.jda.selfUser)
-                        engine.put("selfMember", event.guild.selfMember)
-                        val scriptPrefix = buildString {
-                            for (import in KOTLIN_PACKAGES) {
-                                appendln("import $import.*")
-                            }
-                            for (import in commandImports) {
-                                appendln(import)
-                            }
-                            for ((key, value) in engine.getBindings(ScriptContext.ENGINE_SCOPE)) {
-                                if ("." !in key) {
-                                    val name: String = value::class.qualifiedName!!
-                                    val bind = """val $key = bindings["$key"] as $name"""
-                                    appendln(bind)
-                                }
-                            }
-                        }
-                        val script = "$scriptPrefix\n$scr"
-                        try {
-                            val evaluated: Any? = engine.compileAndEval(script, engine.context)
-                            if (evaluated !== null) {
-                                when (evaluated) {
-                                    is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                                    is MessageEmbed -> event.channel.sendMessage(evaluated).queue()
-                                    is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                                    is Message -> event.channel.sendMessage(evaluated).queue()
-                                    is RestAction<*> -> evaluated.queue()
-                                    is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
-                                    else -> event.channel.sendMessage("$evaluated").queue()
-                                }
-                            }
-                        } catch (t: Throwable) {
-                            event.sendMessage(buildEmbed {
-                                color {
-                                    Immutable.FAILURE
-                                }
-                                author {
-                                    "An error has occured:"
-                                }
-                                description {
-                                    """```kotlin
-                                            |${t::class.qualifiedName ?: t.javaClass.name}
-                                            |
-                                            |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
-                                }
-                                timestamp()
-                            }).queue()
-                        }
-                    }
-                    content.startsWith("groovy", true) -> {
-                        val script = buildString {
-                            for (import in PACKAGES) {
-                                appendln("import $import.*")
-                            }
-                            appendln(content.substring(6))
-                        }
-                        val engine = GroovyShell()
-                        engine.setVariable("event", event)
-                        engine.setVariable("message", event.message)
-                        engine.setVariable("textChannel", event.textChannel)
-                        engine.setVariable("channel", event.channel)
-                        engine.setVariable("author", event.author)
-                        engine.setVariable("jda", event.jda)
-                        engine.setVariable("guild", event.guild)
-                        engine.setVariable("member", event.member)
-                        engine.setVariable("selfUser", event.jda.selfUser)
-                        engine.setVariable("selfMember", event.guild.selfMember)
-                        try {
-                            val evaluated: Any? = engine.evaluate(script)
-                            if (evaluated !== null) {
-                                when (evaluated) {
-                                    is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                                    is MessageEmbed -> event.channel.sendMessage(evaluated).queue()
-                                    is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                                    is Message -> event.channel.sendMessage(evaluated).queue()
-                                    is RestAction<*> -> evaluated.queue()
-                                    is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
-                                    else -> event.channel.sendMessage("$evaluated").queue()
-                                }
-                            }
-                        } catch (t: Throwable) {
-                            event.sendMessage(buildEmbed {
-                                color {
-                                    Immutable.FAILURE
-                                }
-                                author {
-                                    "An error has occured:"
-                                }
-                                description {
-                                    """```groovy
-                                            |${t::class.qualifiedName ?: t.javaClass.name}
-                                            |
-                                            |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
-                                }
-                                timestamp()
-                            }).queue()
-                        }
-                    }
+                    content.startsWith("kotlin", true) -> kotlinEval(event, content.substring(6), engine)
+                    content.startsWith("groovy", true) -> groovyEval(event, content, GroovyShell())
                     else -> event.sendError("That's not a valid language!").queue()
                 }
             } else {
-                event.sendError("You didn't surround your script with code block!").queue()
+                kotlinEval(event, arguments, engine)
             }
         } else {
             event.sendError("You specified no code!").queue()
+        }
+    }
+    private fun kotlinEval(event: MessageReceivedEvent, content: String, engine: KotlinJsr223JvmLocalScriptEngine) {
+        var scr = content
+        val commandImports = mutableListOf<String>()
+        for (result in IMPORT_REGEX.findAll(content).filter { !it.value.contains("\"") }) {
+            commandImports += result.value
+            scr = scr.replace(result.value, "")
+        }
+        engine.put("event", event)
+        engine.put("message", event.message)
+        engine.put("textChannel", event.textChannel)
+        engine.put("channel", event.channel)
+        engine.put("author", event.author)
+        engine.put("jda", event.jda)
+        engine.put("guild", event.guild)
+        engine.put("member", event.member)
+        engine.put("selfUser", event.jda.selfUser)
+        engine.put("selfMember", event.guild.selfMember)
+        val scriptPrefix = buildString {
+            for (import in KOTLIN_PACKAGES) {
+                appendln("import $import.*")
+            }
+            for (import in commandImports) {
+                appendln(import)
+            }
+            for ((key, value) in engine.getBindings(ScriptContext.ENGINE_SCOPE)) {
+                if ("." !in key) {
+                    val name: String = value::class.qualifiedName!!
+                    val bind = """val $key = bindings["$key"] as $name"""
+                    appendln(bind)
+                }
+            }
+        }
+        val script = "$scriptPrefix\n$scr"
+        try {
+            val evaluated: Any? = engine.compileAndEval(script, engine.context)
+            if (evaluated !== null) {
+                when (evaluated) {
+                    is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
+                    is MessageEmbed -> event.channel.sendMessage(evaluated).queue()
+                    is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
+                    is Message -> event.channel.sendMessage(evaluated).queue()
+                    is RestAction<*> -> evaluated.queue()
+                    is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
+                    else -> event.channel.sendMessage("$evaluated").queue()
+                }
+            }
+        } catch (t: Throwable) {
+            event.sendMessage(buildEmbed {
+                color {
+                    Immutable.FAILURE
+                }
+                author {
+                    "An error has occured:"
+                }
+                description {
+                    """```kotlin
+                        |${t::class.qualifiedName ?: t.javaClass.name}
+                        |
+                        |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
+                }
+                timestamp()
+            }).queue()
+        }
+    }
+    private fun groovyEval(event: MessageReceivedEvent, content: String, engine: GroovyShell) {
+        val script = buildString {
+            for (import in PACKAGES) {
+                appendln("import $import.*")
+            }
+            appendln(content.substring(6))
+        }
+        engine.setVariable("event", event)
+        engine.setVariable("message", event.message)
+        engine.setVariable("textChannel", event.textChannel)
+        engine.setVariable("channel", event.channel)
+        engine.setVariable("author", event.author)
+        engine.setVariable("jda", event.jda)
+        engine.setVariable("guild", event.guild)
+        engine.setVariable("member", event.member)
+        engine.setVariable("selfUser", event.jda.selfUser)
+        engine.setVariable("selfMember", event.guild.selfMember)
+        try {
+            val evaluated: Any? = engine.evaluate(script)
+            if (evaluated !== null) {
+                when (evaluated) {
+                    is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
+                    is MessageEmbed -> event.channel.sendMessage(evaluated).queue()
+                    is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
+                    is Message -> event.channel.sendMessage(evaluated).queue()
+                    is RestAction<*> -> evaluated.queue()
+                    is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
+                    else -> event.channel.sendMessage("$evaluated").queue()
+                }
+            }
+        } catch (t: Throwable) {
+            event.sendMessage(buildEmbed {
+                color {
+                    Immutable.FAILURE
+                }
+                author {
+                    "An error has occured:"
+                }
+                description {
+                    """```groovy
+                        |${t::class.qualifiedName ?: t.javaClass.name}
+                        |
+                        |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
+                }
+                timestamp()
+            }).queue()
         }
     }
 }

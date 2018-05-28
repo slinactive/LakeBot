@@ -29,7 +29,7 @@ open class PlayCommand internal constructor() : Command {
     override val name = "play"
     override val description = "The command that plays song by the specified link"
     override val usage: (String) -> String = { "${super.usage(it)} <query/link>" }
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member.isConnected) {
                 event.sendError("You're not in the voice channel!").queue()

@@ -28,7 +28,7 @@ class AboutCommand : Command {
     override val name = "about"
     override val aliases = listOf("info", "stats")
     override val description = "The command that send complete information about the bot"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
             color {
                 Immutable.SUCCESS

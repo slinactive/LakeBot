@@ -33,7 +33,7 @@ class WeatherCommand : Command {
     override val description = "The command that displays weather in the specified city/town"
     override val cooldown = 3L
     override val usage = { it: String -> "${super.usage(it)} <city/town>" }
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
             try {

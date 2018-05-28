@@ -35,7 +35,7 @@ class JumpForwardCommand : Command {
             "$it$name 5s" to "rewinds track from 00:06 to 00:11"
         )
     }
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member.isConnected) {
                 event.sendError("You're not in the voice channel!").queue()

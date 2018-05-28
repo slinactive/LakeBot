@@ -25,7 +25,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 class UptimeCommand : Command {
     override val name = "uptime"
     override val description = "The command that sends bot uptime off from statistics"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
             color {
                 Immutable.SUCCESS

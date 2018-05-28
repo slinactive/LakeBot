@@ -29,7 +29,7 @@ class TextToImageCommand : Command {
     override val description = "The command that turns your text into an image"
     override val usage: (String) -> String = { "${super.usage(it)} <text>" }
     override val cooldown = 3L
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsStripped !== null) {
             try {
                 event.channel.sendFile(ImageUtils.getImagedText(event.argsStripped!!.split("\n")), "tti.png").queue()

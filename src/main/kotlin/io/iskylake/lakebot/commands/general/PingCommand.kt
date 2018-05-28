@@ -26,7 +26,7 @@ class PingCommand : Command {
     override val name = "ping"
     override val aliases = listOf("delay", "response")
     override val description = "The command that sends the bot's current response time off from statistics"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val now = System.currentTimeMillis()
         event.channel.sendMessage("Calculating...").queue {
             buildEmbed {

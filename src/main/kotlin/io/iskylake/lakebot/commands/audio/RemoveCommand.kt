@@ -27,7 +27,7 @@ class RemoveCommand : Command {
     override val aliases = listOf("removeat")
     override val description = "The command that removes the specified song from the queue"
     override val usage: (String) -> String = { "${super.usage(it)} <index>" }
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member.isConnected) {
                 event.sendError("You're not in the voice channel!").queue()

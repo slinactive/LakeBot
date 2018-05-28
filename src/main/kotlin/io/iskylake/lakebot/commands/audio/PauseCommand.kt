@@ -28,7 +28,7 @@ class PauseCommand : Command {
     override val name = "pause"
     override val aliases = listOf("suspend")
     override val description = "The command that pauses the song that is currently playing"
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()
         } else {

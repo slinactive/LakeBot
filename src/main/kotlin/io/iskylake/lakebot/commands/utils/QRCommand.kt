@@ -29,7 +29,7 @@ class QRCommand : Command {
     override val description = "The command that creates an image with QR code from the given text"
     override val usage: (String) -> String = { "${super.usage(it)} <text>" }
     override val cooldown = 2L
-    override fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             try {
                 event.channel.sendFile(ImageUtils.getQRCode(event.argsRaw!!), "qr.png").queue()
