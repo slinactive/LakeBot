@@ -20,6 +20,7 @@ import io.iskylake.lakebot.commands.`fun`.*
 import io.iskylake.lakebot.commands.audio.*
 import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
+import io.iskylake.lakebot.commands.info.*
 import io.iskylake.lakebot.commands.moderation.*
 import io.iskylake.lakebot.commands.utils.*
 import io.iskylake.lakebot.entities.EventWaiter
@@ -68,6 +69,8 @@ val DEFAULT_COMMANDS = listOf(
         HelpCommand(),
         PingCommand(),
         UptimeCommand(),
+        // Info
+        AvatarCommand(),
         // Moderation
         PruneCommand(),
         // Utils
