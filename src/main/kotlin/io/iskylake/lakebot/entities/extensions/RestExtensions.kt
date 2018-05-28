@@ -24,8 +24,8 @@ import net.dv8tion.jda.core.requests.RestAction
 
 import kotlin.coroutines.experimental.CoroutineContext
 
-suspend inline fun <reified T> RestAction<T>.await(context: CoroutineContext = CommandHandler, crossinline func: suspend (T) -> Unit) = queue { rest ->
+suspend inline fun <reified T> RestAction<T>.await(context: CoroutineContext = CommandHandler, noinline func: suspend (T) -> Unit) = queue {
     async(context) {
-        func(rest)
+        func(it)
     }
 }
