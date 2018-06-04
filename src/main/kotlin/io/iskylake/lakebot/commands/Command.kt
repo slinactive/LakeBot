@@ -24,6 +24,10 @@ interface Command {
         get() = emptyList()
     val examples: (String) -> Map<String, String>
         get() = { _ -> emptyMap() }
+    val fullName: String
+        get() = this::class.simpleName!!.removeSuffix("Command")
+    val id: Long
+        get() = fullName.hashCode().toLong()
     val category: CommandCategory
         get() {
             val args = this.javaClass.`package`.name.split("\\.".toRegex())

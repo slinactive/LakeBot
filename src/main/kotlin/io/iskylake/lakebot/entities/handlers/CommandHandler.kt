@@ -35,18 +35,18 @@ import kotlin.coroutines.experimental.CoroutineContext
 object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Command-Thread") {
     val registeredCommands = mutableListOf<Command>()
     private val cooldowns = mutableMapOf<String, OffsetDateTime>()
+    private fun getPriority(actual: String, expected: Command): Int = when (actual) {
+        expected.name -> 2
+        in expected.aliases -> 1
+        else -> 0
+    }
     operator fun iterator() = registeredCommands.iterator()
     operator fun contains(command: String): Boolean = this[command] !== null && this[command] in registeredCommands
     operator fun contains(command: Command): Boolean = command in registeredCommands
-    operator fun get(name: String): Command? {
-        val names = registeredCommands.filter { it.name.equals(name, true) }
-        val aliases = registeredCommands.filter { name.toLowerCase() in it.aliases }
-        return when {
-            !names.isEmpty() -> names[0]
-            !aliases.isEmpty() -> aliases[0]
-            else -> null
-        }
-    }
+    operator fun get(id: Long): Command? = registeredCommands.firstOrNull { it.id == id }
+    operator fun get(name: String): Command? = registeredCommands.filter {
+        getPriority(name.toLowerCase(), it) > 0
+    }.sortedBy { getPriority(name.toLowerCase(), it) }.firstOrNull()
     operator fun plusAssign(command: Command) {
         registeredCommands += command
     }
