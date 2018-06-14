@@ -66,8 +66,8 @@ class YouTubePlayCommand : PlayCommand() {
                                 }
                             }).await {
                                 try {
-                                    this.awaitInt(event, videos, it)
                                     USERS_WITH_PROCESSES += event.author
+                                    this.awaitInt(event, videos, it)
                                 } catch (e: Exception) {
                                     event.sendError("Something went wrong searching YouTube!").queue()
                                 }

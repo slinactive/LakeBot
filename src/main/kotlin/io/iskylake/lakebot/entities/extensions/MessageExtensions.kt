@@ -21,5 +21,7 @@ import io.iskylake.lakebot.entities.EventWaiter
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.User
 
-suspend fun Message.awaitConfirmation(user: User) = EventWaiter.awaitConfirmation(this, user)
-suspend fun Message.awaitNullableConfirmation(user: User) = EventWaiter.awaitNullableConfirmation(this, user)
+import java.util.concurrent.TimeUnit
+
+suspend fun Message.awaitConfirmation(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) = EventWaiter.awaitConfirmation(this, user, delay, unit)
+suspend fun Message.awaitNullableConfirmation(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) = EventWaiter.awaitNullableConfirmation(this, user,  delay, unit)

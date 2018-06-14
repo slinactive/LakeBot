@@ -21,7 +21,9 @@ import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.requests.restaction.MessageAction
 
-suspend fun MessageReceivedEvent.awaitMessage(user: User) = channel.awaitMessage(user)
+import java.util.concurrent.TimeUnit
+
+suspend fun MessageReceivedEvent.awaitMessage(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) = channel.awaitMessage(user, delay, unit)
 val MessageReceivedEvent.selfUser: SelfUser
     get() = this.jda.selfUser
 val MessageReceivedEvent.selfMember: Member?

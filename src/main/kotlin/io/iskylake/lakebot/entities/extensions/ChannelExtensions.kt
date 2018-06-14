@@ -17,13 +17,14 @@
 package io.iskylake.lakebot.entities.extensions
 
 import net.dv8tion.jda.core.entities.MessageChannel
+import net.dv8tion.jda.core.entities.User
 
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.entities.EventWaiter
 
-import net.dv8tion.jda.core.entities.User
+import java.util.concurrent.TimeUnit
 
-suspend fun MessageChannel.awaitMessage(user: User) = EventWaiter.awaitMessage(user, this)
+suspend fun MessageChannel.awaitMessage(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) = EventWaiter.awaitMessage(user, this, delay, unit)
 fun MessageChannel.sendSuccess(text: String) = this.sendMessage(buildEmbed {
     color { Immutable.SUCCESS }
     author { "Successfully!" }
