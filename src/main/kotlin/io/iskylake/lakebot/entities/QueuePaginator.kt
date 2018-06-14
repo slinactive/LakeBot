@@ -53,7 +53,7 @@ data class QueuePaginator(
         const val BIG_RIGHT = "\u23E9"
     }
     private val pages: List<List<AudioTrack>> = Lists.partition(tracks, 10)
-    operator fun invoke(channel: MessageChannel = event.channel, page: Int = 1) = accept(channel.sendMessage(this[page]), page)
+    operator fun invoke(page: Int = 1) = accept(event.channel.sendMessage(this[page]), page)
     private fun accept(rest: RestAction<Message>, pageNum: Int) = rest.queue { m ->
         if (pages.size > 1) {
             m.addReaction(BIG_LEFT).queue()
