@@ -113,10 +113,10 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
     suspend fun awaitConfirmation(msg: Message, author: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES): Boolean {
         msg.addReaction("\u2705").complete()
         msg.addReaction("\u274E").complete()
-        return this.receiveEvent<MessageReactionAddEvent>(delay, unit) {
+        return this.receiveEventRaw<MessageReactionAddEvent>(delay, unit) {
             val emote = it.reactionEmote.name
             it.user == author && it.messageIdLong == msg.idLong && (emote == "\u2705" || emote == "\u274E")
-        }.await()?.reactionEmote?.name == "\u2705"
+        }?.reactionEmote?.name == "\u2705"
     }
     @Author("ISkylake")
     fun awaitConfirmationAsync(
@@ -144,10 +144,10 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
     suspend fun awaitNullableConfirmation(msg: Message, author: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES): Boolean? {
         msg.addReaction("\u2705").complete()
         msg.addReaction("\u274E").complete()
-        val name = this.receiveEvent<MessageReactionAddEvent>(delay, unit) {
+        val name = this.receiveEventRaw<MessageReactionAddEvent>(delay, unit) {
             val emote = it.reactionEmote.name
             it.user == author && it.messageIdLong == msg.idLong && (emote == "\u2705" || emote == "\u274E")
-        }.await()?.reactionEmote?.name
+        }?.reactionEmote?.name
         return if (name != null) name == "\u2705" else null
     }
     @Author("ISkylake")
@@ -173,9 +173,9 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
      */
     @Author("ISkylake")
     suspend fun awaitMessage(user: User, channel: MessageChannel, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES): Message? {
-        return this.receiveEvent<MessageReceivedEvent>(delay, unit) {
+        return this.receiveEventRaw<MessageReceivedEvent>(delay, unit) {
             it.author == user && it.channel == channel
-        }.await()?.message
+        }?.message
     }
     @Author("ISkylake")
     fun awaitMessageAsync(
