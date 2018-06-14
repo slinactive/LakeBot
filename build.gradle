@@ -40,7 +40,7 @@ task stage(dependsOn: ['build', 'clean'])
 build.mustRunAfter clean
 
 group 'io.iskylake.lakebot'
-version '0.3.7'
+version '0.3.8'
 
 apply plugin: 'kotlin'
 
@@ -59,11 +59,11 @@ repositories {
 }
 
 dependencies {
-    compile "net.dv8tion:JDA:3.6.0_372"
+    compile "net.dv8tion:JDA:3.6.0_375"
     compile "org.slf4j:slf4j-simple:1.7.5"
     compile "org.json:json:20171018"
     compile "net.glxn.qrgen:javase:2.0"
-    compile "com.sedmelluq:lavaplayer:1.2.64"
+    compile "com.sedmelluq:lavaplayer:1.3.5"
     compile "org.codehaus.groovy:groovy:3.0.0-alpha-1"
     compile "com.google.guava:guava:24.1-jre"
     compile "com.github.jkcclemens:khttp:0.1.0"
