@@ -78,10 +78,10 @@ object ImageUtils {
     fun getImagedText(content: List<String>): ByteArray {
         var bufferedImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
         var g = bufferedImage.createGraphics()
-        val font = Font("Rubik Medium", Font.PLAIN, 22)
+        val font = Font("SF Pro Display", Font.BOLD, 22)
         g.font = font
         g.dispose()
-        val width = content.sortedWith(compareBy { it.count() }).last().count() * font.size
+        val width = content.sortedWith(compareBy { it.count() }).last().count() * 15
         val height = content.size * font.size + font.size / 2
         bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         g = bufferedImage.createGraphics()

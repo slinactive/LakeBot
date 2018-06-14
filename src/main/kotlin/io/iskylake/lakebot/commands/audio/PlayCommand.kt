@@ -25,7 +25,7 @@ import io.iskylake.lakebot.utils.AudioUtils
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
-open class PlayCommand internal constructor() : Command {
+open class PlayCommand : Command {
     override val name = "play"
     override val description = "The command that plays song by the specified link"
     override val usage: (String) -> String = { "${super.usage(it)} <query/link>" }
