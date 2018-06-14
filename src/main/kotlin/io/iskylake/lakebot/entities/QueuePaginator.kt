@@ -68,11 +68,11 @@ data class QueuePaginator(
         }
     }
     private fun waiter(msg: Message, num: Int = 1) = async(EventWaiter) {
-        val e = EventWaiter.receiveEvent<MessageReactionAddEvent>(1, TimeUnit.MINUTES) {
+        val e = EventWaiter.receiveEventRaw<MessageReactionAddEvent>(1, TimeUnit.MINUTES) {
             val isValidEmote = BIG_LEFT == it.reactionEmote.name || BIG_RIGHT == it.reactionEmote.name || LEFT == it.reactionEmote.name || STOP == it.reactionEmote.name || RIGHT == it.reactionEmote.name
             it.messageId == msg.id && isValidEmote && event.author == it.user
-        }.await()
-        if (e != null) {
+        }
+        if (e !== null) {
             var newPageNum = num
             when (e.reactionEmote.name) {
                 BIG_LEFT -> newPageNum = 1
