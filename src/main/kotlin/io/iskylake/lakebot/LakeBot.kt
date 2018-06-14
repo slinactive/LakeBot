@@ -67,7 +67,9 @@ val DEFAULT_COMMANDS = listOf(
         // General
         AboutCommand(),
         HelpCommand(),
+        InviteCommand(),
         PingCommand(),
+        SupportCommand(),
         UptimeCommand(),
         // Info
         AvatarCommand(),
