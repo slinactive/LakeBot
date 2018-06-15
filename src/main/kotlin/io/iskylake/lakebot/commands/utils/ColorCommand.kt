@@ -60,15 +60,24 @@ class ColorCommand : Command {
                     color { color }
                     author { name }
                     image { "attachment://$clear.png" }
-                    field(true, "Info:") {
-                        """**HEX**: $hex
-                            |**RGB**: ${color.red}, ${color.green}, ${color.blue}
-                            |**DEC**: ${clear.toInt(16)}
-                            |**CMYK**: ${color.toCmyk().joinToString()}
-                            |**HSL**: ${hsl["h"]}, ${hsl["s"]}, ${hsl["l"]}
-                        """.trimMargin()
-                    }
-                    if (closestHex != hex) {
+                    if (closestHex == hex) {
+                        description {
+                            """**HEX**: $hex
+                                |**RGB**: ${color.red}, ${color.green}, ${color.blue}
+                                |**DEC**: ${clear.toInt(16)}
+                                |**CMYK**: ${color.toCmyk().joinToString()}
+                                |**HSL**: ${hsl["h"]}, ${hsl["s"]}, ${hsl["l"]}
+                            """.trimMargin()
+                        }
+                    } else {
+                        field(true, "Info:") {
+                            """**HEX**: $hex
+                                |**RGB**: ${color.red}, ${color.green}, ${color.blue}
+                                |**DEC**: ${clear.toInt(16)}
+                                |**CMYK**: ${color.toCmyk().joinToString()}
+                                |**HSL**: ${hsl["h"]}, ${hsl["s"]}, ${hsl["l"]}
+                            """.trimMargin()
+                        }
                         field(true, "Closest Color:") {
                             val r = get("http://www.thecolorapi.com/id?hex=${closestHex.removePrefix("#")}")
                             val closestHsl = r.jsonObject.getJSONObject("hsl")
