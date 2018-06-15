@@ -16,8 +16,6 @@
 
 package io.iskylake.lakebot.commands.developer
 
-import groovy.lang.GroovyShell
-
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
@@ -45,7 +43,6 @@ class EvalCommand : Command {
                 "java.time",
                 "java.time.temporal",
                 "java.time.format",
-                "java.util",
                 "java.util.function",
                 "java.util.concurrent",
                 "java.util.concurrent.atomic",
@@ -77,7 +74,7 @@ class EvalCommand : Command {
                 "io.iskylake.lakebot.commands",
                 "io.iskylake.lakebot.commands.audio",
                 "io.iskylake.lakebot.commands.developer",
-                "io.iskylake.lakebot.commands.fun",
+                "io.iskylake.lakebot.commands.`fun`",
                 "io.iskylake.lakebot.commands.general",
                 "io.iskylake.lakebot.commands.moderation",
                 "io.iskylake.lakebot.commands.utils",
@@ -86,11 +83,6 @@ class EvalCommand : Command {
                 "io.iskylake.lakebot.entities.extensions",
                 "io.iskylake.lakebot.entities.handlers",
                 "io.iskylake.lakebot.utils",
-                "org.slf4j",
-                "org.json"
-        )
-        val KOTLIN_PACKAGES = PACKAGES - listOf("io.iskylake.lakebot.commands.fun", "java.util") + listOf(
-                "io.iskylake.lakebot.commands.`fun`",
                 "kotlinx.coroutines.experimental",
                 "kotlin.reflect",
                 "kotlin.reflect.jvm",
@@ -100,7 +92,9 @@ class EvalCommand : Command {
                 "kotlin.concurrent",
                 "kotlin.coroutines.experimental",
                 "kotlin.streams",
-                "kotlin.properties"
+                "kotlin.properties",
+                "org.slf4j",
+                "org.json"
         )
         val IMPORT_REGEX = "(\")?(import\\s+(\\w+|\\d+|_|\\*|\\.)+(?:\\s+(as)\\s+(\\w+|\\d+|_))?;?)(\")?".toRegex()
     }
@@ -120,10 +114,10 @@ class EvalCommand : Command {
             val engine = ScriptEngineManager().getEngineByExtension("kts") as KotlinJsr223JvmLocalScriptEngine
             if (arguments.startsWith("```")) {
                 val content = arguments.removeSurrounding("```")
-                when {
-                    content.startsWith("kotlin", true) -> kotlinEval(event, content.substring(6), engine)
-                    content.startsWith("groovy", true) -> groovyEval(event, content, GroovyShell())
-                    else -> event.sendError("That's not a valid language!").queue()
+                if (content.startsWith("kotlin", true)) {
+                    kotlinEval(event, content.substring(6), engine)
+                } else {
+                    event.sendError("That's not a valid language!").queue()
                 }
             } else {
                 kotlinEval(event, arguments, engine)
@@ -133,11 +127,11 @@ class EvalCommand : Command {
         }
     }
     private fun kotlinEval(event: MessageReceivedEvent, content: String, engine: KotlinJsr223JvmLocalScriptEngine) {
-        var scr = content
+        var script = content
         val commandImports = mutableListOf<String>()
         for (result in IMPORT_REGEX.findAll(content).filter { !it.value.contains("\"") }) {
             commandImports += result.value
-            scr = scr.replace(result.value, "")
+            script = script.replace(result.value, "")
         }
         engine.put("event", event)
         engine.put("message", event.message)
@@ -150,7 +144,7 @@ class EvalCommand : Command {
         engine.put("selfUser", event.jda.selfUser)
         engine.put("selfMember", event.guild.selfMember)
         val scriptPrefix = buildString {
-            for (import in KOTLIN_PACKAGES) {
+            for (import in PACKAGES) {
                 appendln("import $import.*")
             }
             for (import in commandImports) {
@@ -164,9 +158,8 @@ class EvalCommand : Command {
                 }
             }
         }
-        val script = "$scriptPrefix\n$scr"
         try {
-            val evaluated: Any? = engine.compileAndEval(script, engine.context)
+            val evaluated: Any? = engine.compileAndEval("$scriptPrefix\n$script", engine.context)
             if (evaluated !== null) {
                 when (evaluated) {
                     is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
@@ -188,54 +181,6 @@ class EvalCommand : Command {
                 }
                 description {
                     """```kotlin
-                        |${t::class.qualifiedName ?: t.javaClass.name}
-                        |
-                        |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
-                }
-                timestamp()
-            }).queue()
-        }
-    }
-    private fun groovyEval(event: MessageReceivedEvent, content: String, engine: GroovyShell) {
-        val script = buildString {
-            for (import in PACKAGES) {
-                appendln("import $import.*")
-            }
-            appendln(content.substring(6))
-        }
-        engine.setVariable("event", event)
-        engine.setVariable("message", event.message)
-        engine.setVariable("textChannel", event.textChannel)
-        engine.setVariable("channel", event.channel)
-        engine.setVariable("author", event.author)
-        engine.setVariable("jda", event.jda)
-        engine.setVariable("guild", event.guild)
-        engine.setVariable("member", event.member)
-        engine.setVariable("selfUser", event.jda.selfUser)
-        engine.setVariable("selfMember", event.guild.selfMember)
-        try {
-            val evaluated: Any? = engine.evaluate(script)
-            if (evaluated !== null) {
-                when (evaluated) {
-                    is EmbedBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                    is MessageEmbed -> event.channel.sendMessage(evaluated).queue()
-                    is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
-                    is Message -> event.channel.sendMessage(evaluated).queue()
-                    is RestAction<*> -> evaluated.queue()
-                    is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
-                    else -> event.channel.sendMessage("$evaluated").queue()
-                }
-            }
-        } catch (t: Throwable) {
-            event.sendMessage(buildEmbed {
-                color {
-                    Immutable.FAILURE
-                }
-                author {
-                    "An error has occured:"
-                }
-                description {
-                    """```groovy
                         |${t::class.qualifiedName ?: t.javaClass.name}
                         |
                         |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
