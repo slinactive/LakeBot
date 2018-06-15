@@ -214,7 +214,10 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
             tasks -= type
         }
     }
-    class AwaitableTask<in E: Event>(val condition: suspend (E) -> Boolean, val completion: CompletableDeferred<in E?>) {
+    class AwaitableTask<in E: Event>(
+            private val condition: suspend (E) -> Boolean,
+            private val completion: CompletableDeferred<in E?>
+    ) {
         suspend operator fun invoke(event: E): Boolean = try {
             if (condition(event)) {
                 completion.complete(event)
