@@ -61,6 +61,7 @@ val DEFAULT_COMMANDS = listOf(
         EvalCommand(),
         ShutdownCommand(),
         // Fun
+        AkinatorCommand(),
         InvertCommand(),
         SayCommand(),
         TextToImageCommand(),

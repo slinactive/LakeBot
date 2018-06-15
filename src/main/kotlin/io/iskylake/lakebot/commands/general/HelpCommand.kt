@@ -19,10 +19,11 @@ package io.iskylake.lakebot.commands.general
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.commands.CommandCategory
+import io.iskylake.lakebot.commands.`fun`.AkinatorCommand
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
-import net.dv8tion.jda.core.entities.MessageEmbed
 
+import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 class HelpCommand : Command {
@@ -96,6 +97,15 @@ class HelpCommand : Command {
                                 buildString {
                                     for ((example, description) in command.examples(Immutable.DEFAULT_PREFIX)) {
                                         appendln("$example \u2014 $description")
+                                    }
+                                }
+                            }
+                        }
+                        if (command is AkinatorCommand) {
+                            field(title = "Available Languages:") {
+                                buildString {
+                                    for (language in command.languages.keys) {
+                                        appendln("\u2022 ${language.capitalize()}")
                                     }
                                 }
                             }
