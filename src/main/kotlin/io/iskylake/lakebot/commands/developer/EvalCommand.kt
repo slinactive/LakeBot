@@ -107,7 +107,7 @@ class EvalCommand : Command {
     override val name = "eval"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <code>"
     override val aliases = listOf("evaluate", "exec", "execute")
-    override val description = "The command that evaluates Groovy/Kotlin script"
+    override val description = "The command that evaluates Kotlin script"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
