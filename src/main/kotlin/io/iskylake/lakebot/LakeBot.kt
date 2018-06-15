@@ -77,6 +77,7 @@ val DEFAULT_COMMANDS = listOf(
         // Moderation
         PruneCommand(),
         // Utils
+        ColorCommand(),
         QRCommand(),
         UrbanCommand(),
         WeatherCommand(),
