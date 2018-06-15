@@ -16,7 +16,8 @@ As the development has just begun, help from Kotlin programmers (with experience
 * **[OpenWeatherMap API](https://www.openweathermap.org/api)** - clear current weather data API 
 * **[Urban Dictionary API](https://www.urbandictionary.com/)** - popular modern dictionary API
 * **[Simple Logging Facade for Java (SLF4J)](https://www.slf4j.org/)** - logger implementation
-* **[Groovy](https://github.com/apache/groovy)** - the JVM programming language LakeBot uses as script engine
+* **[Akiwrapper](https://github.com/markozajc/Akiwrapper)** - the JVM programming language LakeBot uses as script engine
+* **[The Color API](http://www.thecolorapi.com/)** - color conversion, naming, scheming & placeholders
 * **[QRGen](https://github.com/kenglxn/QRGen)** - library for QR code generation
 * **[Guava](https://github.com/google/guava)** - set of core libraries that includes a lot of useful stuff
 ## Kotlin Modules
