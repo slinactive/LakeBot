@@ -40,7 +40,7 @@ task stage(dependsOn: ['build', 'clean'])
 build.mustRunAfter clean
 
 group 'io.iskylake.lakebot'
-version '0.3.8'
+version '0.3.9'
 
 apply plugin: 'kotlin'
 
