@@ -86,6 +86,7 @@ val DEFAULT_COMMANDS = listOf(
         // Utils
         ColorCommand(),
         QRCommand(),
+        ShortenerCommand(),
         UrbanCommand(),
         WeatherCommand(),
         YouTubeCommand()
