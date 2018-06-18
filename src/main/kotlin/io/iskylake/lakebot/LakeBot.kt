@@ -86,36 +86,34 @@ val DEFAULT_COMMANDS = listOf(
 )
 val USERS_WITH_PROCESSES = mutableListOf<User>()
 lateinit var DISCORD: JDA
-fun main(args: Array<String>) {
-    try {
-        runBlocking {
-            DISCORD = buildJDA {
-                token {
-                    Immutable.BOT_TOKEN
-                }
-                eventListener {
-                    EventHandler
-                }
-                eventListener {
-                    EventWaiter
-                }
-                game {
-                    watching("loading..")
-                }
-                onlineStatus {
-                    OnlineStatus.DO_NOT_DISTURB
-                }
+fun main(args: Array<String>) = try {
+    runBlocking {
+        DISCORD = buildJDA {
+            token {
+                Immutable.BOT_TOKEN
             }
-            for (command in DEFAULT_COMMANDS) {
-                CommandHandler += command
+            eventListener {
+                EventHandler
             }
-            System.setProperty("lakebot.version", Immutable.VERSION)
-            System.setProperty("kotlin.version", KotlinVersion.CURRENT.toString())
-            DISCORD.presence.game = streaming("${Immutable.VERSION} | ${Immutable.DEFAULT_PREFIX}help", "https://twitch.tv/raidlier")
-            DISCORD.presence.status = OnlineStatus.ONLINE
+            eventListener {
+                EventWaiter
+            }
+            game {
+                watching("loading..")
+            }
+            onlineStatus {
+                OnlineStatus.DO_NOT_DISTURB
+            }
         }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        exitProcess(0)
+        for (command in DEFAULT_COMMANDS) {
+            CommandHandler += command
+        }
+        System.setProperty("lakebot.version", Immutable.VERSION)
+        System.setProperty("kotlin.version", KotlinVersion.CURRENT.toString())
+        DISCORD.presence.game = streaming("${Immutable.VERSION} | ${Immutable.DEFAULT_PREFIX}help", "https://twitch.tv/raidlier")
+        DISCORD.presence.status = OnlineStatus.ONLINE
     }
+} catch (e: Exception) {
+    e.printStackTrace()
+    exitProcess(0)
 }
