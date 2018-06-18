@@ -81,7 +81,7 @@ object ImageUtils {
         val font = Font("SF Pro Display", Font.BOLD, 22)
         g.font = font
         g.dispose()
-        val width = content.sortedWith(compareBy { it.count() }).last().count() * 17
+        val width = g.fontMetrics.stringWidth(content.sortedWith(compareBy { it.count() }).last()) + 5
         val height = content.size * font.size + font.size / 2
         bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         g = bufferedImage.createGraphics()
