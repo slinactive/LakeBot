@@ -16,6 +16,8 @@
 
 package io.iskylake.lakebot
 
+import com.mongodb.MongoClient
+
 import io.iskylake.lakebot.commands.`fun`.*
 import io.iskylake.lakebot.commands.audio.*
 import io.iskylake.lakebot.commands.developer.*
@@ -27,7 +29,9 @@ import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
 import io.iskylake.lakebot.entities.handlers.EventHandler
+import io.iskylake.lakebot.utils.ConfigUtils
 
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 
 import net.dv8tion.jda.core.JDA
@@ -59,6 +63,8 @@ val DEFAULT_COMMANDS = listOf(
         YouTubePlayCommand(),
         // Developer
         EvalCommand(),
+        LakeBanCommand(),
+        LakeUnbanCommand(),
         ShutdownCommand(),
         // Fun
         AkinatorCommand(),
@@ -86,8 +92,11 @@ val DEFAULT_COMMANDS = listOf(
 )
 val USERS_WITH_PROCESSES = mutableListOf<User>()
 lateinit var DISCORD: JDA
+private lateinit var client: MongoClient
 fun main(args: Array<String>) = try {
     runBlocking {
+        client = ConfigUtils.CLIENT
+        delay(1000)
         DISCORD = buildJDA {
             token {
                 Immutable.BOT_TOKEN

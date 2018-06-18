@@ -16,10 +16,18 @@
 
 package io.iskylake.lakebot.entities.extensions
 
+import io.iskylake.lakebot.utils.ConfigUtils
+
 import net.dv8tion.jda.core.entities.PrivateChannel
 import net.dv8tion.jda.core.entities.User
+
+import org.bson.Document
 
 val User.privateChannel: PrivateChannel
     get() = this.openPrivateChannel().complete()
 val User.tag: String
     get() = "${this.name}#${this.discriminator}"
+val User.lakeBan: Document?
+    get() = ConfigUtils.getLakeBan(this)
+fun User.putLakeBan(reason: String) = ConfigUtils.putLakeBan(this, reason)
+fun User.clearLakeBan() = ConfigUtils.clearLakeBan(this)

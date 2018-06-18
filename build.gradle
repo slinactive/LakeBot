@@ -67,6 +67,7 @@ dependencies {
     compile "com.google.guava:guava:24.1-jre"
     compile "com.github.jkcclemens:khttp:0.1.0"
     compile "com.github.markozajc:akiwrapper:1.3.3"
+    compile "org.mongodb:mongo-java-driver:3.7.0-rc0"
     compile "com.google.apis:google-api-services-youtube:v3-rev187-1.23.0"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
