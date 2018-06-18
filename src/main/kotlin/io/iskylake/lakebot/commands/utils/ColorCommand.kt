@@ -27,8 +27,6 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.awt.Color
 import java.util.*
 
-import kotlin.math.max
-
 class ColorCommand : Command {
     override val name = "color"
     override val description = "The command that sends a short information about the specified color"
@@ -36,14 +34,15 @@ class ColorCommand : Command {
     override val usage = { it: String -> "${super.usage(it)} <HEX code>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         fun Color.toCmyk(): IntArray {
-            val r = red / 255f
-            val g = green / 255f
-            val b = blue / 255f
-            val k = 1.0f - max(r, max(g, b))
-            val c = (1f - r - k) / (1f - k)
-            val m = (1f - g - k) / (1f - k)
-            val y = (1f - b - k) / (1f - k)
-            return arrayOf(c * 100, m * 100, y * 100, k * 100).map { Math.round(it) }.toIntArray()
+            val rgbArray = arrayOf(red, green, blue).map { it / 255f }
+            val k = 1f - (rgbArray.max() ?: 0f)
+            val arr = mutableListOf<Float>().apply {
+                for (digit in rgbArray) {
+                    this += (1f - digit - k) / (1f - k) * 100
+                }
+                this += k * 100
+            }
+            return arr.map { Math.round(it) }.toIntArray()
         }
         if (args.isNotEmpty()) {
             if (args[0] matches "#?(([A-Fa-f\\d]){3}|([A-Fa-f\\d]){6})".toRegex()) {
