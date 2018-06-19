@@ -31,6 +31,13 @@ object Immutable {
     val BOT_TOKEN = System.getenv("BOT_TOKEN")!!
     val YOUTUBE_API_KEY = System.getenv("YOUTUBE_API_KEY")!!
     val WEATHER_API_KEY = System.getenv("WEATHER_API_KEY")!!
+    val GOOGLE_API_KEYS = listOf(
+            System.getenv("GOOGLE_API1")!!,
+            System.getenv("GOOGLE_API2")!!,
+            System.getenv("GOOGLE_API3")!!,
+            System.getenv("GOOGLE_API4")!!,
+            System.getenv("GOOGLE_API5")!!
+    )
     val SUCCESS = Color(232, 66, 102)
     val FAILURE = Color(239, 67, 63)
     val CONFIRMATION = Color(118, 255, 3)
