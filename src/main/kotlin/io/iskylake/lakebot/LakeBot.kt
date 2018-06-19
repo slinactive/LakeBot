@@ -81,6 +81,7 @@ val DEFAULT_COMMANDS = listOf(
         // Info
         AvatarCommand(),
         EmotesCommand(),
+        UserCommand(),
         // Moderation
         PruneCommand(),
         // Utils

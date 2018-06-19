@@ -24,6 +24,7 @@ enum class CommandCategory(val category: String) {
     AUDIO("Audio"),
     INFO("Info"),
     FUN("Fun"),
+    BETA("Beta"),
     UNKNOWN("Unknown");
     override fun toString(): String = this.category
     operator fun invoke(): String = this.category

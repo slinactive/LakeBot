@@ -89,6 +89,9 @@ class HelpCommand : Command {
                                 command.aliases.joinToString()
                             }
                         }
+                        field(title = "Category:") {
+                            command.category()
+                        }
                         field(title = "Usage:") {
                             command.usage(Immutable.DEFAULT_PREFIX)
                         }
