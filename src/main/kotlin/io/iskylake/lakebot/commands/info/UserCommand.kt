@@ -23,17 +23,21 @@ import io.iskylake.lakebot.commands.CommandCategory
 import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 
+import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.entities.Game
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
 
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
 class UserCommand : Command {
     override val name = "user"
-    override val description = "N/A"
-    override val category = CommandCategory.BETA
+    override val aliases = listOf("userinfo", "usermenu")
+    override val description = "The command that sends complete information about your account or the account of the specified user"
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <user (optional)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
@@ -67,6 +71,55 @@ class UserCommand : Command {
             userMenu(event, event.member)
         }
     }
+    inline fun userInfo(lazy: () -> Member) = buildEmbed {
+        val member = lazy()
+        val user = member.user
+        val hasPermissions = member.isOwner || member.hasPermission(Permission.ADMINISTRATOR) || member.hasPermission(Permission.MANAGE_SERVER) || member.roles.isEmpty()
+        val roles = member.roles.filter { !it.isPublicRole }
+        author(user.tag) { user.effectiveAvatarUrl }
+        color { Immutable.SUCCESS }
+        thumbnail { user.effectiveAvatarUrl }
+        footer(user.effectiveAvatarUrl) { "Requested by ${user.tag}" }
+        timestamp()
+        field(true, "Online Status:") { member.onlineStatus.name.replace("_", " ").capitalizeAll(true) }
+        field(true, if (member.game !== null) when (member.game) {
+            Game.GameType.LISTENING -> "Listening To:"
+            Game.GameType.STREAMING -> "Streaming:"
+            Game.GameType.WATCHING -> "Watching:"
+            else -> "Playing:"
+        } else "Game Status:") { member.game?.name ?: "None" }
+        field(true, "Creation Date:") { user.creationTime.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
+        field(true, "Join Date:") { member.joinDate.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
+        field(true, "ID:") { user.id }
+        field(true, "Color:") { member.color?.rgb?.toHex()?.takeLast(6)?.prepend("#") ?: "Default" }
+        field(true, "Username:") { user.name.escapeDiscordMarkdown() }
+        field(true, "Nickname:") { member.nickname?.escapeDiscordMarkdown() ?: "No Nickname" }
+        field(title = "Join Order:") { member.joinOrder }
+        field(hasPermissions, "Join Position:") { "#${member.joinPosition}" }
+        if (hasPermissions) {
+            field(true, "Acknowledgements:") {
+                when {
+                    member.isOwner -> "Server Owner"
+                    member.hasPermission(Permission.ADMINISTRATOR) -> "Server Admin"
+                    member.hasPermission(Permission.MANAGE_SERVER) -> "Server Moderator"
+                    else -> "Unknown"
+                }
+            }
+        }
+        field(roles.size > 2, if (roles.isEmpty()) "Roles:" else "Roles (${roles.size}):") {
+            when {
+                roles.isEmpty() -> "No"
+                roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString().length > 1024 -> "Too many roles to display"
+                else -> roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString()
+            }
+        }
+        if (member.roles.isNotEmpty()) {
+            field(true, "Highest Role:") { roles[0].name.escapeDiscordMarkdown() }
+        }
+        if (member.keyPermissions.isNotEmpty()) {
+            field(title = "Key Permissions:") { member.keyPermissions.mapNotNull { it.getName() }.joinToString() }
+        }
+    }
     suspend fun userMenu(event: MessageReceivedEvent, member: Member) = event.channel.sendMessage(buildEmbed {
         color { Immutable.SUCCESS }
         author { "Select The Action:" }
@@ -86,6 +139,8 @@ class UserCommand : Command {
                 "\u0031\u20E3" -> {
                     it.delete().queue()
                     USERS_WITH_PROCESSES -= event.author
+                    val embed = userInfo { member }
+                    event.channel.sendMessage(embed).queue()
                 }
                 "\u0032\u20E3" -> {
                     it.delete().queue()
@@ -105,6 +160,7 @@ class UserCommand : Command {
                 }
             }
         } else {
+            it.delete().queue()
             event.sendError("Time is up!").queue()
             USERS_WITH_PROCESSES -= event.author
         }

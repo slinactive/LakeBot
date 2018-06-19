@@ -77,6 +77,7 @@ class EvalCommand : Command {
                 "io.iskylake.lakebot.commands.developer",
                 "io.iskylake.lakebot.commands.`fun`",
                 "io.iskylake.lakebot.commands.general",
+                "io.iskylake.lakebot.commands.info",
                 "io.iskylake.lakebot.commands.moderation",
                 "io.iskylake.lakebot.commands.utils",
                 "io.iskylake.lakebot.entities",
