@@ -44,10 +44,11 @@ class UserCommand : Command {
                     if (list.size > 1) {
                         event.channel.sendMessage(buildEmbed {
                             color { Immutable.SUCCESS }
-                            author { "Select The User:" }
-                            for (member in list) {
-                                appendln { "\u2022 ${member.user.tag}" }
+                            author("Select The User:") { event.selfUser.effectiveAvatarUrl }
+                            for ((index, member) in list.withIndex()) {
+                                appendln { "${index + 1}. ${member.user.tag}" }
                             }
+                            footer { "Type in \"exit\" to kill the process" }
                         }).await {
                             USERS_WITH_PROCESSES += event.author
                             selectUser(event, it, list)
@@ -63,7 +64,7 @@ class UserCommand : Command {
                 else -> event.sendError("Couldn't find that user!").queue()
             }
         } else {
-            invoke(event, arrayOf(event.author.asMention))
+            userMenu(event, event.member)
         }
     }
     suspend fun userMenu(event: MessageReceivedEvent, member: Member) = event.channel.sendMessage(buildEmbed {
@@ -88,7 +89,13 @@ class UserCommand : Command {
                 }
                 "\u0032\u20E3" -> {
                     it.delete().queue()
-                    AvatarCommand()(event, arrayOf(member.user.asMention))
+                    val embed = buildEmbed {
+                        author { "Avatar of:" }
+                        description { "[${member.user.tag.escapeDiscordMarkdown()}](${member.user.effectiveAvatarUrl}?size=2048)" }
+                        image { "${member.user.effectiveAvatarUrl}?size=2048" }
+                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                    }
+                    event.channel.sendMessage(embed).queue()
                     USERS_WITH_PROCESSES -= event.author
                 }
                 "\u274C" -> {
