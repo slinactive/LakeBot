@@ -65,7 +65,6 @@ class GuessGameCommand : Command {
                     val input = content.toInt()
                     when {
                         input == toGuess -> {
-                            attempt++
                             event.channel.sendSuccess("GG! Game took $attempt attempts!").queue()
                             USERS_WITH_PROCESSES -= event.author
                         }
