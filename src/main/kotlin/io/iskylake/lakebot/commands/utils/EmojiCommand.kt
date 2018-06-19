@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter
 
 class EmojiCommand : Command {
     override val name = "emoji"
+    override val aliases = listOf("emote", "char", "character")
     override val description = "beta"
     override val category = CommandCategory.BETA
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
@@ -47,7 +48,7 @@ class EmojiCommand : Command {
             } else {
                 val input = arguments.replace(" ", "")
                 if (input.length > 15) {
-
+                    event.sendError("Content can't be longer than 15 characters!").queue()
                 } else {
                     val embed = buildEmbed {
                         color { Immutable.SUCCESS }
@@ -81,7 +82,7 @@ class EmojiCommand : Command {
                 }
             }
         } else {
-
+            event.sendError("You specified no content!").queue()
         }
     }
 }
