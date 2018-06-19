@@ -12,6 +12,7 @@ As the development has just begun, help from Kotlin programmers (with experience
 * **[JDA](https://github.com/DV8FromTheWorld/JDA)** - Java wrapper for Discord API
 * **[LavaPlayer](https://github.com/sedmelluq/lavaplayer)** - Discord audio player library
 * **[KHttp](https://github.com/jkcclemens/khttp)** - simple library for HTTP requests in Kotlin
+* **[MongoDB Java Driver](https://mongodb.github.io/mongo-java-driver/)** - the official MongoDB Java driver
 * **[YouTube API Wrapper](https://developers.google.com/api-client-library/java/apis/youtube/v3)** - Java wrapper for YouTube API
 * **[OpenWeatherMap API](https://www.openweathermap.org/api)** - clear current weather data API 
 * **[Urban Dictionary API](https://www.urbandictionary.com/)** - popular modern dictionary API
