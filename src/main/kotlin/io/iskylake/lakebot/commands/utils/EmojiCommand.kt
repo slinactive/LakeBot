@@ -18,16 +18,17 @@ package io.iskylake.lakebot.commands.utils
 
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
-import io.iskylake.lakebot.commands.CommandCategory
 import io.iskylake.lakebot.entities.extensions.*
+
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+
 import java.time.format.DateTimeFormatter
 
 class EmojiCommand : Command {
     override val name = "emoji"
-    override val aliases = listOf("emote", "char", "character")
-    override val description = "beta"
-    override val category = CommandCategory.BETA
+    override val aliases = listOf("emote", "char", "character", "symbol")
+    override val description = "The command that sends information about specified emoji, custom emote or symbol"
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <symbol/emote>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
