@@ -27,15 +27,14 @@ import io.iskylake.lakebot.utils.TimeUtils
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 data class QueuePaginator(override val list: List<AudioTrack>, override val event: MessageReceivedEvent) : Paginator<AudioTrack> {
-    override fun invoke(page: Int) = accept(event.channel.sendMessage(this[page]), page)
+    override val pageSize = 10
     override fun get(num: Int) = buildEmbed {
         val page = when {
             num >= pages.size -> pages.size
             num <= 0 -> 1
             else -> num
         }
-        val trackPage = pages[page - 1]
-        for (track in trackPage) {
+        for (track in pages[page - 1]) {
             appendln {
                 "**${list.indexOf(track) + 1}. [${track.info.title}](${track.info.uri}) (${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})**"
             }

@@ -83,6 +83,7 @@ class EvalCommand : Command {
                 "io.iskylake.lakebot.entities.annotations",
                 "io.iskylake.lakebot.entities.extensions",
                 "io.iskylake.lakebot.entities.handlers",
+                "io.iskylake.lakebot.entities.pagination",
                 "io.iskylake.lakebot.utils",
                 "kotlinx.coroutines.experimental",
                 "kotlin.reflect",

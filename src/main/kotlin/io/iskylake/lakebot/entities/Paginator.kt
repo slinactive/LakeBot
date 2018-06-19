@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+@file:Suppress("UNUSED")
 package io.iskylake.lakebot.entities
 
 import com.google.common.collect.Lists
@@ -38,6 +39,7 @@ interface Paginator<out T> {
     }
     val event: MessageReceivedEvent
     val list: List<T>
+    val pageSize: Int
     val action: (Message) -> Unit
         get() = {
             try {
@@ -46,9 +48,9 @@ interface Paginator<out T> {
             }
         }
     val pages: List<List<T>>
-        get() = Lists.partition(list, 10)
-    operator fun invoke(page: Int = 1)
+        get() = Lists.partition(list, pageSize)
     operator fun get(num: Int = 1): MessageEmbed
+    operator fun invoke(page: Int = 1) = accept(event.channel.sendMessage(this[page]), page)
     fun accept(rest: RestAction<Message>, pageNum: Int = 1) = rest.queue { m ->
         if (pages.size > 1) {
             m.addReaction(BIG_LEFT).queue()
