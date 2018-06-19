@@ -38,7 +38,7 @@ class GuessGameCommand : Command {
                     val toGuess = Random().nextInt(max)
                     val round = 1
                     event.channel.sendMessage(buildEmbed {
-                        author { "Game was started!" }
+                        author { "Attempt #$round" }
                         description { "Let's go!" }
                         footer { "Type in \"exit\" to kill the process" }
                         color { Immutable.SUCCESS }
