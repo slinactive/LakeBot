@@ -36,7 +36,7 @@ class DogCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
             color { Immutable.SUCCESS }
-            image { getImage() }
+            image { "https://random.dog/${getImage()}" }
             footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
         }
         event.channel.sendMessage(embed).queue()
