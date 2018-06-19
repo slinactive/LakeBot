@@ -19,6 +19,7 @@ As the development has just begun, help from Kotlin programmers (with experience
 * **[Akiwrapper](https://github.com/markozajc/Akiwrapper)** - the JVM programming language LakeBot uses as script engine
 * **[The Color API](http://www.thecolorapi.com/)** - color conversion, naming, scheming & placeholders
 * **[QRGen](https://github.com/kenglxn/QRGen)** - library for QR code generation
+* **[Jsoup](https://jsoup.org/)** - library for working with real-world HTML
 * **[Guava](https://github.com/google/guava)** - set of core libraries that includes a lot of useful stuff
 ## Kotlin Modules
 * `kotlin-stdlib-jdk8` - standard library
