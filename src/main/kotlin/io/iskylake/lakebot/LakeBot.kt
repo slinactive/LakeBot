@@ -86,6 +86,7 @@ val DEFAULT_COMMANDS = listOf(
         PruneCommand(),
         // Utils
         ColorCommand(),
+        EmojiCommand(),
         QRCommand(),
         ShortenerCommand(),
         UrbanCommand(),
