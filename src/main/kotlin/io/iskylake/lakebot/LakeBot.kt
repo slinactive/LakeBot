@@ -87,6 +87,7 @@ val DEFAULT_COMMANDS = listOf(
         // Utils
         ColorCommand(),
         EmojiCommand(),
+        GoogleCommand(),
         QRCommand(),
         ShortenerCommand(),
         UrbanCommand(),
