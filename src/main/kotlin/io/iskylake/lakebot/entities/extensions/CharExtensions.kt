@@ -17,5 +17,7 @@
 @file:Suppress("UNUSED")
 package io.iskylake.lakebot.entities.extensions
 
+val Char.name: String?
+    get() = Char.getName(this)
 fun Char.Companion.getName(value: Int): String? = Character.getName(value)
 fun Char.Companion.getName(value: Char): String? = getName(value.toInt())
