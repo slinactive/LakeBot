@@ -17,6 +17,7 @@
 package io.iskylake.lakebot.commands
 
 enum class CommandCategory(val category: String) {
+    ANIMALS("Animals"),
     MODERATION("Moderation"),
     UTILS("Utils"),
     GENERAL("General"),

@@ -73,6 +73,7 @@ class EvalCommand : Command {
                 "io.iskylake.lakebot",
                 "io.iskylake.lakebot.audio",
                 "io.iskylake.lakebot.commands",
+                "io.iskylake.lakebot.commands.animals",
                 "io.iskylake.lakebot.commands.audio",
                 "io.iskylake.lakebot.commands.developer",
                 "io.iskylake.lakebot.commands.`fun`",

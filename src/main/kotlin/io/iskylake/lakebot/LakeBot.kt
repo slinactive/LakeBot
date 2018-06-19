@@ -19,6 +19,7 @@ package io.iskylake.lakebot
 import com.mongodb.MongoClient
 
 import io.iskylake.lakebot.commands.`fun`.*
+import io.iskylake.lakebot.commands.animals.*
 import io.iskylake.lakebot.commands.audio.*
 import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
@@ -43,6 +44,11 @@ import net.dv8tion.jda.core.entities.User
 import kotlin.system.exitProcess
 
 val DEFAULT_COMMANDS = listOf(
+        // Animals
+        AlpacaCommand(),
+        BirdCommand(),
+        CatCommand(),
+        DogCommand(),
         // Audio
         JoinCommand(),
         JumpCommand(),
