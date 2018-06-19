@@ -18,7 +18,7 @@ package io.iskylake.lakebot.commands.audio
 
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
-import io.iskylake.lakebot.entities.QueuePaginator
+import io.iskylake.lakebot.entities.pagination.QueuePaginator
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.utils.AudioUtils
 import io.iskylake.lakebot.utils.TimeUtils
