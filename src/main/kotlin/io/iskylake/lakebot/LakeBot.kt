@@ -90,6 +90,7 @@ val DEFAULT_COMMANDS = listOf(
         EmotesCommand(),
         UserCommand(),
         // Moderation
+        PrefixCommand(),
         PruneCommand(),
         // Utils
         ColorCommand(),

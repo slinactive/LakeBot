@@ -78,7 +78,7 @@ class HelpCommand : Command {
                         color {
                             Immutable.SUCCESS
                         }
-                        author("${Immutable.DEFAULT_PREFIX}${command.name}") {
+                        author("${event.guild.prefix}${command.name}") {
                             event.selfUser.effectiveAvatarUrl
                         }
                         field(title = "Description:") {
@@ -93,12 +93,12 @@ class HelpCommand : Command {
                             command.category()
                         }
                         field(title = "Usage:") {
-                            command.usage(Immutable.DEFAULT_PREFIX)
+                            command.usage(event.guild.prefix)
                         }
-                        if (command.examples(Immutable.DEFAULT_PREFIX).isNotEmpty()) {
+                        if (command.examples(event.guild.prefix).isNotEmpty()) {
                             field(title = "Examples:") {
                                 buildString {
-                                    for ((example, description) in command.examples(Immutable.DEFAULT_PREFIX)) {
+                                    for ((example, description) in command.examples(event.guild.prefix)) {
                                         appendln("$example \u2014 $description")
                                     }
                                 }

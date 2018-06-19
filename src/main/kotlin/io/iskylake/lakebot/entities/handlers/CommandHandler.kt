@@ -20,6 +20,7 @@ import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.USERS_WITH_PROCESSES
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.lakeBan
+import io.iskylake.lakebot.entities.extensions.prefix
 import io.iskylake.lakebot.entities.extensions.sendError
 
 import kotlinx.coroutines.experimental.launch
@@ -56,9 +57,9 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
     }
     internal operator fun invoke(event: MessageReceivedEvent) {
         if (!event.author.isBot && !event.author.isFake && event.channelType.isGuild && event.message.type == MessageType.DEFAULT) {
-            if (event.message.contentRaw.startsWith(Immutable.DEFAULT_PREFIX, true)) {
+            if (event.message.contentRaw.startsWith(event.guild.prefix, true)) {
                 val args = event.message.contentRaw.split("\\s".toRegex(), 2)
-                val command = this[args[0].toLowerCase().substring(Immutable.DEFAULT_PREFIX.length)]
+                val command = this[args[0].toLowerCase().substring(event.guild.prefix.length)]
                 if (command !== null) {
                     when {
                         command.isDeveloper && event.author.idLong !in Immutable.DEVELOPERS -> event.sendError("You don't have permissions to execute this command!").queue()

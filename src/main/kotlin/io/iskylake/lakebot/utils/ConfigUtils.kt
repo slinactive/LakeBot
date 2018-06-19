@@ -23,6 +23,7 @@ import com.mongodb.client.model.Filters
 
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.entities.extensions.tag
+import net.dv8tion.jda.core.entities.Guild
 
 import net.dv8tion.jda.core.entities.User
 
@@ -31,6 +32,31 @@ import org.bson.Document
 object ConfigUtils {
     val CLIENT = MongoClient()
     val DATABASE: MongoDatabase = CLIENT.getDatabase("lake-bot")
+    // Prefix
+    fun getPrefix(guild: Guild): String = if (isPrefixEnabled(guild)) {
+        DATABASE.getCollection("prefixes").find(Filters.eq("id", guild.id)).first()!!.getString("prefix")
+    } else {
+        Immutable.DEFAULT_PREFIX
+    }
+    fun setPrefix(prefix: String, guild: Guild) {
+        if (!isPrefixEnabled(guild)) {
+            if (prefix != Immutable.DEFAULT_PREFIX) {
+                DATABASE.getCollection("prefixes").insertOne(Document().append("id", guild.id).append("prefix", prefix))
+            }
+        } else {
+            if (prefix == Immutable.DEFAULT_PREFIX) {
+                clearPrefix(guild)
+            } else {
+                DATABASE.getCollection("prefixes").replaceOne(Filters.eq("id", guild.id), Document().append("id", guild.id).append("prefix", prefix))
+            }
+        }
+    }
+    fun clearPrefix(guild: Guild) {
+        if (isPrefixEnabled(guild)) {
+            DATABASE.getCollection("prefixes").deleteOne(Filters.eq("id", guild.id))
+        }
+    }
+    fun isPrefixEnabled(guild: Guild): Boolean = DATABASE.getCollection("prefixes").find(Filters.eq("id", guild.id)).first() !== null
     // LakeBan
     fun getLakeBans(): List<Document> = DATABASE.getCollection("lakebans").find().toList()
     fun getLakeBan(user: User): Document? = getLakeBans().firstOrNull {
