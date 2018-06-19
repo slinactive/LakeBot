@@ -29,6 +29,7 @@ import net.dv8tion.jda.core.requests.RestAction
 
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngine
+import org.json.JSONObject
 
 import javax.script.ScriptContext
 import javax.script.ScriptEngineManager
@@ -168,6 +169,7 @@ class EvalCommand : Command {
                     is Message -> event.channel.sendMessage(evaluated).queue()
                     is RestAction<*> -> evaluated.queue()
                     is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
+                    is JSONObject -> event.channel.sendMessage(evaluated.toString(2)).queue()
                     else -> event.channel.sendMessage("$evaluated").queue()
                 }
             }
