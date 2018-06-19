@@ -27,6 +27,7 @@ import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Game
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
 
@@ -71,7 +72,7 @@ class UserCommand : Command {
             userMenu(event, event.member)
         }
     }
-    inline fun userInfo(lazy: () -> Member) = buildEmbed {
+    inline fun userInfo(author: User, lazy: () -> Member) = buildEmbed {
         val member = lazy()
         val user = member.user
         val hasPermissions = member.isOwner || member.hasPermission(Permission.ADMINISTRATOR) || member.hasPermission(Permission.MANAGE_SERVER) || member.roles.isEmpty()
@@ -79,7 +80,7 @@ class UserCommand : Command {
         author(user.tag) { user.effectiveAvatarUrl }
         color { Immutable.SUCCESS }
         thumbnail { user.effectiveAvatarUrl }
-        footer(user.effectiveAvatarUrl) { "Requested by ${user.tag}" }
+        footer(author.effectiveAvatarUrl) { "Requested by ${author.tag}" }
         timestamp()
         field(true, "Online Status:") { member.onlineStatus.name.replace("_", " ").capitalizeAll(true) }
         field(true, if (member.game !== null) when (member.game) {
@@ -139,7 +140,7 @@ class UserCommand : Command {
                 "\u0031\u20E3" -> {
                     it.delete().queue()
                     USERS_WITH_PROCESSES -= event.author
-                    val embed = userInfo { member }
+                    val embed = userInfo(event.author) { member }
                     event.channel.sendMessage(embed).queue()
                 }
                 "\u0032\u20E3" -> {
