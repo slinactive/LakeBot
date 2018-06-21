@@ -110,21 +110,11 @@ fun main(args: Array<String>) = try {
         client = ConfigUtils.CLIENT
         delay(1000)
         DISCORD = buildJDA {
-            token {
-                Immutable.BOT_TOKEN
-            }
-            eventListener {
-                EventHandler
-            }
-            eventListener {
-                EventWaiter
-            }
-            game {
-                watching("loading..")
-            }
-            onlineStatus {
-                OnlineStatus.DO_NOT_DISTURB
-            }
+            token { Immutable.BOT_TOKEN }
+            eventListener { EventHandler }
+            eventListener { EventWaiter }
+            game { watching("loading..") }
+            onlineStatus { OnlineStatus.DO_NOT_DISTURB }
         }
         for (command in DEFAULT_COMMANDS) {
             CommandHandler += command
