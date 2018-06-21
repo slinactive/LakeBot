@@ -30,15 +30,9 @@ class PingCommand : Command {
         val now = System.currentTimeMillis()
         event.channel.sendMessage("Calculating...").queue {
             buildEmbed {
-                field(true, "Rest Ping") {
-                    "${System.currentTimeMillis() - now} ms"
-                }
-                field(true, "WebSocket Ping") {
-                    "${event.jda.ping} ms"
-                }
-                color {
-                    Immutable.SUCCESS
-                }
+                field(true, "Rest Ping") { "${System.currentTimeMillis() - now} ms" }
+                field(true, "WebSocket Ping") { "${event.jda.ping} ms" }
+                color { Immutable.SUCCESS }
             }.run {
                 it.editMessage(this).override(true).queue()
             }

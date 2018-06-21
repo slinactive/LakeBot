@@ -27,18 +27,10 @@ class UptimeCommand : Command {
     override val description = "The command that sends bot uptime off from statistics"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
-            color {
-                Immutable.SUCCESS
-            }
-            field(title = "Uptime:") {
-                event.jda.formattedUptime
-            }
-            footer {
-                "Last Reboot"
-            }
-            timestamp {
-                event.jda.startDate
-            }
+            color { Immutable.SUCCESS }
+            field(title = "Uptime:") { event.jda.formattedUptime }
+            footer { "Last Reboot" }
+            timestamp { event.jda.startDate }
         }
         event.channel.sendMessage(embed).queue()
     }
