@@ -99,7 +99,7 @@ class ColorCommand : Command {
             val g = Random().nextInt(255)
             val b = Random().nextInt(255)
             val color = Color(r, g, b)
-            invoke(event, arrayOf("#${color.rgb.toHex().removePrefix("ffffffffff")}"))
+            invoke(event, arrayOf("#${color.rgb.toHex().takeLast(6)}"))
         }
     }
 }
