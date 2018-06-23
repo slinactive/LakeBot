@@ -38,14 +38,14 @@ object ImageUtils {
         for (x in 0 until image.width) {
             for (y in 0 until image.height) {
                 val rgba = image.getRGB(x, y)
-                val a = (rgba shr 24) and 0xff
-                var r = (rgba shr 16) and 0xff
-                var g = (rgba shr 8) and 0xff
+                val a = rgba shr 24 and 0xff shl 24
+                var r = rgba shr 16 and 0xff
+                var g = rgba shr 8 and 0xff
                 var b = rgba and 0xff
-                r = 255 - r
-                g = 255 - g
+                r = 255 - r shl 16
+                g = 255 - g shl 8
                 b = 255 - b
-                image.setRGB(x, y, (a shl 24) or (r shl 16) or (g shl 8) or b)
+                image.setRGB(x, y, a or r or g or b)
             }
         }
         return image
