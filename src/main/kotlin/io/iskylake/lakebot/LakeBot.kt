@@ -87,6 +87,7 @@ val DEFAULT_COMMANDS = listOf(
         UptimeCommand(),
         // Info
         EmotesCommand(),
+        RoleCommand(),
         ServerCommand(),
         UserCommand(),
         // Moderation
