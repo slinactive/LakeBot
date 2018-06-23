@@ -19,7 +19,6 @@ package io.iskylake.lakebot.commands.info
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.USERS_WITH_PROCESSES
 import io.iskylake.lakebot.commands.Command
-import io.iskylake.lakebot.commands.CommandCategory
 import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 
@@ -109,7 +108,7 @@ class UserCommand : Command {
         }
         field(roles.size > 2, if (roles.isEmpty()) "Roles:" else "Roles (${roles.size}):") {
             when {
-                roles.isEmpty() -> "No"
+                roles.isEmpty() -> "No roles"
                 roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString().length > 1024 -> "Too many roles to display"
                 else -> roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString()
             }
