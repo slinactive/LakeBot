@@ -171,6 +171,7 @@ class EvalCommand : Command {
                     is MessageBuilder -> event.channel.sendMessage(evaluated.build()).queue()
                     is Message -> event.channel.sendMessage(evaluated).queue()
                     is RestAction<*> -> evaluated.queue()
+                    is Command -> event.channel.sendMessage("Command[${evaluated.fullName}, ${evaluated.id}]").queue()
                     is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
                     is JSONObject -> event.channel.sendMessage(evaluated.toString(2)).queue()
                     else -> event.channel.sendMessage("$evaluated").queue()
