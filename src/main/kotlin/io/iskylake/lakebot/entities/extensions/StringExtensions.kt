@@ -69,9 +69,10 @@ operator fun String.times(num: Int): String = buildString {
         append(this@times)
     }
 }
-fun String.safeSubstring(begin: Int, end: Int = this.count()) = try {
+fun String.safeSubstring(begin: Int = 0, end: Int = this.count()) = try {
     this.substring(begin, end)
 } catch (t: Throwable) {
     this
 }
-fun String.escapeDiscordMarkdown(): String = this.replace("*", "\\*").replace("_", "\\_").replace("~", "\\~").replace("`", "\\`")
+fun String.removeContent(content: String) = replace(content, "")
+fun String.escapeDiscordMarkdown() = replace("*", "\\*").replace("_", "\\_").replace("~", "\\~").replace("`", "\\`")

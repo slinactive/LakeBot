@@ -74,6 +74,7 @@ val DEFAULT_COMMANDS = listOf(
         ShutdownCommand(),
         // Fun
         AkinatorCommand(),
+        ChooseCommand(),
         GuessGameCommand(),
         InvertCommand(),
         SayCommand(),
