@@ -22,6 +22,7 @@ import io.iskylake.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.core.EmbedBuilder.ZERO_WIDTH_SPACE
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.core.utils.Helpers
 
 class ChooseCommand : Command {
     override val name = "choose"
@@ -31,20 +32,13 @@ class ChooseCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
-            val toChoose = arguments.split("(\\s+\\|+\\s+)|(\\|+)".toRegex())
-            event.channel.run {
-                try {
-                    sendMessage(buildEmbed {
-                        color { Immutable.SUCCESS }
-                        description { toChoose.random() }
-                    }).queue()
-                } catch (e: Exception) {
-                    sendMessage(buildEmbed {
-                        color { Immutable.SUCCESS }
-                        description { ZERO_WIDTH_SPACE }
-                    }).queue()
-                }
-            }
+            event.channel.sendMessage(buildEmbed {
+                val toChoose = arguments.split("(\\s+\\|+\\s+)|(\\|+)".toRegex())
+                val random = toChoose.random()
+                val toSend = if (Helpers.isBlank(random)) ZERO_WIDTH_SPACE else random
+                color { Immutable.SUCCESS }
+                description { toSend }
+            }).queue()
         } else {
             event.sendError("You specified no content!").queue()
         }
