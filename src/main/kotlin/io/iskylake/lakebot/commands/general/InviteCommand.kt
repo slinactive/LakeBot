@@ -29,7 +29,7 @@ class InviteCommand : Command {
         val embed = buildEmbed {
             color { Immutable.SUCCESS }
             author { "${event.selfUser.name} Invite" }
-            description { "Want to invite ${event.selfUser.name} to own server? Do it [here](https://discordapp.com/api/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)!" }
+            description { "Want to invite ${event.selfUser.name} to own server? Do it [here](https://discordapp.com/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)!" }
             thumbnail { event.selfUser.effectiveAvatarUrl }
         }
         event.channel.sendMessage(embed).queue()

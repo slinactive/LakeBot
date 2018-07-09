@@ -32,19 +32,13 @@ class HelpCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (args.isEmpty()) {
             val embed = buildEmbed {
-                color {
-                    Immutable.SUCCESS
-                }
-                author("${event.selfUser.name} Help:") {
-                    event.selfUser.effectiveAvatarUrl
-                }
+                color { Immutable.SUCCESS }
+                author("${event.selfUser.name} Help:") { event.selfUser.effectiveAvatarUrl }
                 description {
-                    "**[Support Server](${Immutable.SUPPORT_INVITE})** \u2022 **[Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)** \u2022 **[GitHub Repository](${Immutable.GITHUB_REPOSITORY})**"
+                    "**[Support Server](${Immutable.SUPPORT_INVITE})** \u2022 **[Invite Link](https://discordapp.com/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)** \u2022 **[GitHub Repository](${Immutable.GITHUB_REPOSITORY})**"
                 }
                 timestamp()
-                footer(event.author.effectiveAvatarUrl) {
-                    "Requested by ${event.author.tag}"
-                }
+                footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                 val categories = mutableMapOf<CommandCategory, List<Command>>()
                 for (command in CommandHandler.registeredCommands) {
                     val category = command.category
@@ -61,9 +55,7 @@ class HelpCommand : Command {
                     commandFields += MessageEmbed.Field("${category().capitalize()} Commands:", list, false)
                 }
                 for (field in commandFields) {
-                    field {
-                        field
-                    }
+                    field { field }
                 }
             }
             event.message.addReaction(event.jda.getEmoteById(397757496447729664)).queue()
@@ -75,26 +67,16 @@ class HelpCommand : Command {
             if (command !== null) {
                 if (command !is HelpCommand) {
                     val embed = buildEmbed {
-                        color {
-                            Immutable.SUCCESS
-                        }
-                        author("${event.guild.prefix}${command.name}") {
-                            event.selfUser.effectiveAvatarUrl
-                        }
-                        field(title = "Description:") {
-                            command.description
-                        }
+                        color { Immutable.SUCCESS }
+                        author("${event.guild.prefix}${command.name}") { event.selfUser.effectiveAvatarUrl }
+                        field(title = "Description:") { command.description }
                         if (command.aliases.isNotEmpty()) {
                             field(title = "Aliases:") {
                                 command.aliases.joinToString()
                             }
                         }
-                        field(title = "Category:") {
-                            command.category()
-                        }
-                        field(title = "Usage:") {
-                            command.usage(event.guild.prefix)
-                        }
+                        field(title = "Category:") { command.category() }
+                        field(title = "Usage:") { command.usage(event.guild.prefix) }
                         if (command.examples(event.guild.prefix).isNotEmpty()) {
                             field(title = "Examples:") {
                                 buildString {

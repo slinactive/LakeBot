@@ -30,21 +30,11 @@ class AboutCommand : Command {
     override val description = "The command that send complete information about the bot"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
-            color {
-                Immutable.SUCCESS
-            }
-            author(event.selfUser.name) {
-                event.selfUser.effectiveAvatarUrl
-            }
-            thumbnail {
-                event.selfUser.effectiveAvatarUrl
-            }
-            footer {
-                "Last Reboot"
-            }
-            timestamp {
-                event.jda.startDate
-            }
+            color { Immutable.SUCCESS }
+            author(event.selfUser.name) { event.selfUser.effectiveAvatarUrl }
+            thumbnail { event.selfUser.effectiveAvatarUrl }
+            footer { "Last Reboot" }
+            timestamp { event.jda.startDate }
             description {
                 val count = event.jda.guildCache.count { it.selfMember.isConnected }
                 val end = if (count > 1) "s" else ""
@@ -52,7 +42,7 @@ class AboutCommand : Command {
                 """${event.selfUser.name} is the next generation of [KabyBot](https://github.com/KabyBot/KabyBot). It is Discord multi-purpose bot coded in 100% [Kotlin](https://kotlinlang.org/).
                     |$description
                     |
-                    |**[Support Server](${Immutable.SUPPORT_INVITE})** • **[Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)** • **[GitHub Repository](${Immutable.GITHUB_REPOSITORY})**
+                    |**[Support Server](${Immutable.SUPPORT_INVITE})** • **[Invite Link](https://discordapp.com/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)** • **[GitHub Repository](${Immutable.GITHUB_REPOSITORY})**
                     |**Creator/Developer**: ${event.jda.asBot().applicationInfo.complete().owner.tag}
                     |**Commands**: ${CommandHandler.registeredCommands.size}
                     |**Bot Version**: ${Immutable.VERSION}
