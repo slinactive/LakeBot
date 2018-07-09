@@ -133,6 +133,12 @@ class EvalCommand : Command {
     private fun kotlinEval(event: MessageReceivedEvent, content: String, engine: KotlinJsr223JvmLocalScriptEngine) {
         var script = content
         val commandImports = mutableListOf<String>()
+        val khttpImports = mutableListOf<String>().apply {
+            val packages = listOf("get", "post", "patch", "put", "delete")
+            for (`package` in packages) {
+                this += "import khttp.$`package` as http${`package`.capitalize()}"
+            }
+        }.toList()
         for (result in IMPORT_REGEX.findAll(content).filter { !it.value.contains("\"") }) {
             commandImports += result.value
             script = script.replace(result.value, "")
@@ -154,9 +160,12 @@ class EvalCommand : Command {
             for (import in commandImports) {
                 appendln(import)
             }
+            for (import in khttpImports) {
+                appendln(import)
+            }
             for ((key, value) in engine.getBindings(ScriptContext.ENGINE_SCOPE)) {
                 if ("." !in key) {
-                    val name: String = value::class.qualifiedName!!
+                    val name: String = value.javaClass.name
                     val bind = """val $key = bindings["$key"] as $name"""
                     appendln(bind)
                 }
