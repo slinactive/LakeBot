@@ -188,15 +188,11 @@ class EvalCommand : Command {
             }
         } catch (t: Throwable) {
             event.sendMessage(buildEmbed {
-                color {
-                    Immutable.FAILURE
-                }
-                author {
-                    "An error has occured:"
-                }
+                color { Immutable.FAILURE }
+                author { "An error has occured:" }
                 description {
                     """```kotlin
-                        |${t::class.qualifiedName ?: t.javaClass.name}
+                        |${t::class.qualifiedName ?: t.javaClass.name ?: "Unknown"}
                         |
                         |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
                 }
