@@ -111,6 +111,7 @@ fun main(args: Array<String>) = try {
     runBlocking {
         client = ConfigUtils.CLIENT
         delay(1000)
+        Immutable.LOGGER.info("MongoDB was successfully loaded!")
         DISCORD = buildJDA {
             token { Immutable.BOT_TOKEN }
             eventListener { EventHandler }
@@ -118,13 +119,16 @@ fun main(args: Array<String>) = try {
             game { watching("loading..") }
             onlineStatus { OnlineStatus.DO_NOT_DISTURB }
         }
+        Immutable.LOGGER.info("JDA was successfully built!")
         for (command in DEFAULT_COMMANDS) {
             CommandHandler += command
         }
+        Immutable.LOGGER.info("CommandHandler successfully loaded all ${CommandHandler.registeredCommands.size} commands!")
         System.setProperty("lakebot.version", Immutable.VERSION)
         System.setProperty("kotlin.version", KotlinVersion.CURRENT.toString())
         DISCORD.presence.game = streaming("${Immutable.VERSION} | ${Immutable.DEFAULT_PREFIX}help", "https://twitch.tv/raidlier")
         DISCORD.presence.status = OnlineStatus.ONLINE
+        Immutable.LOGGER.info("LakeBot is successfully loaded!")
     }
 } catch (e: Exception) {
     e.printStackTrace()
