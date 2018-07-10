@@ -55,41 +55,21 @@ class WeatherCommand : Command {
                         val humidity = if (json.getJSONObject("main").has("humidity")) "${json.getJSONObject("main").getInt("humidity")}%" else "N/A"
                         val pressure = if (json.getJSONObject("main").has("pressure")) "${json.getJSONObject("main").getInt("pressure")} hPA" else "N/A"
                         val speed = if (json.getJSONObject("wind").has("speed")) "${Math.round((json.getJSONObject("wind").getInt("speed")) * 3.6)} km/h" else "N/A"
-                        val direction = if (json.getJSONObject("wind").has("deg")) "${json.getJSONObject("wind").getInt("deg")}°" else "N/A"
+                        val directionRaw = if (json.getJSONObject("wind").has("deg")) "${json.getJSONObject("wind").getInt("deg")}°" else "N/A"
+                        val directionName = if (json.getJSONObject("wind").has("deg")) getWindDirection(json.getJSONObject("wind").getInt("deg")) else null
+                        val direction = if (directionName !== null) "$directionName ($directionRaw)" else directionRaw
                         val weather = json.getJSONArray("weather").getJSONObject(0).getString("main")
-                        author("Weather - $city") {
-                            event.selfUser.effectiveAvatarUrl
-                        }
-                        color {
-                            Immutable.SUCCESS
-                        }
-                        thumbnail {
-                            event.selfUser.effectiveAvatarUrl
-                        }
-                        field(true, "Temperature (°C):") {
-                            "$temp°C"
-                        }
-                        field(true, "Temperature (°F):") {
-                            "$tempF°F"
-                        }
-                        field(true, "Wind Direction:") {
-                            direction
-                        }
-                        field(true, "Wind Speed:") {
-                            speed
-                        }
-                        field(true, "Humidity:") {
-                            humidity
-                        }
-                        field(true, "Pressure:") {
-                            pressure
-                        }
-                        field(true, "Condition:") {
-                            weather
-                        }
-                        footer(event.author.effectiveAvatarUrl) {
-                            "Requested by ${event.author.tag}"
-                        }
+                        author("Weather - $city") { event.selfUser.effectiveAvatarUrl }
+                        color { Immutable.SUCCESS }
+                        thumbnail { event.selfUser.effectiveAvatarUrl }
+                        field(true, "Temperature (°C):") { "$temp°C" }
+                        field(true, "Temperature (°F):") { "$tempF°F" }
+                        field(true, "Wind Direction:") { direction }
+                        field(true, "Wind Speed:") { speed }
+                        field(true, "Humidity:") { humidity }
+                        field(true, "Pressure:") { pressure }
+                        field(true, "Condition:") { weather }
+                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                         timestamp()
                     }
                     event.channel.sendMessage(embed).queue()
@@ -100,5 +80,17 @@ class WeatherCommand : Command {
         } else {
             event.sendError("You specified no query!").queue()
         }
+    }
+    @Throws(IllegalArgumentException::class)
+    fun getWindDirection(raw: Int) = when (raw) {
+        in 0..25, in 336..360 -> "North"
+        in 26..70 -> "Northeast"
+        in 71..110 -> "East"
+        in 111..155 -> "Southeast"
+        in 156..200 -> "South"
+        in 201..250 -> "Southwest"
+        in 251..290 -> "West"
+        in 291..335 -> "Northwest"
+        else -> throw IllegalArgumentException()
     }
 }
