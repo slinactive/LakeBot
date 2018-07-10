@@ -39,7 +39,7 @@ class GoogleCommand : Command {
         val arguments = event.argsRaw
         if (arguments !== null) {
             try {
-                val results = searchAsJSON(arguments)
+                val results = searchAsJSON(arguments, isNSFW = event.textChannel.isNSFW)
                 val embed = buildEmbed {
                     color { Immutable.SUCCESS }
                     author("LakeSearch:") { event.selfUser.effectiveAvatarUrl }
@@ -60,12 +60,12 @@ class GoogleCommand : Command {
         }
     }
     @Throws(IOException::class)
-    fun searchAsJSON(query: String, limit: Long = 5L): JSONArray {
+    fun searchAsJSON(query: String, isNSFW: Boolean, limit: Long = 5L): JSONArray {
         val api = "https://www.googleapis.com"
         val endpoint = "/customsearch/v1"
         for (key in Immutable.GOOGLE_API_KEYS) {
             try {
-                val params = "?safe=off&cx=018291224751151548851%3Ajzifriqvl1o&key=$key&num=$limit"
+                val params = "?safe=${if (isNSFW) "off" else "medium"}&cx=018291224751151548851%3Ajzifriqvl1o&key=$key&num=$limit"
                 val queryParam = "&q=${URLEncoder.encode(query, "UTF-8")}"
                 val req = get("$api$endpoint$params$queryParam")
                 if ("${req.statusCode}".startsWith('2')) {
