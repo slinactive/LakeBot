@@ -15,7 +15,7 @@
  */
 
 buildscript {
-    ext.kotlin_version = '1.2.50'
+    ext.kotlin_version = '1.2.51'
 
     repositories {
         mavenCentral()
@@ -59,7 +59,7 @@ repositories {
 }
 
 dependencies {
-    compile "net.dv8tion:JDA:3.6.0_375"
+    compile "net.dv8tion:JDA:3.6.0_378"
     compile "org.slf4j:slf4j-simple:1.7.5"
     compile "org.json:json:20171018"
     compile "net.glxn.qrgen:javase:2.0"
