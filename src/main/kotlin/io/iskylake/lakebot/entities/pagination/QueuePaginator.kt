@@ -19,7 +19,6 @@ package io.iskylake.lakebot.entities.pagination
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 
 import io.iskylake.lakebot.Immutable
-import io.iskylake.lakebot.entities.Paginator
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.utils.AudioUtils
 import io.iskylake.lakebot.utils.TimeUtils
