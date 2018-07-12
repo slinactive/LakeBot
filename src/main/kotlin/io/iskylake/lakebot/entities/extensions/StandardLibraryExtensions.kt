@@ -16,11 +16,12 @@
 
 package io.iskylake.lakebot.entities.extensions
 
-import java.util.Random
 import java.lang.Long.toBinaryString
 import java.lang.Long.toHexString
+import java.util.Random
 
 import kotlin.experimental.inv
+import kotlin.text.Regex as RegularExpression
 
 // Array
 fun <T> Array<T>.random() = this[Random().nextInt(size)]
@@ -38,7 +39,7 @@ operator fun Int.not() = inv()
 fun Int.toByteArray() = toLong().toByteArray()
 fun Int.toBinary() = toLong().toBinary()
 fun Int.toHex() = toLong().toHex()
-fun Int.Companion.random(range: IntRange) = range.toList().random()
+fun Int.Companion.random(range: IntRange) = range.random()
 // List
 fun <T> List<T>.random() = this[Random().nextInt(size)]
 // Long
@@ -52,10 +53,9 @@ fun IntRange.random() = toList().random()
 operator fun Short.not() = inv()
 // String
 infix fun String.append(str: String): String = "$this$str"
-infix fun String.appendln(str: String): String = this.append("$str\n")
+infix fun String.appendln(str: String): String = append("$str\n")
 infix fun String.prepend(str: String): String = "$str$this"
-infix fun String.prependln(str: String): String = this.append("\n$str")
-infix fun String.matches(regex: String): Boolean = this.matches(regex.toRegex())
+infix fun String.prependln(str: String): String = append("\n$str")
 val String.isByte: Boolean
     get() = toByteOrNull() !== null
 val String.isShort: Boolean
@@ -89,4 +89,5 @@ fun String.safeSubstring(begin: Int = 0, end: Int = this.count()) = try {
     this
 }
 fun String.removeContent(content: String) = replace(content, "")
+fun String.removeContent(regex: RegularExpression) = replace(regex, "")
 fun String.escapeDiscordMarkdown() = replace("*", "\\*").replace("_", "\\_").replace("~", "\\~").replace("`", "\\`")
