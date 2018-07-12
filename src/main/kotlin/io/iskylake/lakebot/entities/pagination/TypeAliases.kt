@@ -18,5 +18,4 @@ package io.iskylake.lakebot.entities.pagination
 
 import net.dv8tion.jda.core.EmbedBuilder
 
-typealias PaginatorPages<T> = List<List<T>>
-typealias PaginatorEmbed<T> = EmbedBuilder.(num: Int, pages: PaginatorPages<T>) -> Unit
+typealias PaginatorEmbed<T> = EmbedBuilder.(Int, List<List<T>>) -> Unit
