@@ -16,10 +16,11 @@
 
 package io.iskylake.lakebot.commands.audio
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
-import io.iskylake.lakebot.entities.pagination.QueuePaginator
 import io.iskylake.lakebot.entities.extensions.*
+import io.iskylake.lakebot.entities.pagination.buildPaginator
 import io.iskylake.lakebot.utils.AudioUtils
 import io.iskylake.lakebot.utils.TimeUtils
 
@@ -36,7 +37,36 @@ class QueueCommand : Command {
             val queue = AudioUtils[event.guild].trackScheduler.queue
             queue -= AudioUtils[event.guild].audioPlayer.playingTrack
             if (queue.isNotEmpty()) {
-                QueuePaginator(queue.toList(), event)(args.firstOrNull()?.toInt() ?: 1)
+                val paginator = buildPaginator<AudioTrack> {
+                    event { event }
+                    size { 10 }
+                    list { queue.toList() }
+                    embed { num, pages ->
+                        for (track in pages[num - 1]) {
+                            appendln {
+                                "**${elements.indexOf(track) + 1}. [${track.info.title}](${track.info.uri}) (${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})**"
+                            }
+                        }
+                        color { Immutable.SUCCESS }
+                        author("LakePlayer") { event.selfUser.effectiveAvatarUrl }
+                        field(title = "Total Songs:") {
+                            "${AudioUtils[event.guild].trackScheduler.queue.size + 1} songs"
+                        }
+                        field(title = "Total Duration:") {
+                            TimeUtils.asDuration(AudioUtils[event.guild].trackScheduler.queue.map { it.duration }.filter { it != Long.MAX_VALUE }.sum())
+                        }
+                        field(title = "Looping:") {
+                            if (AudioUtils[event.guild].trackScheduler.isLoop) "Enabled" else "Disabled"
+                        }
+                        field(title = "Now Playing:") {
+                            "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
+                        }
+                        footer(event.author.effectiveAvatarUrl) {
+                            "Page $num/${pages.size} | Requested by ${event.author.tag}"
+                        }
+                    }
+                }
+                paginator(args.firstOrNull()?.toInt() ?: 1)
             } else {
                 val embed = buildEmbed {
                     field(title = "Looping:") {
@@ -45,12 +75,8 @@ class QueueCommand : Command {
                     field(title = "Now Playing:") {
                         "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
                     }
-                    color {
-                        Immutable.SUCCESS
-                    }
-                    author("LakePlayer") {
-                        event.selfUser.effectiveAvatarUrl
-                    }
+                    color { Immutable.SUCCESS }
+                    author("LakePlayer") { event.selfUser.effectiveAvatarUrl }
                 }
                 event.channel.sendMessage(embed).queue()
             }
