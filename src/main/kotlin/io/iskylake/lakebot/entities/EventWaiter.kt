@@ -193,9 +193,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         launch(this) {
             val type = event::class
             dispatchEventType(event, type)
-            for (superclass in type.allSuperclasses) {
-                dispatchEventType(event, superclass)
-            }
+            type.allSuperclasses.forEach { dispatchEventType(event, it) }
         }
     }
     private fun <E: Event> taskSetType(type: KClass<E>): MutableSet<AwaitableTask<E>> {
