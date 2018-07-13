@@ -18,6 +18,7 @@ package io.iskylake.lakebot.entities.extensions
 
 import java.lang.Long.toBinaryString
 import java.lang.Long.toHexString
+import java.lang.String.format as javaFormat
 import java.util.Random
 
 import kotlin.experimental.inv
@@ -83,6 +84,7 @@ operator fun String.times(num: Int) = buildString {
         append(this@times)
     }
 }
+fun String.format(vararg args: Any) = javaFormat(this, *args)
 fun String.safeSubstring(begin: Int = 0, end: Int = this.count()) = try {
     substring(begin, end)
 } catch (t: Throwable) {
