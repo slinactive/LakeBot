@@ -25,7 +25,6 @@ import khttp.get
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 import java.awt.Color
-import java.util.*
 
 class ColorCommand : Command {
     override val name = "color"
@@ -95,9 +94,9 @@ class ColorCommand : Command {
                 event.sendError("That color isn't a valid one!").queue()
             }
         } else {
-            val r = Random().nextInt(255)
-            val g = Random().nextInt(255)
-            val b = Random().nextInt(255)
+            val r = Int.random(0..255)
+            val g = Int.random(0..255)
+            val b = Int.random(0..255)
             val color = Color(r, g, b)
             invoke(event, arrayOf("#${color.rgb.toHex().takeLast(6)}"))
         }
