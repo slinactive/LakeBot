@@ -19,12 +19,10 @@ package io.iskylake.lakebot.commands.utils
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
-
-import khttp.get
+import io.iskylake.weather.Units
+import io.iskylake.weather.lakeWeather
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-
-import java.net.URLEncoder
 
 import kotlin.math.round
 
@@ -37,42 +35,42 @@ class WeatherCommand : Command {
         val arguments = event.argsRaw
         if (arguments !== null) {
             try {
-                val base = "http://api.openweathermap.org/data/2.5/weather"
-                val endpoint = "$base?appid=${Immutable.WEATHER_API_KEY}&units=metric&q=${URLEncoder.encode(arguments, "UTF-8")}"
-                val response = get(endpoint)
-                if (!response.statusCode.toString().startsWith('2')) {
-                    when (response.statusCode) {
-                        400, 401 -> return
-                        404, 502 -> event.sendError("Couldn't find that town!").queue()
-                        else -> return
-                    }
-                } else {
+                val api = lakeWeather {
+                    units { Units.IMPERIAL }
+                    key { Immutable.WEATHER_API_KEY }
+                }
+                val forecast = api.getForecast(arguments)
+                if (forecast !== null) {
+                    val city = "${forecast.city.name}, ${forecast.system.countryCode}"
+                    val fahrenheit = forecast.temperature.temperature.toShort()
+                    val celsius = round((fahrenheit - 32) / 1.8).toShort()
+                    val humidity = forecast.temperature.humidity
+                    val pressure = forecast.temperature.pressure?.toShort()
+                    val speed = "${round(forecast.wind.speed).toShort()} mph"
+                    val (degrees, name) = forecast.wind.direction to forecast.wind.directionName
+                    val condition = forecast.weather.main
+                    val cloudiness = "${forecast.clouds.cloudiness}%"
+                    val link = "https://openweathermap.org/city/${forecast.city.id}"
                     val embed = buildEmbed {
-                        val json = response.jsonObject
-                        val city = "${json.getString("name")}, ${json.getJSONObject("sys").getString("country")}"
-                        val temp = json.getJSONObject("main").getInt("temp")
-                        val tempF = (round((temp * 1.8 + 32) * 100) / 100).toInt()
-                        val humidity = if (json.getJSONObject("main").has("humidity")) "${json.getJSONObject("main").getInt("humidity")}%" else "N/A"
-                        val pressure = if (json.getJSONObject("main").has("pressure")) "${json.getJSONObject("main").getInt("pressure")} hPA" else "N/A"
-                        val speed = if (json.getJSONObject("wind").has("speed")) "${Math.round((json.getJSONObject("wind").getInt("speed")) * 3.6)} km/h" else "N/A"
-                        val directionRaw = if (json.getJSONObject("wind").has("deg")) "${json.getJSONObject("wind").getInt("deg")}°" else "N/A"
-                        val directionName = if (json.getJSONObject("wind").has("deg")) getWindDirection(json.getJSONObject("wind").getInt("deg")) else null
-                        val direction = if (directionName !== null) "$directionName ($directionRaw)" else directionRaw
-                        val weather = json.getJSONArray("weather").getJSONObject(0).getString("main")
-                        author("Weather - $city") { event.selfUser.effectiveAvatarUrl }
+                        author("Weather - $city", link) { event.selfUser.effectiveAvatarUrl }
                         color { Immutable.SUCCESS }
                         thumbnail { event.selfUser.effectiveAvatarUrl }
-                        field(true, "Temperature (°C):") { "$temp°C" }
-                        field(true, "Temperature (°F):") { "$tempF°F" }
-                        field(true, "Wind Direction:") { direction }
+                        field(true, "Temperature (°F):") { "$fahrenheit°F" }
+                        field(true, "Temperature (°C):") { "$celsius°C" }
+                        field(true, "Wind Direction:") {
+                            if (name !== null && degrees !== null) "$name ($degrees°)" else "N/A"
+                        }
                         field(true, "Wind Speed:") { speed }
-                        field(true, "Humidity:") { humidity }
-                        field(true, "Pressure:") { pressure }
-                        field(true, "Condition:") { weather }
+                        field(true, "Humidity:") { if (humidity !== null) "$humidity%" else "N/A" }
+                        field(true, "Pressure:") { if (pressure !== null) "$pressure hPA" else "N/A" }
+                        field(true, "Condition:") { condition }
+                        field(true, "Cloudiness:") { cloudiness }
                         footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                         timestamp()
                     }
                     event.channel.sendMessage(embed).queue()
+                } else {
+                    event.sendError("Couldn't find that town!").queue()
                 }
             } catch (e: Exception) {
                 event.sendError("Something went wrong!").queue()
@@ -80,17 +78,5 @@ class WeatherCommand : Command {
         } else {
             event.sendError("You specified no query!").queue()
         }
-    }
-    @Throws(IllegalArgumentException::class)
-    fun getWindDirection(raw: Int) = when (raw) {
-        in 0..25, in 336..360 -> "North"
-        in 26..70 -> "Northeast"
-        in 71..110 -> "East"
-        in 111..155 -> "Southeast"
-        in 156..200 -> "South"
-        in 201..250 -> "Southwest"
-        in 251..290 -> "West"
-        in 291..335 -> "Northwest"
-        else -> throw IllegalArgumentException()
     }
 }
