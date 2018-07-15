@@ -14,7 +14,7 @@ As the development has just begun, help from Kotlin programmers (with experience
 * **[KHttp](https://github.com/jkcclemens/khttp)** - simple library for HTTP requests in Kotlin
 * **[MongoDB Java Driver](https://mongodb.github.io/mongo-java-driver/)** - the official MongoDB Java driver
 * **[YouTube API Wrapper](https://developers.google.com/api-client-library/java/apis/youtube/v3)** - Java wrapper for YouTube API
-* **[OpenWeatherMap API](https://www.openweathermap.org/api)** - clear current weather data API 
+* **[LakeWeather](https://github.com/ISkylakeS/lakeweather)** - simple Kotlin library for Current Weather API
 * **[Urban Dictionary API](https://www.urbandictionary.com/)** - popular modern dictionary API
 * **[Simple Logging Facade for Java (SLF4J)](https://www.slf4j.org/)** - logger implementation
 * **[Akiwrapper](https://github.com/markozajc/Akiwrapper)** - the JVM programming language LakeBot uses as script engine
