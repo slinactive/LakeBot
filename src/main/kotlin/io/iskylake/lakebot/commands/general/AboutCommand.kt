@@ -16,12 +16,15 @@
 
 package io.iskylake.lakebot.commands.general
 
+import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary
+
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
-import net.dv8tion.jda.core.JDAInfo
+import io.iskylake.weather.LakeWeatherInfo
 
+import net.dv8tion.jda.core.JDAInfo
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 class AboutCommand : Command {
@@ -47,6 +50,8 @@ class AboutCommand : Command {
                     |**Commands**: ${CommandHandler.registeredCommands.size}
                     |**Bot Version**: ${Immutable.VERSION}
                     |**JDA Version**: ${JDAInfo.VERSION}
+                    |**LakeWeather Version**: ${LakeWeatherInfo.VERSION}
+                    |**LavaPlayer Version**: ${PlayerLibrary.VERSION}
                     |**Java Version**: ${System.getProperty("java.version") ?: "Unknown"}
                     |**Kotlin Version**: ${System.getProperty("kotlin.version") ?: KotlinVersion.CURRENT}
                     |**Guilds**: ${event.jda.guildCache.size()}
