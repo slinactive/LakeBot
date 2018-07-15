@@ -19,6 +19,7 @@ package io.iskylake.lakebot.commands.developer
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
+import io.iskylake.weather.LakeWeather
 import io.iskylake.weather.entities.Forecast
 
 import net.dv8tion.jda.core.EmbedBuilder
@@ -187,6 +188,7 @@ class EvalCommand : Command {
                     is Array<*> -> event.channel.sendMessage(evaluated.contentToString()).queue()
                     is JSONObject -> event.channel.sendMessage(evaluated.toString(2)).queue()
                     is Forecast -> event.channel.sendMessage(evaluated.toString().removeContent(evaluated.api.key)).queue()
+                    is LakeWeather -> event.channel.sendMessage(evaluated.toString().removeContent(evaluated.key)).queue()
                     else -> event.channel.sendMessage("$evaluated").queue()
                 }
             }
