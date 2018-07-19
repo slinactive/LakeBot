@@ -58,7 +58,11 @@ class WeatherCommand : Command {
                         field(true, "Temperature (°F):") { "$fahrenheit°F" }
                         field(true, "Temperature (°C):") { "$celsius°C" }
                         field(true, "Wind Direction:") {
-                            if (name !== null && degrees !== null) "$name ($degrees°)" else "N/A"
+                            if (name !== null && degrees !== null) {
+                                "$name ($degrees°)"
+                            } else {
+                                "N/A"
+                            }
                         }
                         field(true, "Wind Speed:") { speed }
                         field(true, "Humidity:") { if (humidity !== null) "$humidity%" else "N/A" }
@@ -72,7 +76,7 @@ class WeatherCommand : Command {
                 } else {
                     event.sendError("Couldn't find that town!").queue()
                 }
-            } catch (e: Exception) {
+             } catch (e: Exception) {
                 event.sendError("Something went wrong!").queue()
             }
         } else {
