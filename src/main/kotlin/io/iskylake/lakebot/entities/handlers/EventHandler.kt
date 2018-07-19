@@ -17,7 +17,7 @@
 package io.iskylake.lakebot.entities.handlers
 
 import io.iskylake.lakebot.Immutable
-import io.iskylake.lakebot.entities.EventWaiter.receiveEventRaw
+import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.utils.AudioUtils
 
@@ -65,8 +65,9 @@ object EventHandler : ListenerAdapter() {
             if (members.isEmpty()) {
                 AudioUtils[event.guild].audioPlayer.isPaused = true
                 launch(CommandHandler) {
-                    val check: suspend (GuildVoiceJoinEvent) -> Boolean = { it.channelJoined == event.channelLeft && !it.member.user.isBot }
-                    if (receiveEventRaw(90, TimeUnit.SECONDS, check) !== null) {
+                    if (EventWaiter.receiveEventRaw<GuildVoiceJoinEvent>(90, TimeUnit.SECONDS) {
+                        it.channelJoined == event.channelLeft && !it.member.user.isBot
+                    } !== null) {
                         AudioUtils[event.guild].audioPlayer.isPaused = false
                     } else {
                         AudioUtils.clear(event.guild, AudioUtils[event.guild])
@@ -81,8 +82,9 @@ object EventHandler : ListenerAdapter() {
             if (members.isEmpty()) {
                 AudioUtils[event.guild].audioPlayer.isPaused = true
                 launch(CommandHandler) {
-                    val check: suspend (GuildVoiceJoinEvent) -> Boolean = { it.channelJoined == event.channelLeft && !it.member.user.isBot }
-                    if (receiveEventRaw(90, TimeUnit.SECONDS, check) !== null) {
+                    if (EventWaiter.receiveEventRaw<GuildVoiceJoinEvent>(90, TimeUnit.SECONDS) {
+                        it.channelJoined == event.channelLeft && !it.member.user.isBot
+                    } !== null) {
                         AudioUtils[event.guild].audioPlayer.isPaused = false
                     } else {
                         AudioUtils.clear(event.guild, AudioUtils[event.guild])
