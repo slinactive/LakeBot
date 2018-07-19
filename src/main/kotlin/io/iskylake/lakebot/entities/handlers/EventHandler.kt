@@ -17,14 +17,20 @@
 package io.iskylake.lakebot.entities.handlers
 
 import io.iskylake.lakebot.Immutable
+import io.iskylake.lakebot.entities.EventWaiter.receiveEventRaw
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.utils.AudioUtils
 
+import kotlinx.coroutines.experimental.launch
+
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMoveEvent
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException
 import net.dv8tion.jda.core.hooks.ListenerAdapter
+
+import java.util.concurrent.TimeUnit
 
 object EventHandler : ListenerAdapter() {
     override fun onMessageReceived(event: MessageReceivedEvent) = try {
@@ -33,12 +39,8 @@ object EventHandler : ListenerAdapter() {
     } catch (t: Throwable) {
         event.jda.asBot().applicationInfo.queue {
             it.owner.privateChannel.sendMessage(buildEmbed {
-                color {
-                    Immutable.FAILURE
-                }
-                author(t::class.simpleName ?: t.javaClass.simpleName) {
-                    event.selfUser.effectiveAvatarUrl
-                }
+                color { Immutable.FAILURE }
+                author(t::class.simpleName ?: t.javaClass.simpleName ?: "Unknown Exception") { event.selfUser.effectiveAvatarUrl }
                 field(true, "Command:") {
                     try {
                         event.message.contentRaw.split("\\s+".toRegex(), 2)[0]
@@ -46,28 +48,14 @@ object EventHandler : ListenerAdapter() {
                         "Unknown command"
                     }
                 }
-                field(true, "Arguments:") {
-                    event.argsRaw ?: "None"
-                }
-                field(true, "Guild:") {
-                    event.guild?.name ?: "Unknown"
-                }
-                field(true, "Author:") {
-                    event.author.tag
-                }
-                field(true, "Guild ID:") {
-                    event.guild?.id ?: "Unknown"
-                }
-                field(true, "Author ID:") {
-                    event.author.id
-                }
-                field(title = "Message:") {
-                    t.message?.safeSubstring(0, 1024) ?: "None"
-                }
+                field(true, "Arguments:") { event.argsRaw ?: "None" }
+                field(true, "Guild:") { event.guild?.name ?: "Unknown" }
+                field(true, "Author:") { event.author.tag }
+                field(true, "Guild ID:") { event.guild?.id ?: "Unknown" }
+                field(true, "Author ID:") { event.author.id }
+                field(title = "Message:") { t.message?.safeSubstring(0, 1024) ?: "None" }
                 timestamp()
-                thumbnail {
-                    event.selfUser.effectiveAvatarUrl
-                }
+                thumbnail { event.selfUser.effectiveAvatarUrl }
             })
         }
     }
@@ -75,7 +63,15 @@ object EventHandler : ListenerAdapter() {
         if (event.guild.selfMember.isConnected && event.guild.selfMember.connectedChannel == event.channelLeft) {
             val members = event.channelLeft.members.filter { !it.user.isBot }
             if (members.isEmpty()) {
-                AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                AudioUtils[event.guild].audioPlayer.isPaused = true
+                launch(CommandHandler) {
+                    val check: suspend (GuildVoiceJoinEvent) -> Boolean = { it.channelJoined == event.channelLeft && !it.member.user.isBot }
+                    if (receiveEventRaw(90, TimeUnit.SECONDS, check) !== null) {
+                        AudioUtils[event.guild].audioPlayer.isPaused = false
+                    } else {
+                        AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                    }
+                }
             }
         }
     }
@@ -83,7 +79,15 @@ object EventHandler : ListenerAdapter() {
         if (event.guild.selfMember.isConnected && event.guild.selfMember.connectedChannel == event.channelLeft) {
             val members = event.channelLeft.members.filter { !it.user.isBot }
             if (members.isEmpty()) {
-                AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                AudioUtils[event.guild].audioPlayer.isPaused = true
+                launch(CommandHandler) {
+                    val check: suspend (GuildVoiceJoinEvent) -> Boolean = { it.channelJoined == event.channelLeft && !it.member.user.isBot }
+                    if (receiveEventRaw(90, TimeUnit.SECONDS, check) !== null) {
+                        AudioUtils[event.guild].audioPlayer.isPaused = false
+                    } else {
+                        AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                    }
+                }
             }
         }
     }
