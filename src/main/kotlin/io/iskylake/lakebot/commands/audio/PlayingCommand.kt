@@ -42,27 +42,20 @@ class PlayingCommand : Command {
             val timeline = MusicUtils.getProgressBar(if (track.duration == Long.MAX_VALUE) Long.MAX_VALUE else track.position, track.duration)
             val bar = "$timeline ($now/${if (track.duration == Long.MAX_VALUE) "LIVE" else total})"
             val embed = buildEmbed {
-                color {
-                    Immutable.SUCCESS
-                }
-                author("LakePlayer") {
-                    event.selfUser.effectiveAvatarUrl
-                }
-                thumbnail {
-                    event.selfUser.effectiveAvatarUrl
-                }
-                field(title = "Now Playing:") {
-                    "**[$title]($url)**"
-                }
+                color { Immutable.SUCCESS }
+                author("LakePlayer") { event.selfUser.effectiveAvatarUrl }
+                thumbnail { event.selfUser.effectiveAvatarUrl }
+                field(title = "Now Playing:") { "**[$title]($url)**" }
                 field(title = "Looping:") {
-                    if (AudioUtils[event.guild].trackScheduler.isLoop) "Enabled" else "Disabled"
+                    if (AudioUtils[event.guild].trackScheduler.isLoop) {
+                        "Enabled"
+                    } else {
+                        "Disabled"
+                    }
                 }
-                field(title = "Duration:") {
-                    bar
-                }
-                footer(event.author.effectiveAvatarUrl) {
-                    "Requested by ${event.author.tag}"
-                }
+                field(title = "Volume") { "${AudioUtils[event.guild].audioPlayer.volume}%" }
+                field(title = "Duration:") { bar }
+                footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
             }
             event.channel.sendMessage(embed).queue()
         }

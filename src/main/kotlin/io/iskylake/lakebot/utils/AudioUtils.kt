@@ -99,6 +99,7 @@ object AudioUtils {
         manager.audioPlayer.isPaused = false
         manager.audioPlayer.playingTrack?.stop()
         manager.audioPlayer.destroy()
+        manager.audioPlayer.volume = 100
         manager.trackScheduler.isLoop = false
         manager.trackScheduler.clearQueue()
     }
@@ -111,7 +112,7 @@ object AudioUtils {
         val event = e()
         when {
             !event.member.isConnected -> event.sendError("You're not in the voice channel!").queue()
-            !event.selfMember!!.isConnected -> event.sendError("I'm not in the voice channel!").queue()
+            event.selfMember?.isConnected == false -> event.sendError("I'm not in the voice channel!").queue()
             else -> {
                 clear(event.guild, this[event.guild])
                 event.channel.sendSuccess("Left the voice channel!").queue()

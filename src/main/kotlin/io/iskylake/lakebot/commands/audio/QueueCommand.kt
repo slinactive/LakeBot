@@ -58,6 +58,7 @@ class QueueCommand : Command {
                         field(title = "Looping:") {
                             if (AudioUtils[event.guild].trackScheduler.isLoop) "Enabled" else "Disabled"
                         }
+                        field(title = "Volume") { "${AudioUtils[event.guild].audioPlayer.volume}%" }
                         field(title = "Now Playing:") {
                             "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
                         }
@@ -72,6 +73,7 @@ class QueueCommand : Command {
                     field(title = "Looping:") {
                         if (AudioUtils[event.guild].trackScheduler.isLoop) "Enabled" else "Disabled"
                     }
+                    field(title = "Volume") { "${AudioUtils[event.guild].audioPlayer.volume}%" }
                     field(title = "Now Playing:") {
                         "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
                     }
