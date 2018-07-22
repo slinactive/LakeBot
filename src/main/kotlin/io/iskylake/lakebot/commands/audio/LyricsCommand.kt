@@ -20,6 +20,7 @@ import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.USERS_WITH_PROCESSES
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
+import io.iskylake.lakebot.entities.pagination.buildPaginator
 import io.iskylake.lakebot.utils.AudioUtils
 
 import khttp.get
@@ -46,23 +47,18 @@ class LyricsCommand : Command {
             )
             return "Bearer ${post(api, data = data).jsonObject.getString("access_token")}"
         }
-    private val songEmbed = fun(song: Song, event: MessageReceivedEvent) = buildEmbed {
-        author("${song.author} - ${song.title}", song.link) {
-            event.selfUser.effectiveAvatarUrl
-        }
-        color { Immutable.SUCCESS }
-        description { song.lyrics.safeSubstring(end = 2048) }
-        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
-    }
     override val name = "lyrics"
-    override val description = "beta command"
-    override val category = io.iskylake.lakebot.commands.CommandCategory.BETA
+    override val description = "The command that sends the lyrics of specified or current playing song"
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <song name (optional if song is being played now by bot)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
             val songs = searchSongs(arguments)
             if (songs.isNotEmpty()) {
                 event.channel.sendMessage(buildEmbed {
+                    color { Immutable.SUCCESS }
+                    author("Select The Song:") { event.selfUser.effectiveAvatarUrl }
+                    footer { "Type in \"exit\" to kill the process" }
                     for ((index, song) in songs.withIndex()) {
                         appendln { "${index + 1}. ${song.author} - ${song.title}" }
                     }
@@ -71,19 +67,30 @@ class LyricsCommand : Command {
                     selectSong(event, it, songs)
                 }
             } else {
-                event.sendError("that song couldn't be found").queue()
+                event.sendError("Couldn't find that track!").queue()
             }
         } else if (AudioUtils[event.guild].audioPlayer.playingTrack !== null) {
             val track = AudioUtils[event.guild].audioPlayer.playingTrack.info.title
-            val regex = "(?:[\\[({])?((official)\\s+(video)|live|lyrics|guitar|remix|acoustics?)(?:[]})])?".toRegex(RegexOption.IGNORE_CASE)
-            val song = searchSongs(track.removeContent(regex)).firstOrNull()
-            if (song !== null) {
-                event.channel.sendMessage(songEmbed(song, event)).queue()
+            val regex = "(?:[\\[({])?((official)\\s+(video)|live|lyrics|guitar|remix|acoustics?|hd|sd|4k|full\\s+hd|hq)(?:[]})])?"
+                    .toRegex(RegexOption.IGNORE_CASE)
+            val songs = searchSongs(track.removeContent(regex))
+            if (songs.isNotEmpty()) {
+                event.channel.sendMessage(buildEmbed {
+                    color { Immutable.SUCCESS }
+                    author("Select The Song:") { event.selfUser.effectiveAvatarUrl }
+                    footer { "Type in \"exit\" to kill the process" }
+                    for ((index, song) in songs.withIndex()) {
+                        appendln { "${index + 1}. ${song.author} - ${song.title}" }
+                    }
+                }).await {
+                    USERS_WITH_PROCESSES += event.author
+                    selectSong(event, it, songs)
+                }
             } else {
-                event.sendError("couldn't find that track").queue()
+                event.sendError("Couldn't find that track!").queue()
             }
         } else {
-            event.sendError("you specified no content").queue()
+            event.sendError("You specified no content!").queue()
         }
     }
     private val Song.lyrics: String
@@ -98,8 +105,34 @@ class LyricsCommand : Command {
                 if (c.toInt() in 1..songs.size) {
                     msg.delete().queue()
                     val song = songs[c.toInt() - 1]
-                    event.channel.sendMessage(songEmbed(song, event)).queue()
                     USERS_WITH_PROCESSES -= event.author
+                    if (song.lyrics.length > 2048) {
+                        val paginator = buildPaginator<Char> {
+                            size { 2048 }
+                            list { song.lyrics.toCharArray().toList() }
+                            event { event }
+                            embed { num, pages ->
+                                for (char in pages[num - 1]) {
+                                    append { char.toString() }
+                                }
+                                author("${song.author} - ${song.title}", song.link) {
+                                    event.selfUser.effectiveAvatarUrl
+                                }
+                                color { Immutable.SUCCESS }
+                                footer(event.author.effectiveAvatarUrl) { "Page $num/${pages.size} | Requested by ${event.author.tag}" }
+                            }
+                        }
+                        paginator()
+                    } else {
+                        event.channel.sendMessage(buildEmbed {
+                            author("${song.author} - ${song.title}", song.link) {
+                                event.selfUser.effectiveAvatarUrl
+                            }
+                            color { Immutable.SUCCESS }
+                            description { song.lyrics }
+                            footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                        }).queue()
+                    }
                 } else {
                     event.sendError("Try again!").await { selectSong(event, msg, songs) }
                 }
