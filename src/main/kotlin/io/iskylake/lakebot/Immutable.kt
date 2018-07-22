@@ -31,6 +31,8 @@ object Immutable {
     val BOT_TOKEN = System.getenv("BOT_TOKEN")!!
     val YOUTUBE_API_KEY = System.getenv("YOUTUBE_API_KEY")!!
     val WEATHER_API_KEY = System.getenv("WEATHER_API_KEY")!!
+    val GENIUS_ID = System.getenv("GENIUS_ID")!!
+    val GENIUS_SECRET = System.getenv("GENIUS_SECRET")!!
     val GOOGLE_API_KEYS = listOf(
             System.getenv("GOOGLE_API1")!!,
             System.getenv("GOOGLE_API2")!!,

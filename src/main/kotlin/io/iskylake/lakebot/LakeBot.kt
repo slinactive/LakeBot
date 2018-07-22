@@ -56,6 +56,7 @@ val DEFAULT_COMMANDS = listOf(
         JumpForwardCommand(),
         LeaveCommand(),
         LoopCommand(),
+        LyricsCommand(),
         PauseCommand(),
         PlayCommand(),
         PlayingCommand(),
