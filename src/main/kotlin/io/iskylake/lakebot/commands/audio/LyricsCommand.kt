@@ -71,7 +71,7 @@ class LyricsCommand : Command {
             }
         } else if (AudioUtils[event.guild].audioPlayer.playingTrack !== null) {
             val track = AudioUtils[event.guild].audioPlayer.playingTrack.info.title
-            val regex = "(?:[\\[({])?((official)\\s+(video)|live|lyrics|guitar|remix|acoustics?|hd|sd|4k|full\\s+hd|hq)(?:[]})])?"
+            val regex = "(?:[\\[({])?((official)(?:\\s+(video))?|live|lyrics|guitar|remix|acoustics?|hd|sd|4k|full\\s+hd|hq)(?:[]})])?"
                     .toRegex(RegexOption.IGNORE_CASE)
             val songs = searchSongs(track.removeContent(regex))
             if (songs.isNotEmpty()) {
