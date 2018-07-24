@@ -39,7 +39,7 @@ class UrbanCommand : Command {
                 val endpoint = "$base/define?term=${URLEncoder.encode(arguments, "UTF-8")}"
                 val response = get(endpoint)
                 val json = response.jsonObject
-                if (json.getString("result_type") == "no_results") {
+                if (json.getJSONArray("list").toList().isEmpty()) {
                     event.sendError("Couldn't find that on Urban!").queue()
                 } else {
                     val embed = buildEmbed {
@@ -51,15 +51,9 @@ class UrbanCommand : Command {
                         val like: Int = result.getInt("thumbs_up")
                         val dislike: Int = result.getInt("thumbs_down")
                         val link = "https://www.urbandictionary.com/define.php?term=${URLEncoder.encode(arguments, "UTF-8")}"
-                        author("Result For $word:", link) {
-                            event.selfUser.effectiveAvatarUrl
-                        }
-                        color {
-                            Immutable.SUCCESS
-                        }
-                        thumbnail {
-                            event.selfUser.effectiveAvatarUrl
-                        }
+                        author("Result For $word:", link) { event.selfUser.effectiveAvatarUrl }
+                        color { Immutable.SUCCESS }
+                        thumbnail { event.selfUser.effectiveAvatarUrl }
                         field(title = "Meaning:") {
                             when {
                                 meaning.isEmpty() -> "No meaning provided"
