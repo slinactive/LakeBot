@@ -63,7 +63,7 @@ class ColorCommand : Command {
                             """**HEX**: $hex
                                 |**RGB**: ${color.red}, ${color.green}, ${color.blue}
                                 |**DEC**: ${clear.toInt(16)}
-                                |**CMYK**: ${color.toCmyk().joinToString("%, %", postfix = "%")}
+                                |**CMYK**: ${color.toCmyk().joinToString("%, ", postfix = "%")}
                                 |**HSL**: ${hsl["h"]}, ${hsl["s"]}, ${hsl["l"]}
                             """.trimMargin()
                         }
@@ -72,7 +72,7 @@ class ColorCommand : Command {
                             """**HEX**: $hex
                                 |**RGB**: ${color.red}, ${color.green}, ${color.blue}
                                 |**DEC**: ${clear.toInt(16)}
-                                |**CMYK**: ${color.toCmyk().joinToString("%, %", postfix = "%")}
+                                |**CMYK**: ${color.toCmyk().joinToString("%, ", postfix = "%")}
                                 |**HSL**: ${hsl["h"]}, ${hsl["s"]}, ${hsl["l"]}
                             """.trimMargin()
                         }
@@ -83,7 +83,7 @@ class ColorCommand : Command {
                             """**HEX**: $closestHex
                                 |**RGB**: ${c.red}, ${c.green}, ${c.blue}
                                 |**DEC**: ${closestHex.removePrefix("#").toInt(16)}
-                                |**CMYK**: ${c.toCmyk().joinToString("%, %", postfix = "%")}
+                                |**CMYK**: ${c.toCmyk().joinToString("%, ", postfix = "%")}
                                 |**HSL**: ${closestHsl["h"]}, ${closestHsl["s"]}, ${closestHsl["l"]}
                             """.trimMargin()
                         }
