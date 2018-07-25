@@ -23,14 +23,23 @@ import io.iskylake.lakebot.utils.AudioUtils
 
 import kotlinx.coroutines.experimental.launch
 
+import net.dv8tion.jda.core.events.ReadyEvent
+import net.dv8tion.jda.core.events.channel.text.TextChannelCreateEvent
+import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMoveEvent
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.core.events.role.RoleDeleteEvent
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 
+import org.bson.Document
+
+import java.util.Timer
 import java.util.concurrent.TimeUnit
+
+import kotlin.concurrent.schedule
 
 object EventHandler : ListenerAdapter() {
     override fun onMessageReceived(event: MessageReceivedEvent) = try {
@@ -57,6 +66,65 @@ object EventHandler : ListenerAdapter() {
                 timestamp()
                 thumbnail { event.selfUser.effectiveAvatarUrl }
             })
+        }
+    }
+    override fun onRoleDelete(event: RoleDeleteEvent) {
+        if (event.guild.muteRole !== null) {
+            if (event.guild.muteRole == event.role.id) {
+                event.guild.clearMuteRole()
+            }
+        }
+    }
+    override fun onReady(event: ReadyEvent) {
+        for (guild in event.jda.guildCache.filter { it.muteRole !== null }) {
+            val role = guild.getRoleById(guild.muteRole)
+            val members = role.members
+            for (member in members) {
+                try {
+                    val mute = guild.getMute(member.user)
+                    if (mute !== null) {
+                        val muteObject = mute["mute", Document::class.java]
+                        val ago = muteObject.getLong("time")
+                        val muteTime = muteObject.getLong("long")
+                        if (System.currentTimeMillis() >= ago + muteTime) {
+                            guild.controller.removeSingleRoleFromMember(member, role).queue()
+                        } else {
+                            val timer = Timer()
+                            timer.schedule(ago + muteTime - System.currentTimeMillis()) {
+                                guild.controller.removeSingleRoleFromMember(member, role).queue()
+                            }
+                        }
+                    }
+                } catch (ignored: Exception) {
+                } finally {
+                    guild.clearMute(member.user)
+                }
+            }
+        }
+    }
+    override fun onGuildMemberJoin(event: GuildMemberJoinEvent) {
+        if (event.guild.muteRole !== null) {
+            val role = event.guild.getRoleById(event.guild.muteRole)
+            val mute = event.guild.getMute(event.user)
+            if (mute !== null) {
+                try {
+                    event.guild.controller.addSingleRoleToMember(event.member, role).queue()
+                    val muteObject = mute["mute", Document::class.java]
+                    val ago = muteObject.getLong("time")
+                    val muteTime = muteObject.getLong("long")
+                    if (System.currentTimeMillis() >= ago + muteTime) {
+                        event.guild.controller.removeSingleRoleFromMember(event.member, role).queue()
+                    } else {
+                        val timer = Timer()
+                        timer.schedule(ago + muteTime - System.currentTimeMillis()) {
+                            event.guild.controller.removeSingleRoleFromMember(event.member, role).queue()
+                        }
+                    }
+                } catch (ignored: Exception) {
+                } finally {
+                    event.guild.clearMute(event.user)
+                }
+            }
         }
     }
     override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
@@ -90,6 +158,18 @@ object EventHandler : ListenerAdapter() {
                         AudioUtils.clear(event.guild, AudioUtils[event.guild])
                     }
                 }
+            }
+        }
+    }
+    override fun onTextChannelCreate(event: TextChannelCreateEvent) {
+        if (event.guild.isMuteRoleEnabled) {
+            try {
+                val id = event.guild.muteRole
+                val role = event.guild.getRoleById(id)
+                val override = event.channel.putPermissionOverride(role)
+                override.deny = 34880
+                override.queue()
+            } catch (ignored: Exception) {
             }
         }
     }

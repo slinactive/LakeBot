@@ -18,7 +18,9 @@ package io.iskylake.lakebot.entities.extensions
 
 import io.iskylake.lakebot.utils.ConfigUtils
 
-import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.*
+
+import org.bson.Document
 
 val Guild.prefix: String
     get() = ConfigUtils.getPrefix(this)
@@ -26,3 +28,15 @@ val Guild.isPrefixEnabled: Boolean
     get() = ConfigUtils.isPrefixEnabled(this)
 fun Guild.setPrefix(prefix: String) = ConfigUtils.setPrefix(prefix, this)
 fun Guild.clearPrefix() = ConfigUtils.clearPrefix(this)
+val Guild.muteRole: String?
+    get() = ConfigUtils.getMuteRole(this)
+val Guild.isMuteRoleEnabled: Boolean
+    get() = ConfigUtils.isMuteRoleEnabled(this)
+fun Guild.setMuteRole(role: Role) = ConfigUtils.setMuteRole(role.id, this)
+fun Guild.clearMuteRole() = ConfigUtils.clearMuteRole(this)
+val Guild.mutes: List<Document>
+    get() = ConfigUtils.getMutes(this)
+fun Guild.getMute(user: User) = ConfigUtils.getMute(this, user)
+fun Guild.putMute(user: User, mod: User, reason: String, time: Long) = ConfigUtils.putMute(this, user, mod, reason, time)
+fun Guild.clearMutes() = ConfigUtils.clearMutes(this)
+fun Guild.clearMute(user: User) = ConfigUtils.clearMute(this, user)

@@ -63,27 +63,27 @@ class ColorCommand : Command {
                             """**HEX**: $hex
                                 |**RGB**: ${color.red}, ${color.green}, ${color.blue}
                                 |**DEC**: ${clear.toInt(16)}
-                                |**CMYK**: ${color.toCmyk().joinToString()}
+                                |**CMYK**: ${color.toCmyk().joinToString("%, %", postfix = "%")}
                                 |**HSL**: ${hsl["h"]}, ${hsl["s"]}, ${hsl["l"]}
                             """.trimMargin()
                         }
                     } else {
-                        field(true, "Info:") {
+                        field(title = "Info:") {
                             """**HEX**: $hex
                                 |**RGB**: ${color.red}, ${color.green}, ${color.blue}
                                 |**DEC**: ${clear.toInt(16)}
-                                |**CMYK**: ${color.toCmyk().joinToString()}
+                                |**CMYK**: ${color.toCmyk().joinToString("%, %", postfix = "%")}
                                 |**HSL**: ${hsl["h"]}, ${hsl["s"]}, ${hsl["l"]}
                             """.trimMargin()
                         }
-                        field(true, "Closest Color:") {
+                        field(title = "Closest Color:") {
                             val r = get("http://www.thecolorapi.com/id?hex=${closestHex.removePrefix("#")}")
                             val closestHsl = r.jsonObject.getJSONObject("hsl")
                             val c = Color.decode(closestHex)
                             """**HEX**: $closestHex
                                 |**RGB**: ${c.red}, ${c.green}, ${c.blue}
                                 |**DEC**: ${closestHex.removePrefix("#").toInt(16)}
-                                |**CMYK**: ${c.toCmyk().joinToString()}
+                                |**CMYK**: ${c.toCmyk().joinToString("%, %", postfix = "%")}
                                 |**HSL**: ${closestHsl["h"]}, ${closestHsl["s"]}, ${closestHsl["l"]}
                             """.trimMargin()
                         }

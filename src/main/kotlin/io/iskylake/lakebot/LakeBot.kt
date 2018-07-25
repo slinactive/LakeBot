@@ -94,8 +94,11 @@ val DEFAULT_COMMANDS = listOf(
         ServerCommand(),
         UserCommand(),
         // Moderation
+        MuteCommand(),
+        MuteRoleCommand(),
         PrefixCommand(),
         PruneCommand(),
+        UnmuteCommand(),
         // Utils
         ColorCommand(),
         EmojiCommand(),
