@@ -104,6 +104,7 @@ class MuteRoleCommand : Command {
                                     event.guild.clearMuteRole()
                                     event.sendSuccess(text = "The mute role has been disabled!").queue()
                                 } else {
+                                    it.delete().queue()
                                     event.sendSuccess("Process was canceled!").queue()
                                 }
                             } else {
