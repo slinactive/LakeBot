@@ -16,7 +16,6 @@
 
 package io.iskylake.lakebot.commands.moderation
 
-import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 
@@ -28,7 +27,7 @@ class PrefixCommand : Command {
     override val aliases = listOf("setprefix")
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <prefix>"
     override val description = "The command that changes command prefix for this server"
-    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (Permission.MANAGE_SERVER in event.member.permissions || event.author.idLong in Immutable.DEVELOPERS) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (Permission.MANAGE_SERVER in event.member.permissions || event.author.isLBDeveloper) {
         if (args.isNotEmpty()) {
             val newPrefix = args[0].toLowerCase()
             if (newPrefix.length > 5) {

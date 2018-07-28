@@ -22,6 +22,7 @@ import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
 
 import io.iskylake.lakebot.Immutable
+import io.iskylake.lakebot.entities.extensions.isLBDeveloper
 import io.iskylake.lakebot.entities.extensions.tag
 import net.dv8tion.jda.core.entities.Guild
 
@@ -63,7 +64,7 @@ object ConfigUtils {
         (it["user"] as List<*>).map { it.toString() }[0] == user.id
     }
     fun putLakeBan(user: User, reason: String) {
-        if (user.idLong !in Immutable.DEVELOPERS && !user.isBot) {
+        if (!user.isLBDeveloper && !user.isBot) {
             val collection = DATABASE.getCollection("lakebans")
             val ban = getLakeBan(user)
             if (ban === null) {
@@ -115,7 +116,7 @@ object ConfigUtils {
     fun putMute(guild: Guild, user: User, mod: User, reason: String, long: Long, time: Long = System.currentTimeMillis()) {
         val c = DATABASE.getCollection("mutes")
         val mutes = getMute(guild, user)
-        if (mutes == null) {
+        if (mutes === null) {
             val mute = Document().apply {
                 val m = Document().append("reason", reason).append("time", time).append("long", long).append("mod", listOf(mod.id, mod.tag))
                 append("guild", guild.id)
@@ -131,7 +132,7 @@ object ConfigUtils {
         }
     }
     fun clearMute(guild: Guild, user: User) {
-        if (getMute(guild, user) != null) {
+        if (getMute(guild, user) !== null) {
             DATABASE.getCollection("mutes").deleteOne(Filters.and(Filters.eq("guild", guild.id), Filters.eq("user", listOf(user.id, user.tag))))
         }
     }

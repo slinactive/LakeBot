@@ -16,6 +16,7 @@
 
 package io.iskylake.lakebot.entities.extensions
 
+import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.utils.ConfigUtils
 
 import net.dv8tion.jda.core.entities.PrivateChannel
@@ -29,5 +30,7 @@ val User.tag: String
     get() = "${this.name}#${this.discriminator}"
 val User.lakeBan: Document?
     get() = ConfigUtils.getLakeBan(this)
+val User.isLBDeveloper: Boolean
+    get() = idLong in Immutable.DEVELOPERS
 fun User.putLakeBan(reason: String) = ConfigUtils.putLakeBan(this, reason)
 fun User.clearLakeBan() = ConfigUtils.clearLakeBan(this)
