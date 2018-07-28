@@ -47,11 +47,7 @@ class PlayingCommand : Command {
                 thumbnail { event.selfUser.effectiveAvatarUrl }
                 field(title = "Now Playing:") { "**[$title]($url)**" }
                 field(title = "Looping:") {
-                    if (AudioUtils[event.guild].trackScheduler.isLoop) {
-                        "Enabled"
-                    } else {
-                        "Disabled"
-                    }
+                    MusicUtils.getLoopingMode(AudioUtils[event.guild].trackScheduler)
                 }
                 field(title = "Volume") { "${AudioUtils[event.guild].audioPlayer.volume}%" }
                 field(title = "Duration:") { bar }

@@ -16,9 +16,11 @@
 
 package io.iskylake.lakebot.utils
 
+import io.iskylake.lakebot.audio.TrackScheduler
+
 object MusicUtils {
     fun getProgressBar(now: Long, total: Long): String {
-        val activeBlocks: Int = (now.toFloat() / total * 15).toInt()
+        val activeBlocks = (now.toFloat() / total * 15).toInt()
         val active = buildString {
             append("[")
             for (i in 0 until 15) {
@@ -32,5 +34,10 @@ object MusicUtils {
             }
         }
         return "$active$rest"
+    }
+    fun getLoopingMode(scheduler: TrackScheduler) = when {
+        scheduler.isLoop -> "Single"
+        scheduler.isQueueLoop -> "Queue"
+        else -> "Disabled"
     }
 }

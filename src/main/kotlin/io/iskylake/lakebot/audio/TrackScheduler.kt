@@ -27,16 +27,20 @@ import java.util.concurrent.LinkedBlockingQueue
 class TrackScheduler(private val player: AudioPlayer) : AudioEventAdapter() {
     val queue: Queue<AudioTrack> = LinkedBlockingQueue()
     var isLoop = false
+    var isQueueLoop = false
     operator fun plusAssign(track: AudioTrack) {
         if (!player.startTrack(track, true)) {
             queue.offer(track)
         }
     }
     fun nextTrack(track: AudioTrack) {
-        if (isLoop) {
-            player.startTrack(track.makeClone(), false)
-        } else {
-            if (!queue.isEmpty()) {
+        when {
+            isLoop -> player.startTrack(track.makeClone(), false)
+            isQueueLoop -> {
+                queue += track.makeClone()
+                player.startTrack(queue.poll(), false)
+            }
+            else -> if (queue.isNotEmpty()) {
                 player.startTrack(queue.poll(), false)
             } else {
                 player.destroy()

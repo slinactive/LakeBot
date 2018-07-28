@@ -101,6 +101,7 @@ object AudioUtils {
         manager.audioPlayer.destroy()
         manager.audioPlayer.volume = 100
         manager.trackScheduler.isLoop = false
+        manager.trackScheduler.isQueueLoop = false
         manager.trackScheduler.clearQueue()
     }
     fun clear(guild: Guild) = clear(this[guild])
