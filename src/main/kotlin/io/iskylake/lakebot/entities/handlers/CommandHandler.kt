@@ -62,7 +62,7 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
                 val command = this[args[0].toLowerCase().substring(event.guild.prefix.length)]
                 if (command !== null) {
                     when {
-                        command.isDeveloper && event.author.isLBDeveloper -> event.sendError("You don't have permissions to execute this command!").queue()
+                        command.isDeveloper && !event.author.isLBDeveloper -> event.sendError("You don't have permissions to execute this command!").queue()
                         event.author.lakeBan !== null -> event.sendError("${event.author.asMention}, sorry! You can't execute this command because you got LakeBan for `${event.author.lakeBan?.getString("reason")}`!").queue()
                         else -> {
                             if (event.author !in USERS_WITH_PROCESSES) {
