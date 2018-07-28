@@ -39,7 +39,7 @@ class WeatherCommand : Command {
                     units { Units.IMPERIAL }
                     key { Immutable.WEATHER_API_KEY }
                 }
-                val forecast = api.getForecast(arguments)
+                val forecast = api[arguments]
                 if (forecast !== null) {
                     val city = "${forecast.city.name}, ${forecast.system.countryCode}"
                     val fahrenheit = forecast.temperature.temperature.toShort()
