@@ -45,8 +45,22 @@ class UrbanCommand : Command {
                     val embed = buildEmbed {
                         val result = json.getJSONArray("list").getJSONObject(0)
                         val word: String = result.getString("word")
-                        val meaning: String = result.getString("definition")
-                        val example: String = result.getString("example")
+                        val meaning: String by lazy {
+                            var meaning = result.getString("definition")
+                            for (res in Regex("\\[([^]]+)]").findAll(meaning)) {
+                                val param = URLEncoder.encode(res.value.removePrefix("[").removeSuffix("]"), "UTF-8")
+                                meaning = meaning.replace(res.value, "${res.value}(https://www.urbandictionary.com/define.php?term=$param)")
+                            }
+                            meaning
+                        }
+                        val example: String by lazy {
+                            var example = result.getString("example")
+                            for (res in Regex("\\[([^]]+)]").findAll(example)) {
+                                val param = URLEncoder.encode(res.value.removePrefix("[").removeSuffix("]"), "UTF-8")
+                                example = example.replace(res.value, "${res.value}(https://www.urbandictionary.com/define.php?term=$param)")
+                            }
+                            example
+                        }
                         val author: String = result.getString("author")
                         val like: Int = result.getInt("thumbs_up")
                         val dislike: Int = result.getInt("thumbs_down")
@@ -58,14 +72,14 @@ class UrbanCommand : Command {
                             when {
                                 meaning.isEmpty() -> "No meaning provided"
                                 meaning.length > 1024 -> "Too much text to display. Check on the site"
-                                else -> meaning.replace(Regex("\\[(.+)]"), "\$1")
+                                else -> meaning
                             }
                         }
                         field(title = "Example:") {
                             when {
                                 example.isEmpty() -> "No example provided"
                                 example.length > 1024 -> "Too much text to display. Check on the site"
-                                else -> example.replace(Regex("\\[(.+)]"), "\$1")
+                                else -> example
                             }
                         }
                         field(title = "Author:") { author }
