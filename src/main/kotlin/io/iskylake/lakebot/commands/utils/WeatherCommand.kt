@@ -19,6 +19,7 @@ package io.iskylake.lakebot.commands.utils
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
+import io.iskylake.lakebot.utils.TimeUtils
 import io.iskylake.weather.Units
 import io.iskylake.weather.lakeWeather
 
@@ -50,6 +51,8 @@ class WeatherCommand : Command {
                     val (degrees, name) = forecast.wind.direction to forecast.wind.directionName
                     val condition = forecast.weather.main
                     val cloudiness = "${forecast.clouds.cloudiness}%"
+                    val sunriseDate = TimeUtils.millisToDate(forecast.system.sunrise.time)
+                    val sunsetDate = TimeUtils.millisToDate(forecast.system.sunset.time)
                     val link = "https://openweathermap.org/city/${forecast.city.id}"
                     val embed = buildEmbed {
                         author("Weather - $city", link) { event.selfUser.effectiveAvatarUrl }
@@ -66,9 +69,43 @@ class WeatherCommand : Command {
                         }
                         field(true, "Wind Speed:") { speed }
                         field(true, "Humidity:") { if (humidity !== null) "$humidity%" else "N/A" }
-                        field(true, "Pressure:") { if (pressure !== null) "$pressure hPA" else "N/A" }
+                        field(true, "Pressure:") {
+                            if (pressure !== null) {
+                                "%.1f inHg".format(pressure * 0.75 / 10 / 2.54).replace(",", ".")
+                            } else {
+                                "N/A"
+                            }
+                        }
                         field(true, "Condition:") { condition }
                         field(true, "Cloudiness:") { cloudiness }
+                        field(true, "Sunrise:") {
+                            buildString {
+                                if (sunriseDate.hour < 10) {
+                                    append("0")
+                                }
+                                append(sunriseDate.hour)
+                                append(":")
+                                if (sunriseDate.minute < 10) {
+                                    append("0")
+                                }
+                                append(sunriseDate.minute)
+                                append(" UTC")
+                            }
+                        }
+                        field(true, "Sunset:") {
+                            buildString {
+                                if (sunsetDate.hour < 10) {
+                                    append("0")
+                                }
+                                append(sunsetDate.hour)
+                                append(":")
+                                if (sunsetDate.minute < 10) {
+                                    append("0")
+                                }
+                                append(sunsetDate.minute)
+                                append(" UTC")
+                            }
+                        }
                         footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                         timestamp()
                     }

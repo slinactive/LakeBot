@@ -17,7 +17,7 @@ As the development has just begun, help from Kotlin programmers (with experience
 * **[LakeWeather](https://github.com/ISkylakeS/lakeweather)** - simple Kotlin library for Current Weather API
 * **[Urban Dictionary API](https://www.urbandictionary.com/)** - popular modern dictionary API
 * **[Simple Logging Facade for Java (SLF4J)](https://www.slf4j.org/)** - logger implementation
-* **[Akiwrapper](https://github.com/markozajc/Akiwrapper)** - the JVM programming language LakeBot uses as script engine
+* **[Akiwrapper](https://github.com/markozajc/Akiwrapper)** - library for API of Akinator game
 * **[The Color API](http://www.thecolorapi.com/)** - color conversion, naming, scheming & placeholders
 * **[QRGen](https://github.com/kenglxn/QRGen)** - library for QR code generation
 * **[Jsoup](https://jsoup.org/)** - library for working with real-world HTML
