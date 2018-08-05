@@ -58,28 +58,24 @@ class UrbanCommand : Command {
                             when {
                                 meaning.isEmpty() -> "No meaning provided"
                                 meaning.length > 1024 -> "Too much text to display. Check on the site"
-                                else -> meaning
+                                else -> meaning.replace(Regex("\\[(.+)]"), "\$1")
                             }
                         }
                         field(title = "Example:") {
                             when {
                                 example.isEmpty() -> "No example provided"
                                 example.length > 1024 -> "Too much text to display. Check on the site"
-                                else -> example
+                                else -> example.replace(Regex("\\[(.+)]"), "\$1")
                             }
                         }
-                        field(title = "Author:") {
-                            author
-                        }
+                        field(title = "Author:") { author }
                         field(true, "Likes:") {
                             "${event.jda.getEmoteById(391954570735124480).asMention} \u2014 $like"
                         }
                         field(true, "Dislikes:") {
                             "${event.jda.getEmoteById(391954570705895434).asMention} \u2014 $dislike"
                         }
-                        footer(event.author.effectiveAvatarUrl) {
-                            "Requested by ${event.author.tag}"
-                        }
+                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                         timestamp()
                     }
                     event.channel.sendMessage(embed).queue()
