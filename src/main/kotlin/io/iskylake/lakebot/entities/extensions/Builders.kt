@@ -32,7 +32,7 @@ inline fun buildJDA(accountType: AccountType = AccountType.BOT, lazyBuilder: JDA
 inline fun buildEmbed(lazyBuilder: EmbedBuilder.() -> Unit): MessageEmbed = EmbedBuilder().apply(lazyBuilder).build()
 inline fun buildMessage(lazyBuilder: MessageBuilder.() -> Unit): Message = MessageBuilder().apply(lazyBuilder).build()
 // JDABuilder Extensions
-operator fun JDABuilder.invoke() = this.buildAsync()
+operator fun JDABuilder.invoke() = build()
 inline infix fun <T: EventListener> JDABuilder.eventListener(lazy: () -> T) = addEventListener(lazy())
 inline infix fun JDABuilder.token(lazy: () -> String) = setToken(lazy())
 inline infix fun JDABuilder.onlineStatus(lazy: () -> OnlineStatus) = setStatus(lazy())
