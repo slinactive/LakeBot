@@ -40,10 +40,24 @@ class TimeCommand : Command {
                     val url = "http://api.geonames.org/timezoneJSON?lat=$latitude&lng=$longitude&username=${Immutable.GEONAME_API_USER}"
                     val response = get(url).jsonObject
                     val time = response.getString("time").takeLast(5)
+                    val name = "${forecast.city.name}, ${forecast.system.countryCode}"
                     event.sendMessage(buildEmbed {
                         color { Immutable.SUCCESS }
-                        author { "${forecast.city.name} Time:" }
-                        description { time }
+                        author("Time - $name") { event.selfUser.effectiveAvatarUrl }
+                        field(true, "12-Hour Time:") {
+                            val timeAsHoursAndMinutes = time.split(":")
+                            val hours = timeAsHoursAndMinutes[0].toInt()
+                            val minutes = timeAsHoursAndMinutes[1]
+                            val twentyHoursFormat = when (hours) {
+                                0 -> 12
+                                in 13..23 -> hours - 12
+                                else -> hours
+                            }
+                            val amOrPm = if (hours in 0..11) "AM" else "PM"
+                            "$twentyHoursFormat:$minutes $amOrPm"
+                        }
+                        field(true, "24-Hour Time:") { time }
+                        description { "The command state is beta. In rare cases, result might get failed. If you had noticed any issue or inconsistency, please, contact developers!" }
                     }).queue()
                 } else {
                     event.sendError("Couldn't find that city or town!").queue()
