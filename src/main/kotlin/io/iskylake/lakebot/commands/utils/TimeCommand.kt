@@ -40,9 +40,13 @@ class TimeCommand : Command {
                     val url = "http://api.geonames.org/timezoneJSON?lat=$latitude&lng=$longitude&username=${Immutable.GEONAME_API_USER}"
                     val response = get(url).jsonObject
                     val time = response.getString("time").takeLast(5)
-                    event.sendMessage(time).queue()
+                    event.sendMessage(buildEmbed {
+                        color { Immutable.SUCCESS }
+                        author { "${forecast.city.name} Time:" }
+                        description { time }
+                    }).queue()
                 } else {
-                    event.sendError("location does not exist").queue()
+                    event.sendError("Couldn't find that city or town!").queue()
                 }
             } catch (e: Exception) {
                 event.sendError("Something went wrong! Try again or contact developers!").queue()
