@@ -27,28 +27,28 @@ import khttp.get
 
 class TimeCommand : Command {
     override val name = "time"
-    override val description = "command sends current time in specified location"
+    override val description = "The command that sends specified location's current time"
     override val cooldown = 3L
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
             try {
                 val api = lakeWeather(token = Immutable.WEATHER_API_KEY)
-                val coordinates = api[arguments]?.coordinates
-                if (coordinates !== null) {
-                    val (longitude, latitude) = coordinates
+                val forecast = api[arguments]
+                if (forecast !== null) {
+                    val (longitude, latitude) = forecast.coordinates
                     val url = "http://api.geonames.org/timezoneJSON?lat=$latitude&lng=$longitude&username=${Immutable.GEONAME_API_USER}"
                     val response = get(url).jsonObject
                     val time = response.getString("time").takeLast(5)
                     event.sendMessage(time).queue()
                 } else {
-                    event.sendMessage("location does not exist").queue()
+                    event.sendError("location does not exist").queue()
                 }
             } catch (e: Exception) {
-                event.sendMessage("$e").queue()
+                event.sendError("Something went wrong! Try again or contact developers!").queue()
             }
         } else {
-            event.sendMessage("something went wrong").queue()
+            event.sendError("You specified no content!").queue()
         }
     }
 }
