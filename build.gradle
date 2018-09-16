@@ -59,7 +59,7 @@ repositories {
 }
 
 dependencies {
-    compile "net.dv8tion:JDA:3.7.1_390"
+    compile "net.dv8tion:JDA:3.8.0_423"
     compile "org.slf4j:slf4j-simple:1.7.5"
     compile "org.json:json:20171018"
     compile "net.glxn.qrgen:javase:2.0"

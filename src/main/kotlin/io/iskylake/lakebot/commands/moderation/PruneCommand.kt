@@ -39,18 +39,18 @@ class PruneCommand : Command {
             |$command bots $dash clears messages from bots
         """.trimMargin()
     }
-    override val description = "The command that deletes a specified amount of messages (from 1 to 100)"
+    override val description = "The command that deletes a specified amount of messages (from 1 to 1000)"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         when {
-            !event.selfMember!!.hasPermission(Permission.MESSAGE_MANAGE) -> event.sendError("I don't have permissions for that!").queue()
+            !event.guild.selfMember.hasPermission(Permission.MESSAGE_MANAGE) -> event.sendError("I don't have permissions for that!").queue()
             !event.member.hasPermission(Permission.MESSAGE_MANAGE) -> event.sendError("You don't have permissions for that!").queue()
             else -> {
                 if (args.isNotEmpty()) {
                     if (args[0].isInt) {
                         val count = args[0].toInt()
                         if (args.size > 1) {
-                            if (count !in 1..100) {
-                                event.sendError("You must specify a number in range from 1 to 100!").queue()
+                            if (count !in 1..1000) {
+                                event.sendError("You must specify a number in range from 1 to 1000!").queue()
                             } else {
                                 if (args[1] matches Regex.DISCORD_USER) {
                                     val user: User? = event.jda.getUserById(args[1].replace(Regex.DISCORD_USER, "\$1"))
@@ -58,10 +58,14 @@ class PruneCommand : Command {
                                         event.sendError("Couldn't find this user!").queue()
                                     } else {
                                         event.message.delete().queue {
-                                            event.textChannel.history.retrievePast(100).queue { historyRaw ->
+                                            event.channel.iterableHistory.takeAsync(1000).thenAccept { historyRaw ->
                                                 val history = historyRaw.filter { it.author == user }.take(count)
                                                 if (history.isEmpty()) {
-                                                    event.sendError("Message history is empty!").queue()
+                                                    event.sendError("Message history is empty!").queue {
+                                                        it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                            // Ignoring ErrorResponseException
+                                                        }
+                                                    }
                                                 } else {
                                                     if (history.size == 1) {
                                                         history[0].delete().queue {
@@ -72,11 +76,10 @@ class PruneCommand : Command {
                                                             }
                                                         }
                                                     } else {
-                                                        event.textChannel.deleteMessages(history).queue {
-                                                            event.sendSuccess("Deleted ${history.size} messages from ${user.asMention}!").queue {
-                                                                it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
-                                                                    // Ignoring ErrorResponseException
-                                                                }
+                                                        event.channel.purgeMessages(history)
+                                                        event.sendSuccess("Deleted ${history.size} messages from ${user.asMention}!").queue {
+                                                            it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                                // Ignoring ErrorResponseException
                                                             }
                                                         }
                                                     }
@@ -89,10 +92,14 @@ class PruneCommand : Command {
                                     when (param) {
                                         "embeds" -> {
                                             event.message.delete().queue {
-                                                event.textChannel.history.retrievePast(100).queue { historyRaw ->
+                                                event.channel.iterableHistory.takeAsync(1000).thenAccept { historyRaw ->
                                                     val history = historyRaw.filter { it.embeds.isNotEmpty() }.take(count)
                                                     if (history.isEmpty()) {
-                                                        event.sendError("Message history is empty!").queue()
+                                                        event.sendError("Message history is empty!").queue {
+                                                            it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                                // Ignoring ErrorResponseException
+                                                            }
+                                                        }
                                                     } else {
                                                         if (history.size == 1) {
                                                             history[0].delete().queue {
@@ -103,11 +110,10 @@ class PruneCommand : Command {
                                                                 }
                                                             }
                                                         } else {
-                                                            event.textChannel.deleteMessages(history).queue {
-                                                                event.sendSuccess("Deleted ${history.size} embed messages!").queue {
-                                                                    it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
-                                                                        // Ignoring ErrorResponseException
-                                                                    }
+                                                            event.channel.purgeMessages(history)
+                                                            event.sendSuccess("Deleted ${history.size} embed messages!").queue {
+                                                                it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                                    // Ignoring ErrorResponseException
                                                                 }
                                                             }
                                                         }
@@ -117,10 +123,14 @@ class PruneCommand : Command {
                                         }
                                         "invites" -> {
                                             event.message.delete().queue {
-                                                event.textChannel.history.retrievePast(100).queue { historyRaw ->
+                                                event.channel.iterableHistory.takeAsync(1000).thenAccept { historyRaw ->
                                                     val history = historyRaw.filter { it.invites.isNotEmpty() }.take(count)
                                                     if (history.isEmpty()) {
-                                                        event.sendError("Message history is empty!").queue()
+                                                        event.sendError("Message history is empty!").queue {
+                                                            it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                                // Ignoring ErrorResponseException
+                                                            }
+                                                        }
                                                     } else {
                                                         if (history.size == 1) {
                                                             history[0].delete().queue {
@@ -131,11 +141,10 @@ class PruneCommand : Command {
                                                                 }
                                                             }
                                                         } else {
-                                                            event.textChannel.deleteMessages(history).queue {
-                                                                event.sendSuccess("Deleted ${history.size} messages with invite links!").queue {
-                                                                    it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
-                                                                        // Ignoring ErrorResponseException
-                                                                    }
+                                                            event.channel.purgeMessages(history)
+                                                            event.sendSuccess("Deleted ${history.size} messages with invite links!").queue {
+                                                                it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                                    // Ignoring ErrorResponseException
                                                                 }
                                                             }
                                                         }
@@ -145,10 +154,14 @@ class PruneCommand : Command {
                                         }
                                         "attachments" -> {
                                             event.message.delete().queue {
-                                                event.textChannel.history.retrievePast(100).queue { historyRaw ->
+                                                event.channel.iterableHistory.takeAsync(1000).thenAccept { historyRaw ->
                                                     val history = historyRaw.filter { it.attachments.isNotEmpty() }.take(count)
                                                     if (history.isEmpty()) {
-                                                        event.sendError("Message history is empty!").queue()
+                                                        event.sendError("Message history is empty!").queue {
+                                                            it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                                // Ignoring ErrorResponseException
+                                                            }
+                                                        }
                                                     } else {
                                                         if (history.size == 1) {
                                                             history[0].delete().queue {
@@ -159,11 +172,10 @@ class PruneCommand : Command {
                                                                 }
                                                             }
                                                         } else {
-                                                            event.textChannel.deleteMessages(history).queue {
-                                                                event.sendSuccess("Deleted ${history.size} messages with attachments!").queue {
-                                                                    it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
-                                                                        // Ignoring ErrorResponseException
-                                                                    }
+                                                            event.channel.purgeMessages(history)
+                                                            event.sendSuccess("Deleted ${history.size} messages with attachments!").queue {
+                                                                it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                                    // Ignoring ErrorResponseException
                                                                 }
                                                             }
                                                         }
@@ -173,10 +185,14 @@ class PruneCommand : Command {
                                         }
                                         "bots" -> {
                                             event.message.delete().queue {
-                                                event.textChannel.history.retrievePast(100).queue { historyRaw ->
+                                                event.channel.iterableHistory.takeAsync(1000).thenAccept { historyRaw ->
                                                     val history = historyRaw.filter { it.author.isBot }.take(count)
                                                     if (history.isEmpty()) {
-                                                        event.sendError("Message history is empty!").queue()
+                                                        event.sendError("Message history is empty!").queue {
+                                                            it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                                // Ignoring ErrorResponseException
+                                                            }
+                                                        }
                                                     } else {
                                                         if (history.size == 1) {
                                                             history[0].delete().queue {
@@ -187,11 +203,10 @@ class PruneCommand : Command {
                                                                 }
                                                             }
                                                         } else {
-                                                            event.textChannel.deleteMessages(history).queue {
-                                                                event.sendSuccess("Deleted ${history.size} messages from bots!").queue {
-                                                                    it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
-                                                                        // Ignoring ErrorResponseException
-                                                                    }
+                                                            event.channel.purgeMessages(history)
+                                                            event.sendSuccess("Deleted ${history.size} messages from bots!").queue {
+                                                                it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                                    // Ignoring ErrorResponseException
                                                                 }
                                                             }
                                                         }
@@ -204,36 +219,28 @@ class PruneCommand : Command {
                                 }
                             }
                         } else {
-                            if (count !in 1..100) {
-                                event.sendError("You must specify a number in range from 1 to 100!").queue()
+                            if (count !in 1..1000) {
+                                event.sendError("You must specify a number in range from 1 to 1000!").queue()
                             } else {
-                                if (count == 1) {
-                                    event.textChannel.history.retrievePast(2).queue { history ->
+                                event.message.delete().queue {
+                                    event.channel.iterableHistory.takeAsync(count).thenAccept { history ->
                                         if (history.isEmpty()) {
-                                            event.sendError("Message history is empty!").queue()
+                                            event.sendError("Message history is empty!").queue {
+                                                it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                    // Ignoring ErrorResponseException
+                                                }
+                                            }
                                         } else {
-                                            event.textChannel.deleteMessages(history).queue {
-                                                event.sendSuccess("Deleted 1 message!").queue {
-                                                    it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
-                                                        // Ignoring ErrorResponseException
+                                            if (history.size == 1) {
+                                                history[0].delete().queue {
+                                                    event.sendSuccess("Deleted 1 message!").queue {
+                                                        it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
+                                                            // Ignoring ErrorResponseException
+                                                        }
                                                     }
                                                 }
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    event.message.delete().complete()
-                                    event.textChannel.history.retrievePast(count).queue { history ->
-                                        when {
-                                            history.isEmpty() -> event.sendError("Message history is empty!").queue()
-                                            history.size == 1 -> history[0].delete().queue {
-                                                event.sendSuccess("Deleted 1 message!").queue {
-                                                    it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
-                                                        // Ignoring ErrorResponseException
-                                                    }
-                                                }
-                                            }
-                                            else -> event.textChannel.deleteMessages(history).queue {
+                                            } else {
+                                                event.channel.purgeMessages(history)
                                                 event.sendSuccess("Deleted ${history.size} messages!").queue {
                                                     it.delete().queueAfter(5, TimeUnit.SECONDS, null) { _ ->
                                                         // Ignoring ErrorResponseException
