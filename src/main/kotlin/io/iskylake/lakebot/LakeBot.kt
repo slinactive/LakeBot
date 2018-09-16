@@ -105,6 +105,7 @@ val DEFAULT_COMMANDS = listOf(
         GoogleCommand(),
         QRCommand(),
         ShortenerCommand(),
+        TimeCommand(),
         UrbanCommand(),
         WeatherCommand(),
         YouTubeCommand()

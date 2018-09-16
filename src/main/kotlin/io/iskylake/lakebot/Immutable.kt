@@ -22,7 +22,7 @@ import java.awt.Color
 
 object Immutable {
     const val DEFAULT_PREFIX = "lb!"
-    const val VERSION = "0.4.5 beta 3"
+    const val VERSION = "0.4.5 beta 4"
     const val PERMISSIONS = 2146958591L
     const val GITHUB_REPOSITORY = "https://github.com/ISkylakeS/LakeBot"
     const val SUPPORT_INVITE = "https://discord.gg/QsTevwF"
@@ -33,6 +33,7 @@ object Immutable {
     val WEATHER_API_KEY = System.getenv("WEATHER_API_KEY")!!
     val GENIUS_ID = System.getenv("GENIUS_ID")!!
     val GENIUS_SECRET = System.getenv("GENIUS_SECRET")!!
+    val GEONAME_API_USER = System.getenv("GEONAME_API_USER")!!
     val GOOGLE_API_KEYS = listOf(
             System.getenv("GOOGLE_API1")!!,
             System.getenv("GOOGLE_API2")!!,
