@@ -131,14 +131,18 @@ object EventHandler : ListenerAdapter() {
         if (event.guild.selfMember.isConnected && event.guild.selfMember.connectedChannel == event.channelLeft) {
             val members = event.channelLeft.members.filter { !it.user.isBot }
             if (members.isEmpty()) {
-                AudioUtils[event.guild].audioPlayer.isPaused = true
-                launch(CommandHandler) {
-                    if (EventWaiter.receiveEventRaw<GuildVoiceJoinEvent>(90, TimeUnit.SECONDS) {
-                        it.channelJoined == event.channelLeft && !it.member.user.isBot
-                    } !== null) {
-                        AudioUtils[event.guild].audioPlayer.isPaused = false
-                    } else {
-                        AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                if (AudioUtils[event.guild].trackScheduler.queue.isEmpty()) {
+                    AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                } else {
+                    AudioUtils[event.guild].audioPlayer.isPaused = true
+                    launch(CommandHandler) {
+                        if (EventWaiter.receiveEventRaw<GuildVoiceJoinEvent>(90, TimeUnit.SECONDS) {
+                            it.channelJoined == event.channelLeft && !it.member.user.isBot
+                        } !== null) {
+                            AudioUtils[event.guild].audioPlayer.isPaused = false
+                        } else {
+                            AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                        }
                     }
                 }
             }
@@ -148,14 +152,18 @@ object EventHandler : ListenerAdapter() {
         if (event.guild.selfMember.isConnected && event.guild.selfMember.connectedChannel == event.channelLeft) {
             val members = event.channelLeft.members.filter { !it.user.isBot }
             if (members.isEmpty()) {
-                AudioUtils[event.guild].audioPlayer.isPaused = true
-                launch(CommandHandler) {
-                    if (EventWaiter.receiveEventRaw<GuildVoiceJoinEvent>(90, TimeUnit.SECONDS) {
-                        it.channelJoined == event.channelLeft && !it.member.user.isBot
-                    } !== null) {
-                        AudioUtils[event.guild].audioPlayer.isPaused = false
-                    } else {
-                        AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                if (AudioUtils[event.guild].trackScheduler.queue.isEmpty()) {
+                    AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                } else {
+                    AudioUtils[event.guild].audioPlayer.isPaused = true
+                    launch(CommandHandler) {
+                        if (EventWaiter.receiveEventRaw<GuildVoiceJoinEvent>(90, TimeUnit.SECONDS) {
+                            it.channelJoined == event.channelLeft && !it.member.user.isBot
+                        } !== null) {
+                            AudioUtils[event.guild].audioPlayer.isPaused = false
+                        } else {
+                            AudioUtils.clear(event.guild, AudioUtils[event.guild])
+                        }
                     }
                 }
             }

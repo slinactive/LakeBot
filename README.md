@@ -22,6 +22,7 @@ As the development has just begun, help from Kotlin programmers (with experience
 * **[QRGen](https://github.com/kenglxn/QRGen)** - library for QR code generation
 * **[Jsoup](https://jsoup.org/)** - library for working with real-world HTML
 * **[Guava](https://github.com/google/guava)** - set of core libraries that includes a lot of useful stuff
+* **[GeoNames](http://www.geonames.org/)** - geographical database covers all countries and contains over eleven million placenames
 ## Kotlin Modules
 * `kotlin-stdlib-jdk8` - standard library
 * `kotlinx-coroutines` - library support for Kotlin coroutines
