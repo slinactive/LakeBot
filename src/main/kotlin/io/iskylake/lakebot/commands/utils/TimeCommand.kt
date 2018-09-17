@@ -29,6 +29,7 @@ class TimeCommand : Command {
     override val name = "time"
     override val description = "The command that sends specified location's current time"
     override val cooldown = 3L
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <location>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
@@ -57,7 +58,6 @@ class TimeCommand : Command {
                             "$twentyHoursFormat:$minutes $amOrPm"
                         }
                         field(true, "24-Hour Time:") { time }
-                        description { "The command state is beta. In rare cases, result might get failed. If you had noticed any issue or inconsistency, please, contact developers!" }
                     }).queue()
                 } else {
                     event.sendError("Couldn't find that city or town!").queue()
