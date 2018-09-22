@@ -22,6 +22,7 @@ import io.iskylake.lakebot.commands.CommandCategory
 import io.iskylake.lakebot.commands.`fun`.AkinatorCommand
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
+import io.iskylake.lakebot.utils.TimeUtils
 
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
@@ -76,6 +77,9 @@ class HelpCommand : Command {
                             }
                         }
                         field(title = "Category:") { command.category() }
+                        if (command.cooldown > 0) {
+                            field(title = "Cooldown:") { TimeUtils.asText(command.cooldown * 1000) }
+                        }
                         field(title = "Usage:") { command.usage(event.guild.prefix) }
                         if (command.examples(event.guild.prefix).isNotEmpty()) {
                             field(title = "Examples:") {
