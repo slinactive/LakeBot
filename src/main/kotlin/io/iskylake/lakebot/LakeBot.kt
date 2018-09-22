@@ -100,6 +100,7 @@ val DEFAULT_COMMANDS = listOf(
         PruneCommand(),
         UnmuteCommand(),
         // Utils
+        CalculatorCommand(),
         ColorCommand(),
         EmojiCommand(),
         GoogleCommand(),
