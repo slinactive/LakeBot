@@ -90,7 +90,7 @@ class CalculatorCommand : Command {
                 while (true) {
                     when {
                         eat('*') || eat('×') -> x *= parseFactor()
-                        eat('/') -> x /= parseFactor()
+                        eat('/') || eat('÷') -> x /= parseFactor()
                         else -> return x
                     }
                 }
