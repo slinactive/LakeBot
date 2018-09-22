@@ -39,17 +39,20 @@ import kotlin.math.*
 class CalculatorCommand : Command {
     override val name = "calculator"
     override val description = "N/A"
+    override val cooldown = 2L
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <expression>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
             try {
                 val evaluated = eval(arguments)
-                event.channel.sendMessage(evaluated.toString()).queue()
+                val result = if (evaluated.toDouble() % 1 == 0.0) evaluated.toPlainString() else "$evaluated"
+                event.channel.sendMessage(result).queue()
             } catch (e: Exception) {
                 event.channel.sendMessage("$e").queue()
             }
         } else {
-            event.channel.sendMessage("no arguments specified").queue()
+            event.sendError("You specified no content!").queue()
         }
     }
     fun eval(expression: String): BigDecimal {
