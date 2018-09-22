@@ -16,29 +16,20 @@
 
 package io.iskylake.lakebot.commands.utils
 
+import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
+
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+
 import java.math.BigDecimal
+
 import kotlin.math.*
 
-/*fun main(args: Array<String>) {
-    while (true) {
-        val input = readLine() ?: "2 + 2"
-        try {
-            val result = CalculatorCommand().eval(input)
-            val toBePrinted = if (round(result.toDouble()) == result.toDouble()) {
-                "${result.toInt()}"
-            } else result.toString()
-            println(toBePrinted)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-}*/
 class CalculatorCommand : Command {
     override val name = "calculator"
-    override val description = "N/A"
+    override val description = "The command that evaluates specified mathematical expression and sends the result"
+    override val aliases = listOf("calculate", "math", "lakemath")
     override val cooldown = 2L
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <expression>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
@@ -47,9 +38,13 @@ class CalculatorCommand : Command {
             try {
                 val evaluated = eval(arguments)
                 val result = if (evaluated.toDouble() % 1 == 0.0) evaluated.toPlainString() else "$evaluated"
-                event.channel.sendMessage(result).queue()
+                event.sendMessage(buildEmbed {
+                    color { Immutable.SUCCESS }
+                    author("LakeMath") { event.selfUser.effectiveAvatarUrl }
+                    description { result }
+                }).queue()
             } catch (e: Exception) {
-                event.channel.sendMessage("$e").queue()
+                event.sendError("This expression may be invalid!").queue()
             }
         } else {
             event.sendError("You specified no content!").queue()
@@ -76,7 +71,7 @@ class CalculatorCommand : Command {
             fun parse(): Double {
                 nextChar()
                 val parsed = parseExpression()
-                return if (position < expression.length) throw ArithmeticException("Unexpected: $char") else parsed
+                return if (position < expression.length) throw ArithmeticException() else parsed
             }
             fun parseExpression(): Double {
                 var x = parseTerm()
@@ -124,10 +119,10 @@ class CalculatorCommand : Command {
                                 "sin" -> sin(Math.toRadians(parseFactor))
                                 "cos" -> cos(Math.toRadians(parseFactor))
                                 "tan" -> tan(Math.toRadians(parseFactor))
-                                else -> throw ArithmeticException("Unknown function: $func")
+                                else -> throw ArithmeticException()
                             }
                         } else {
-                            throw ArithmeticException("Unexpected: $char")
+                            throw ArithmeticException()
                         }
                         if (eat('^')) {
                             x = x.pow(parseFactor())
