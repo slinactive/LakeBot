@@ -131,7 +131,7 @@ object TranslateUtils {
     fun getLanguageName(code: String) = LANGUAGE_PAIRS.firstOrNull { it.first.equals(code, true) }?.second ?: throw IllegalArgumentException("Provided code is invalid!")
     fun rawRequest(code: String, text: String): JSONArray {
         val url = "https://translate.googleapis.com/translate_a/single"
-        val params = "client=gtx&sl=auto&t=$code&hl=$code&dt=t&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&ie=UTF-8&oe=UTF-8&otf=1&ssel=0&tsel=0&kc=7&q=${URLEncoder.encode(text)}"
+        val params = "client=gtx&sl=auto&t=$code&hl=$code&dt=t&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&ie=UTF-8&oe=UTF-8&otf=1&ssel=0&tsel=0&kc=7&q=${URLEncoder.encode(text, "UTF-8")}"
         val response = get("$url?$params")
         return response.jsonArray
     }
