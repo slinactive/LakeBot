@@ -38,7 +38,7 @@ class CalculatorCommand : Command {
             try {
                 val evaluated = eval(arguments)
                 val asDouble = evaluated.toDouble()
-                val result = if (round(asDouble) == asDouble) "$evaluated".removeSuffix(".0") else "$evaluated"
+                val result = if (round(asDouble) == asDouble) evaluated.toPlainString().removeSuffix(".0") else "$evaluated"
                 event.sendMessage(buildEmbed {
                     color { Immutable.SUCCESS }
                     author("LakeMath") { event.selfUser.effectiveAvatarUrl }
