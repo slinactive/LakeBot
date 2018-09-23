@@ -34,7 +34,7 @@ class TranslateCommand : Command {
         if (allArguments !== null) {
             val arguments = allArguments.split("\\s+".toRegex(), 2)
             if (arguments.size == 1) {
-                event.sendError("You didn't specified all needed arguments!").queue()
+                event.sendError("You didn't specify all needed arguments!").queue()
             } else {
                 try {
                     val translated = TranslateUtils.translate(arguments[0], arguments[1])
