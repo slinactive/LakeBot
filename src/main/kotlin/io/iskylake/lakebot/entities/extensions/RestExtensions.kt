@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
+@file:Suppress("UNUSED")
 package io.iskylake.lakebot.entities.extensions
 
 import io.iskylake.lakebot.entities.handlers.CommandHandler
 
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 
 import net.dv8tion.jda.core.requests.RestAction
 
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 suspend inline fun <reified T> RestAction<T>.await(
         context: CoroutineContext = CommandHandler,
         noinline func: suspend (T) -> Unit = {}
 ) = queue {
-    async(context) {
+    CoroutineScope(context).async {
         func(it)
     }
 }

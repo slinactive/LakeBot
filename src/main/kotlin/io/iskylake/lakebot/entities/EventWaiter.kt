@@ -22,11 +22,11 @@ import io.iskylake.lakebot.entities.annotations.Author
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 import kotlin.reflect.full.allSuperclasses
 
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.*
 
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.hooks.EventListener
@@ -84,7 +84,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         val waiting = AwaitableTask(check, deferred)
         eventSet += waiting
         if (delay > 0) {
-            launch(this) {
+            CoroutineScope(this).launch {
                 delay(delay, unit)
                 eventSet -= waiting
                 deferred.complete(null)
@@ -125,7 +125,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
             delay: Long = 1,
             unit: TimeUnit = TimeUnit.MINUTES,
             action: (Boolean) -> Unit = {}
-    ): Deferred<Boolean> = async(this) {
+    ): Deferred<Boolean> = CoroutineScope(this).async {
         val bool = awaitConfirmation(msg, author, delay, unit)
         action(bool)
         bool
@@ -157,7 +157,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
             delay: Long = 1,
             unit: TimeUnit = TimeUnit.MINUTES,
             action: (Boolean?) -> Unit = {}
-    ): Deferred<Boolean?> = async(this) {
+    ): Deferred<Boolean?> = CoroutineScope(this).async {
         val bool = awaitNullableConfirmation(msg, author, delay, unit)
         action(bool)
         bool
@@ -184,13 +184,13 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
             delay: Long = 1,
             unit: TimeUnit = TimeUnit.MINUTES,
             action: (Message?) -> Unit = {}
-    ): Deferred<Message?> = async(this) {
+    ): Deferred<Message?> = CoroutineScope(this).async {
         val msg = awaitMessage(user, channel, delay, unit)
         action(msg)
         msg
     }
     override fun onEvent(event: Event) {
-        launch(this) {
+        CoroutineScope(this).launch {
             val type = event::class
             dispatchEventType(event, type)
             type.allSuperclasses.forEach { dispatchEventType(event, it) }

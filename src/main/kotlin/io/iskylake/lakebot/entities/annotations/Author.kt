@@ -19,6 +19,6 @@ package io.iskylake.lakebot.entities.annotations
 import kotlin.annotation.AnnotationTarget.*
 
 @Target(ANNOTATION_CLASS, LOCAL_VARIABLE, CLASS, PROPERTY, FIELD, CONSTRUCTOR, FUNCTION, PROPERTY_GETTER, PROPERTY_SETTER, TYPEALIAS, EXPRESSION, FILE, TYPE, VALUE_PARAMETER, TYPE_PARAMETER)
-@Retention
 @Repeatable
+@Retention(AnnotationRetention.SOURCE)
 annotation class Author(vararg val authors: String)

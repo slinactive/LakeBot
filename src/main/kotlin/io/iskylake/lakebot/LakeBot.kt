@@ -32,8 +32,8 @@ import io.iskylake.lakebot.entities.handlers.CommandHandler
 import io.iskylake.lakebot.entities.handlers.EventHandler
 import io.iskylake.lakebot.utils.ConfigUtils
 
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.OnlineStatus

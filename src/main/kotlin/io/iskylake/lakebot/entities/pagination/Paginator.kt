@@ -20,7 +20,8 @@ package io.iskylake.lakebot.entities.pagination
 import com.google.common.collect.Lists
 import io.iskylake.lakebot.entities.EventWaiter
 
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageEmbed
@@ -66,7 +67,7 @@ interface Paginator<out T> {
         }
     }
     fun waiter(msg: Message, num: Int = 1) {
-        async(EventWaiter) {
+        CoroutineScope(EventWaiter).async {
             val e = EventWaiter.receiveEventRaw<MessageReactionAddEvent>(1, TimeUnit.MINUTES) {
                 val isValidEmote = BIG_LEFT == it.reactionEmote.name || BIG_RIGHT == it.reactionEmote.name || LEFT == it.reactionEmote.name || STOP == it.reactionEmote.name || RIGHT == it.reactionEmote.name
                 it.messageId == msg.id && isValidEmote && event.author == it.user

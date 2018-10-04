@@ -23,8 +23,9 @@ import io.iskylake.lakebot.entities.extensions.lakeBan
 import io.iskylake.lakebot.entities.extensions.prefix
 import io.iskylake.lakebot.entities.extensions.sendError
 
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newFixedThreadPoolContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
 
 import net.dv8tion.jda.core.entities.MessageType
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
@@ -32,7 +33,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Command-Thread") {
     val registeredCommands = mutableListOf<Command>()
@@ -66,7 +67,7 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
                         event.author.lakeBan !== null -> event.sendError("${event.author.asMention}, sorry! You can't execute this command because you got LakeBan for `${event.author.lakeBan?.getString("reason")}`!").queue()
                         else -> {
                             if (event.author !in USERS_WITH_PROCESSES) {
-                                launch(this) {
+                                CoroutineScope(this).launch {
                                     if (command.cooldown > 0) {
                                         val key = "${command.name}|${event.author.id}"
                                         val time = getRemainingCooldown(key)

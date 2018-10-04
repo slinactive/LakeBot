@@ -21,7 +21,8 @@ import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.utils.AudioUtils
 
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 import net.dv8tion.jda.core.events.ReadyEvent
 import net.dv8tion.jda.core.events.channel.text.TextChannelCreateEvent
@@ -135,7 +136,7 @@ object EventHandler : ListenerAdapter() {
                     AudioUtils.clear(event.guild, AudioUtils[event.guild])
                 } else {
                     AudioUtils[event.guild].audioPlayer.isPaused = true
-                    launch(CommandHandler) {
+                    CoroutineScope(CommandHandler).launch {
                         if (EventWaiter.receiveEventRaw<GuildVoiceJoinEvent>(90, TimeUnit.SECONDS) {
                             it.channelJoined == event.channelLeft && !it.member.user.isBot
                         } !== null) {
@@ -156,7 +157,7 @@ object EventHandler : ListenerAdapter() {
                     AudioUtils.clear(event.guild, AudioUtils[event.guild])
                 } else {
                     AudioUtils[event.guild].audioPlayer.isPaused = true
-                    launch(CommandHandler) {
+                    CoroutineScope(CommandHandler).launch {
                         if (EventWaiter.receiveEventRaw<GuildVoiceJoinEvent>(90, TimeUnit.SECONDS) {
                             it.channelJoined == event.channelLeft && !it.member.user.isBot
                         } !== null) {
