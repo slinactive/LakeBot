@@ -79,6 +79,7 @@ dependencies {
     compile "org.mongodb:mongo-java-driver:3.7.0-rc0"
     compile "com.google.apis:google-api-services-youtube:v3-rev187-1.23.0"
     compile "org.jsoup:jsoup:1.11.2"
+    compile "org.reflections:reflections:0.9.11"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-script-runtime:$kotlin_version"

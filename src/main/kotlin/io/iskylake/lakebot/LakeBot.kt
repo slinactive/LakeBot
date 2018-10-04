@@ -18,14 +18,15 @@ package io.iskylake.lakebot
 
 import com.mongodb.MongoClient
 
-import io.iskylake.lakebot.commands.`fun`.*
+import io.iskylake.lakebot.commands.Command
+/*import io.iskylake.lakebot.commands.`fun`.*
 import io.iskylake.lakebot.commands.animals.*
 import io.iskylake.lakebot.commands.audio.*
 import io.iskylake.lakebot.commands.developer.*
 import io.iskylake.lakebot.commands.general.*
 import io.iskylake.lakebot.commands.info.*
 import io.iskylake.lakebot.commands.moderation.*
-import io.iskylake.lakebot.commands.utils.*
+import io.iskylake.lakebot.commands.utils.**/
 import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
@@ -41,9 +42,11 @@ import net.dv8tion.jda.core.entities.Game.streaming
 import net.dv8tion.jda.core.entities.Game.watching
 import net.dv8tion.jda.core.entities.User
 
+import org.reflections.Reflections
+
 import kotlin.system.exitProcess
 
-val DEFAULT_COMMANDS = listOf(
+/*val DEFAULT_COMMANDS = listOf(
         // Animals
         AlpacaCommand(),
         BirdCommand(),
@@ -111,7 +114,7 @@ val DEFAULT_COMMANDS = listOf(
         UrbanCommand(),
         WeatherCommand(),
         YouTubeCommand()
-)
+)*/
 val USERS_WITH_PROCESSES = mutableListOf<User>()
 lateinit var DISCORD: JDA
 private lateinit var client: MongoClient
@@ -120,6 +123,7 @@ fun main(args: Array<String>) = try {
         client = ConfigUtils.CLIENT
         delay(1000)
         Immutable.LOGGER.info("MongoDB was successfully loaded!")
+        val commandPackage = Reflections("io.iskylake.lakebot.commands")
         DISCORD = buildJDA {
             token { Immutable.BOT_TOKEN }
             eventListener { EventHandler }
@@ -128,8 +132,8 @@ fun main(args: Array<String>) = try {
             onlineStatus { OnlineStatus.DO_NOT_DISTURB }
         }
         Immutable.LOGGER.info("JDA was successfully built!")
-        for (command in DEFAULT_COMMANDS) {
-            CommandHandler += command
+        for (commandWrapper in commandPackage.getSubTypesOf<Command>()) {
+            CommandHandler += commandWrapper.newInstance()
         }
         Immutable.LOGGER.info("CommandHandler successfully loaded all ${CommandHandler.registeredCommands.size} commands!")
         System.setProperty("lakebot.version", Immutable.VERSION)
