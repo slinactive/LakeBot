@@ -118,7 +118,7 @@ import kotlin.system.exitProcess
 val USERS_WITH_PROCESSES = mutableListOf<User>()
 lateinit var DISCORD: JDA
 private lateinit var client: MongoClient
-fun main(args: Array<String>) = try {
+fun main() = try {
     runBlocking {
         client = ConfigUtils.CLIENT
         delay(1000)

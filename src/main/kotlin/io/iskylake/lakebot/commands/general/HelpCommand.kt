@@ -55,7 +55,7 @@ class HelpCommand : Command {
                     val list = commands.map { it.name }.sorted().joinToString()
                     commandFields += MessageEmbed.Field("${category().capitalize()} Commands:", list, false)
                 }
-                for (field in commandFields) {
+                for (field in commandFields.sortedBy { it.name }) {
                     field { field }
                 }
             }
