@@ -19,14 +19,6 @@ package io.iskylake.lakebot
 import com.mongodb.MongoClient
 
 import io.iskylake.lakebot.commands.Command
-/*import io.iskylake.lakebot.commands.`fun`.*
-import io.iskylake.lakebot.commands.animals.*
-import io.iskylake.lakebot.commands.audio.*
-import io.iskylake.lakebot.commands.developer.*
-import io.iskylake.lakebot.commands.general.*
-import io.iskylake.lakebot.commands.info.*
-import io.iskylake.lakebot.commands.moderation.*
-import io.iskylake.lakebot.commands.utils.**/
 import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
@@ -46,75 +38,6 @@ import org.reflections.Reflections
 
 import kotlin.system.exitProcess
 
-/*val DEFAULT_COMMANDS = listOf(
-        // Animals
-        AlpacaCommand(),
-        BirdCommand(),
-        CatCommand(),
-        DogCommand(),
-        // Audio
-        JoinCommand(),
-        JumpCommand(),
-        JumpBackCommand(),
-        JumpForwardCommand(),
-        LeaveCommand(),
-        LoopCommand(),
-        LyricsCommand(),
-        PauseCommand(),
-        PlayCommand(),
-        PlayingCommand(),
-        QueueCommand(),
-        RemoveCommand(),
-        RestartCommand(),
-        ResumeCommand(),
-        SelectCommand(),
-        SkipCommand(),
-        StopCommand(),
-        VolumeCommand(),
-        YouTubePlayCommand(),
-        // Developer
-        EvalCommand(),
-        LakeBanCommand(),
-        LakeUnbanCommand(),
-        ShutdownCommand(),
-        // Fun
-        AkinatorCommand(),
-        ChooseCommand(),
-        GuessGameCommand(),
-        InvertCommand(),
-        SayCommand(),
-        TextToImageCommand(),
-        // General
-        AboutCommand(),
-        HelpCommand(),
-        InviteCommand(),
-        PingCommand(),
-        SupportCommand(),
-        UptimeCommand(),
-        // Info
-        EmotesCommand(),
-        RoleCommand(),
-        ServerCommand(),
-        UserCommand(),
-        // Moderation
-        MuteCommand(),
-        MuteRoleCommand(),
-        PrefixCommand(),
-        PruneCommand(),
-        UnmuteCommand(),
-        // Utils
-        CalculatorCommand(),
-        ColorCommand(),
-        EmojiCommand(),
-        GoogleCommand(),
-        QRCommand(),
-        ShortenerCommand(),
-        TimeCommand(),
-        TranslateCommand(),
-        UrbanCommand(),
-        WeatherCommand(),
-        YouTubeCommand()
-)*/
 val USERS_WITH_PROCESSES = mutableListOf<User>()
 lateinit var DISCORD: JDA
 private lateinit var client: MongoClient
