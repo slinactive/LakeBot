@@ -56,7 +56,7 @@ fun main() = try {
         }
         Immutable.LOGGER.info("JDA was successfully built!")
         for (commandWrapper in commandPackage.getSubTypesOf<Command>()) {
-            CommandHandler += commandWrapper.newInstance()
+            CommandHandler += commandWrapper.getDeclaredConstructor().newInstance()
         }
         Immutable.LOGGER.info("CommandHandler successfully loaded all ${CommandHandler.registeredCommands.size} commands!")
         System.setProperty("lakebot.version", Immutable.VERSION)
