@@ -97,11 +97,13 @@ class EvalCommand : Command {
                 "kotlin.reflect.full",
                 "kotlin.system",
                 "kotlin.io",
+                "kotlin.random",
                 "kotlin.concurrent",
                 "kotlin.streams",
                 "kotlin.properties",
                 "org.slf4j",
-                "org.json"
+                "org.json",
+                "org.reflections"
         )
         val IMPORT_REGEX = "(\")?(import\\s+(\\w+|\\d+|_|\\*|\\.)+(?:\\s+(as)\\s+(\\w+|\\d+|_))?;?)(\")?".toRegex()
     }
