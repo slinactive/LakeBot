@@ -92,7 +92,7 @@ class MuteCommand : Command {
         val member = lazyMember()
         val user = member.user
         if (user != event.author && event.member.canInteract(member) && event.guild.selfMember.canInteract(member)) {
-            event.channel.sendConfirmation("Are you sure want to mute this member?").await {
+            event.channel.sendConfirmation("Are you sure you want to mute this member?").await {
                 val confirmation = it.awaitNullableConfirmation(event.author)
                 if (confirmation !== null) {
                     it.delete().queue()

@@ -56,7 +56,11 @@ fun main() = try {
         }
         Immutable.LOGGER.info("JDA was successfully built!")
         for (commandWrapper in commandPackage.getSubTypesOf<Command>()) {
-            CommandHandler += commandWrapper.getDeclaredConstructor().newInstance()
+            //CommandHandler += commandWrapper.getDeclaredConstructor().newInstance()
+            val command = commandWrapper.getDeclaredConstructor().newInstance()
+            if (command.category != io.iskylake.lakebot.commands.CommandCategory.ANIMALS) {
+                CommandHandler += command
+            }
         }
         Immutable.LOGGER.info("CommandHandler successfully loaded all ${CommandHandler.registeredCommands.size} commands!")
         System.setProperty("lakebot.version", Immutable.VERSION)

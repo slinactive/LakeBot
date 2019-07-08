@@ -79,7 +79,8 @@ object AudioUtils {
         val manager = this[g()]
         manager.trackScheduler.queue -= manager.audioPlayer.playingTrack
         if (manager.trackScheduler.queue.isNotEmpty()) {
-            manager.audioPlayer.startTrack(manager.trackScheduler.queue.poll(), false)
+            val track = manager.trackScheduler.queue.poll()
+            manager.audioPlayer.startTrack(if (manager.trackScheduler.queue.count { it == track } > 1) track.makeClone() else track, false)
         } else {
             manager.audioPlayer.destroy()
         }

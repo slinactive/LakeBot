@@ -86,7 +86,7 @@ class UnmuteCommand : Command {
                 event.guild.clearMute(user)
                 event.sendError("That user is already unmuted!").queue()
             } else {
-                event.channel.sendConfirmation("Are you sure want to unmute this member?").await {
+                event.channel.sendConfirmation("Are you sure you want to unmute this member?").await {
                     val confirmation = it.awaitNullableConfirmation(event.author)
                     if (confirmation !== null) {
                         it.delete().queue()

@@ -28,7 +28,7 @@ class ShutdownCommand : Command {
     override val name = "shutdown"
     override val description = "The command that shutdowns LakeBot"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        event.sendConfirmation("Are you sure want to shutdown ${event.selfUser.name}?").await {
+        event.sendConfirmation("Are you sure you want to shutdown ${event.selfUser.name}?").await {
             val confirmation = it.awaitNullableConfirmation(event.author)
             if (confirmation !== null) {
                 if (confirmation) {
@@ -44,7 +44,7 @@ class ShutdownCommand : Command {
                     }
                 } else {
                     it.delete().queue()
-                    event.sendSuccess("Successfully cancelled!").queue()
+                    event.sendSuccess("Successfully canceled!").queue()
                 }
             } else {
                 it.delete().queue()

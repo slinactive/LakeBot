@@ -30,7 +30,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 class QueueCommand : Command {
     override val name = "queue"
-    override val aliases = listOf("playlist")
+    override val aliases = listOf("playlist", "q")
     override val description = "The command that sends the current queue (playlist)"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null && AudioUtils[event.guild].trackScheduler.queue.isEmpty()) {

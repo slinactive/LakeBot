@@ -96,7 +96,7 @@ class MuteRoleCommand : Command {
                     }
                 } else {
                     if (event.guild.isMuteRoleEnabled) {
-                        event.sendConfirmation("Are you sure want to disable mute role?").await {
+                        event.sendConfirmation("Are you sure you want to disable mute role?").await {
                             val confirmation = it.awaitNullableConfirmation(event.author)
                             if (confirmation !== null) {
                                 if (confirmation) {

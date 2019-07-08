@@ -23,7 +23,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 class LakeBanCommand : Command {
     override val name = "lakeban"
-    override val description = "The command that gives user LakeBan (after ban they can't use LakeBot)"
+    override val description = "The command that gives user LakeBan (after which they can't use LakeBot)"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user> <reason>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (args.size > 1) {
         when {
@@ -32,7 +32,7 @@ class LakeBanCommand : Command {
                 if (user === null) {
                     event.sendError("Couldn't find this user!").queue()
                 } else {
-                    event.sendConfirmation("Are you sure want to ban this user?").await {
+                    event.sendConfirmation("Are you sure you want to ban this user?").await {
                         val boolean = it.awaitNullableConfirmation(event.author)
                         if (boolean !== null) {
                             if (boolean) {
@@ -40,7 +40,7 @@ class LakeBanCommand : Command {
                                 event.sendSuccess("${user.tag} got LakeBan!").queue()
                                 it.delete().queue()
                             } else {
-                                event.sendSuccess("Successfully cancelled!").queue()
+                                event.sendSuccess("Successfully canceled!").queue()
                                 it.delete().queue()
                             }
                         } else {
@@ -52,7 +52,7 @@ class LakeBanCommand : Command {
             }
             event.guild.searchMembers(args[1]).isNotEmpty() -> {
                 val user = event.guild.searchMembers(args[1])[0].user
-                event.sendConfirmation("Are you sure want to ban this user?").await {
+                event.sendConfirmation("Are you sure you want to ban this user?").await {
                     val boolean = it.awaitNullableConfirmation(event.author)
                     if (boolean !== null) {
                         if (boolean) {
@@ -60,7 +60,7 @@ class LakeBanCommand : Command {
                             event.sendSuccess("${user.tag} got LakeBan!").queue()
                             it.delete().queue()
                         } else {
-                            event.sendSuccess("Successfully cancelled!").queue()
+                            event.sendSuccess("Successfully canceled!").queue()
                             it.delete().queue()
                         }
                     } else {

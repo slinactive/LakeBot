@@ -30,7 +30,7 @@ import java.time.Duration
 object YouTubeUtils {
     private val KEY = Immutable.YOUTUBE_API_KEY
     @JvmField
-    val YOUTUBE = YouTube.Builder(NetHttpTransport(), JacksonFactory()) { _ -> }.setApplicationName("KabyBot").build()
+    val YOUTUBE = YouTube.Builder(NetHttpTransport(), JacksonFactory()) { _ -> }.setApplicationName("lakebot").build()
     @JvmField
     val VIDEO_REGEX = "(?:https?://)?(?:youtu\\.be/|(?:www\\.)?youtube\\.com/watch(?:\\.php)?\\?.*v=)([\\w\\d-_]){11}".toRegex()
     @Throws(IOException::class)

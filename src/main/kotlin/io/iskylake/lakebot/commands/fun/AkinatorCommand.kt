@@ -77,7 +77,7 @@ class AkinatorCommand : Command {
         if (content !== null) {
             if (content == "help" || content == "back" || content == "b" || content == "return" || content == "aliases" || content == "y" || content == "n" || content == "d" || content == "p" || content == "pn" || content == "nope" || content == "yes" || content == "yup" || content == "yep" || content == "yeah" || content == "no" || content == "no u" || content == "nah" || content == "dont know" || content == "dunno" || content == "idk" || content == "don't know" || content == "probably" || content == "probably not" || content == "exit") {
                 when (content) {
-                    "exit" -> event.sendConfirmation("Are you sure want to exit?").await {
+                    "exit" -> event.sendConfirmation("Are you sure you want to exit?").await {
                         val bool = it.awaitNullableConfirmation(event.author)
                         if (bool !== null) {
                             if (bool) {
@@ -117,9 +117,9 @@ class AkinatorCommand : Command {
                                 else -> Answer.DONT_KNOW
                             }
                             if (content == "back" || content == "return" || content == "b") {
-                                if (wrapper.currentQuestion?.step != 0) {
+                                //if (wrapper.currentQuestion?.step != 0) {
                                     wrapper.undoAnswer()
-                                }
+                                //}
                             } else {
                                 wrapper.answerCurrentQuestion(answer)
                             }
@@ -131,6 +131,23 @@ class AkinatorCommand : Command {
                             }).await {
                                 awaitAnswer(event, wrapper)
                             }
+                            /*event.channel.sendMessage(buildEmbed {
+                                if (content == "back" || content == "return" || content == "b") {
+                                    val q = if (wrapper.currentQuestion?.step != 0) wrapper.undoAnswer()!! else wrapper.currentQuestion!!
+                                    author { "Question #${q.step + 1}:" }
+                                    description { q.question.capitalize() }
+                                    footer { "Type in \"exit\" to kill the process" }
+                                    color { Immutable.SUCCESS }
+                                } else {
+                                    val q = wrapper.answerCurrentQuestion(answer)!!
+                                    author { "Question #${q.step + 1}:" }
+                                    description { q.question.capitalize() }
+                                    footer { "Type in \"exit\" to kill the process" }
+                                    color { Immutable.SUCCESS }
+                                }
+                            }).await {
+                                awaitAnswer(event, wrapper)
+                            }*/
                         } else {
                             val guess = wrapper.guesses.first { it.probability > 0.825 }
                             val embed = buildEmbed {

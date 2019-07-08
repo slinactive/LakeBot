@@ -45,9 +45,10 @@ class LyricsCommand : Command {
                     "client_secret" to Immutable.GENIUS_SECRET,
                     "grant_type" to "client_credentials"
             )
-            return "Bearer ${post(api, data = data).jsonObject.getString("access_token")}"
+            return "Bearer ${post(api, headers = emptyMap(), data = data).jsonObject.getString("access_token")}"
         }
     override val name = "lyrics"
+    override val aliases = listOf("genius")
     override val description = "The command that sends the lyrics of specified or current playing song"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <song name (optional if song is being played now by bot)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

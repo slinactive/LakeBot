@@ -85,7 +85,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         eventSet += waiting
         if (delay > 0) {
             CoroutineScope(this).launch {
-                delay(delay, unit)
+                delay(unit.toMillis(delay))
                 eventSet -= waiting
                 deferred.complete(null)
             }

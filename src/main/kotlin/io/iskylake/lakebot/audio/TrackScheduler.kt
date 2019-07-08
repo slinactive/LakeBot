@@ -41,7 +41,8 @@ class TrackScheduler(private val player: AudioPlayer) : AudioEventAdapter() {
                 player.startTrack(queue.poll(), false)
             }
             else -> if (queue.isNotEmpty()) {
-                player.startTrack(queue.poll(), false)
+                val trackToPlay = queue.poll()
+                player.startTrack(if (queue.count { it == trackToPlay } > 1) trackToPlay.makeClone() else trackToPlay, false)
             } else {
                 player.destroy()
             }

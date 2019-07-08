@@ -33,7 +33,7 @@ class PrefixCommand : Command {
             if (newPrefix.length > 5) {
                 event.sendError("You can't use that as command prefix!").queue()
             } else {
-                event.sendConfirmation("Are you sure want to change prefix for this server?").await {
+                event.sendConfirmation("Are you sure you want to change prefix for this server?").await {
                     val confirmation = it.awaitNullableConfirmation(event.author)
                     if (confirmation !== null) {
                         it.delete().queue()
@@ -41,7 +41,7 @@ class PrefixCommand : Command {
                             event.guild.setPrefix(newPrefix)
                             event.sendSuccess("Now prefix is $newPrefix").queue()
                         } else {
-                            event.sendSuccess("Successfully cancelled!").queue()
+                            event.sendSuccess("Successfully canceled!").queue()
                         }
                     } else {
                         event.sendError("Time is up!").queue()
