@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class AkinatorCommand : Command {
     val languages: Map<String, Server.Language> = mapOf(
@@ -75,7 +75,8 @@ class AkinatorCommand : Command {
     private suspend fun awaitAnswer(event: MessageReceivedEvent, wrapper: Akiwrapper) {
         val content = event.channel.awaitMessage(event.author)?.contentRaw?.toLowerCase()
         if (content !== null) {
-            if (content == "help" || content == "back" || content == "b" || content == "return" || content == "aliases" || content == "y" || content == "n" || content == "d" || content == "p" || content == "pn" || content == "nope" || content == "yes" || content == "yup" || content == "yep" || content == "yeah" || content == "no" || content == "no u" || content == "nah" || content == "dont know" || content == "dunno" || content == "idk" || content == "don't know" || content == "probably" || content == "probably not" || content == "exit") {
+            val possibleAnswers = setOf("help", "back", "b", "return", "alias", "aliases", "y", "n", "d", "p", "pn", "dk", "perhaps", "likely", "unlikely", "nope", "yes", "yup", "yep", "yeah", "yea", "no", "no u", "nah", "dont know", "dunno", "idk", "don't know", "probably", "probably not", "exit")
+            if (content in possibleAnswers) {
                 when (content) {
                     "exit" -> event.sendConfirmation("Are you sure you want to exit?").await {
                         val bool = it.awaitNullableConfirmation(event.author)
@@ -92,14 +93,14 @@ class AkinatorCommand : Command {
                             }
                         }
                     }
-                    "aliases" -> event.sendMessage(buildEmbed {
+                    "alias", "aliases" -> event.sendMessage(buildEmbed {
                         color { Immutable.SUCCESS }
                         author("Aliases For Answers:") { event.selfUser.effectiveAvatarUrl }
-                        field(title = "Yes:") { "\u2022 Yeah\n\u2022 Yep\n\u2022 Yup\n\u2022 Y" }
+                        field(title = "Yes:") { "\u2022 Yeah\n\u2022 Yep\n\u2022 Yup\n\u2022 Y\n\u2022 Yea" }
                         field(title = "No:") { "\u2022 Nah\n\u2022 No u\n\u2022 Nope\n\u2022 N" }
-                        field(title = "Don't Know:") { "\u2022 Don't Know\n\u2022 Idk\n\u2022 Dunno\n\u2022 D" }
-                        field(title = "Probably:") { "\u2022 P" }
-                        field(title = "Probably Not:") { "\u2022 PN" }
+                        field(title = "Don't Know:") { "\u2022 Don't Know\n\u2022 Idk\n\u2022 Dk\n\u2022 Dunno\n\u2022 D" }
+                        field(title = "Probably:") { "\u2022 P\n\u2022 Perhaps\n\u2022 Likely" }
+                        field(title = "Probably Not:") { "\u2022 PN\n\u2022 Unlikely" }
                         field(title = "Back:") { "\u2022 Return\n\u2022 B" }
                     }).await { awaitAnswer(event, wrapper) }
                     "help" -> {
@@ -109,11 +110,11 @@ class AkinatorCommand : Command {
                     else -> {
                         if (wrapper.currentQuestion !== null && wrapper.guesses.filter { it.probability > 0.825 }.isEmpty()) {
                             val answer = when (content) {
-                                "yes", "yeah", "yep", "yup", "y" -> Answer.YES
+                                "yes", "yeah", "yep", "yup", "y", "yea" -> Answer.YES
                                 "no", "nah", "no u", "n", "nope" -> Answer.NO
                                 "dont know", "idk", "dunno", "don't know", "d" -> Answer.DONT_KNOW
-                                "probably", "p" -> Answer.PROBABLY
-                                "probably not", "pn" -> Answer.PROBABLY_NOT
+                                "probably", "p", "perhaps", "likely" -> Answer.PROBABLY
+                                "probably not", "pn", "unlikely" -> Answer.PROBABLY_NOT
                                 else -> Answer.DONT_KNOW
                             }
                             if (content == "back" || content == "return" || content == "b") {

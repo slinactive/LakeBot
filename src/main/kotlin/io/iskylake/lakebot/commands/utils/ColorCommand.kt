@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import io.iskylake.lakebot.utils.ImageUtils
 
 import khttp.get
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 import java.awt.Color
 
@@ -45,7 +45,7 @@ class ColorCommand : Command {
         }
         if (args.isNotEmpty()) {
             if (args[0] matches "#?(([A-Fa-f\\d]){3}|([A-Fa-f\\d]){6})".toRegex()) {
-                val request = get("http://www.thecolorapi.com/id?hex=${args[0].removePrefix("#").toLowerCase()}")
+                val request = get("http://www.thecolorapi.com/id?hex=${args[0].removePrefix("#").toLowerCase()}", headers = mapOf())
                 val json = request.jsonObject
                 val name = json.getJSONObject("name").getString("value")
                 val closestHex = json.getJSONObject("name").getString("closest_named_hex").toLowerCase()
@@ -77,7 +77,7 @@ class ColorCommand : Command {
                             """.trimMargin()
                         }
                         field(title = "Closest Color:") {
-                            val r = get("http://www.thecolorapi.com/id?hex=${closestHex.removePrefix("#")}")
+                            val r = get("http://www.thecolorapi.com/id?hex=${closestHex.removePrefix("#")}", headers = mapOf())
                             val closestHsl = r.jsonObject.getJSONObject("hsl")
                             val c = Color.decode(closestHex)
                             """**HEX**: $closestHex

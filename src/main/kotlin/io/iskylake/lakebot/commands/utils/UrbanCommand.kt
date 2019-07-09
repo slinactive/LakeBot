@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import io.iskylake.lakebot.entities.extensions.*
 
 import khttp.get
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 import java.net.URLEncoder
 
@@ -37,7 +37,7 @@ class UrbanCommand : Command {
             try {
                 val base = "http://api.urbandictionary.com/v0"
                 val endpoint = "$base/define?term=${URLEncoder.encode(arguments, "UTF-8")}"
-                val response = get(endpoint)
+                val response = get(endpoint, headers = mapOf())
                 val json = response.jsonObject
                 if (json.getJSONArray("list").toList().isEmpty()) {
                     event.sendError("Couldn't find that on Urban!").queue()
@@ -84,10 +84,10 @@ class UrbanCommand : Command {
                         }
                         field(title = "Author:") { author }
                         field(true, "Likes:") {
-                            "${event.jda.getEmoteById(391954570735124480).asMention} \u2014 $like"
+                            "${event.jda.getEmoteById(391954570735124480)!!.asMention} \u2014 $like"
                         }
                         field(true, "Dislikes:") {
-                            "${event.jda.getEmoteById(391954570705895434).asMention} \u2014 $dislike"
+                            "${event.jda.getEmoteById(391954570705895434)!!.asMention} \u2014 $dislike"
                         }
                         footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                         timestamp()

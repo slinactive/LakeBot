@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
 import io.iskylake.weather.LakeWeatherInfo
 
-import net.dv8tion.jda.core.JDAInfo
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.JDAInfo
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class AboutCommand : Command {
     override val name = "about"
     override val aliases = listOf("info", "stats")
-    override val description = "The command that send complete information about the bot"
+    override val description = "The command that sends complete information about the bot"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
             color { Immutable.SUCCESS }
@@ -46,7 +46,7 @@ class AboutCommand : Command {
                     |$description
                     |
                     |**[Support Server](${Immutable.SUPPORT_INVITE})** • **[Invite Link](https://discordapp.com/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)** • **[GitHub Repository](${Immutable.GITHUB_REPOSITORY})**
-                    |**Creator/Developer**: ${event.jda.asBot().applicationInfo.complete().owner.tag}
+                    |**Creator/Developer**: ${event.jda.retrieveApplicationInfo().complete().owner.tag}
                     |**Commands**: ${CommandHandler.registeredCommands.size}
                     |**Bot Version**: ${Immutable.VERSION}
                     |**JDA Version**: ${JDAInfo.VERSION}
@@ -58,7 +58,7 @@ class AboutCommand : Command {
                     |**Users**: ${event.jda.userCache.size()}
                     |**Threads**: ${Thread.activeCount()}
                     |**Uptime**: ${event.jda.formattedUptime}
-                    |**Ping**: ${event.jda.ping} ms
+                    |**Ping**: ${event.jda.restPing.complete()} ms
                 """.trimMargin()
             }
         }

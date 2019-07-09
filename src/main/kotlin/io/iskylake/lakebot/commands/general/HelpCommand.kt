@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.entities.handlers.CommandHandler
 import io.iskylake.lakebot.utils.TimeUtils
 
-import net.dv8tion.jda.core.entities.MessageEmbed
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class HelpCommand : Command {
     override val name = "help"
@@ -59,7 +59,12 @@ class HelpCommand : Command {
                     field { field }
                 }
             }
-            event.message.addReaction(event.jda.getEmoteById(397757496447729664)).queue()
+            val emote = event.jda.getEmoteById(397757496447729664)
+            if (emote !== null) {
+                event.message.addReaction(emote).queue()
+            } else {
+                event.message.addReaction("\\u2705").queue()
+            }
             event.author.privateChannel.sendMessage(embed).queue(null) {
                 event.channel.sendMessage(embed).queue()
             }

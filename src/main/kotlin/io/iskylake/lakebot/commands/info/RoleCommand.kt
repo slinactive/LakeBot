@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.utils.ImageUtils
 
-import net.dv8tion.jda.core.entities.*
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
+import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
@@ -61,7 +61,7 @@ class RoleCommand : Command {
                 }
                 args[0] matches Regex.DISCORD_ID && event.guild.getRoleById(args[0]) !== null -> {
                     val role = event.guild.getRoleById(args[0])
-                    roleMenu(event, role)
+                    roleMenu(event, role!!)
                 }
                 else -> event.sendError("Couldn't find that role!").queue()
             }
@@ -73,7 +73,7 @@ class RoleCommand : Command {
         val role = lazy()
         color { role.color }
         if (role.color !== null) {
-            thumbnail { "attachment://${role.color.rgb.toHex().takeLast(6)}.png" }
+            thumbnail { "attachment://${role.color!!.rgb.toHex().takeLast(6)}.png" }
         }
         footer(author.effectiveAvatarUrl) { "Requested by ${author.tag}" }
         timestamp()
@@ -85,7 +85,7 @@ class RoleCommand : Command {
         field(true, "Hoisted:") { role.isHoisted.asString() }
         field(true, "Mentionable:") { role.isMentionable.asString() }
         field(true, "Color:") { role.color?.rgb?.toHex()?.takeLast(6)?.prepend("#") ?: "Default" }
-        field(true, "Creation Date:") { role.creationTime.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
+        field(true, "Creation Date:") { role.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
         if (role.keyPermissions.isNotEmpty()) {
             field(title = "Key Permissions:") { role.keyPermissions.mapNotNull { it.getName() }.joinToString() }
         }
@@ -115,12 +115,12 @@ class RoleCommand : Command {
                         it.delete().queue()
                         USERS_WITH_PROCESSES -= event.author
                         val embed = roleInfo(event.author) { role }
-                        val color = ImageUtils.getColorImage(role.color, 250, 250)
-                        event.channel.sendMessage(embed).addFile(color, "${role.color.rgb.toHex().takeLast(6)}.png").queue()
+                        val color = ImageUtils.getColorImage(role.color!!, 250, 250)
+                        event.channel.sendMessage(embed).addFile(color, "${role.color!!.rgb.toHex().takeLast(6)}.png").queue()
                     }
                     "\u0032\u20E3" -> {
                         it.delete().queue()
-                        ColorCommand()(event, arrayOf(role.color.rgb.toHex().takeLast(6)))
+                        ColorCommand()(event, arrayOf(role.color!!.rgb.toHex().takeLast(6)))
                         USERS_WITH_PROCESSES -= event.author
                     }
                     "\u274C" -> {

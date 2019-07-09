@@ -1,17 +1,17 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package io.iskylake.lakebot.commands.moderation
@@ -19,15 +19,15 @@ package io.iskylake.lakebot.commands.moderation
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 
-import net.dv8tion.jda.core.Permission
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class PrefixCommand : Command {
     override val name = "prefix"
     override val aliases = listOf("setprefix")
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <prefix>"
     override val description = "The command that changes command prefix for this server"
-    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (Permission.MANAGE_SERVER in event.member.permissions || event.author.isLBDeveloper) {
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (Permission.MANAGE_SERVER in event.member!!.permissions || event.author.isLBDeveloper) {
         if (args.isNotEmpty()) {
             val newPrefix = args[0].toLowerCase()
             if (newPrefix.length > 5) {

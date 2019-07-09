@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.utils.AudioUtils
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 
 import java.util.concurrent.TimeUnit
 
@@ -35,7 +35,7 @@ class LoopCommand : Command {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()
         } else {
-            if (event.member.isConnected) {
+            if (event.member!!.isConnected) {
                 val scheduler = AudioUtils[event.guild].trackScheduler
                 event.sendMessage(buildEmbed {
                     description {

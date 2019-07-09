@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,15 @@ import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class PingCommand : Command {
     override val name = "ping"
     override val aliases = listOf("delay", "response")
     override val description = "The command that sends the bot's current response time off from statistics"
-    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        val now = System.currentTimeMillis()
-        event.channel.sendMessage("Calculating...").queue {
-            buildEmbed {
-                field(true, "Rest Ping") { "${System.currentTimeMillis() - now} ms" }
-                field(true, "WebSocket Ping") { "${event.jda.ping} ms" }
-                color { Immutable.SUCCESS }
-            }.run {
-                it.editMessage(this).override(true).queue()
-            }
-        }
-    }
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = event.channel.sendMessage(buildEmbed {
+        field(true, "Rest Ping") { "${event.jda.restPing.complete()} ms" }
+        field(true, "WebSocket Ping") { "${event.jda.gatewayPing} ms" }
+        color { Immutable.SUCCESS }
+    }).queue()
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 
-import net.dv8tion.jda.core.OnlineStatus
-import net.dv8tion.jda.core.entities.*
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
+import net.dv8tion.jda.api.OnlineStatus
+import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
@@ -50,7 +50,7 @@ class ServerCommand : Command {
         field(true, "Name:") { guild.name.escapeDiscordMarkdown() }
         field(true, "ID:") { guild.id }
         field(true, "Creation Date:") {
-            guild.creationTime.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "")
+            guild.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "")
         }
         field(true, "Online Members:") {
             "${guild.memberCache.count { it.onlineStatus == OnlineStatus.ONLINE }}/${guild.memberCache.size()}"
@@ -61,7 +61,7 @@ class ServerCommand : Command {
         field(true, "Bots:") {
             "${guild.memberCache.count { it.user.isBot }}/${guild.memberCache.size()}"
         }
-        field(true, "Owner:") { guild.owner.user.tag.escapeDiscordMarkdown() }
+        field(true, "Owner:") { guild.owner!!.user.tag.escapeDiscordMarkdown() }
         field(true, "Region:") { guild.region.getName() }
         field(true, "Emotes:") { guild.emoteCache.size().toString() }
         field(true, "Categories:") { guild.categoryCache.size().toString() }
@@ -80,7 +80,7 @@ class ServerCommand : Command {
         }
         field(guild.emoteCache.size() > 2, if (guild.emoteCache.isEmpty) "Emotes:" else "Emotes (${guild.emoteCache.size()}):") {
             when {
-                guild.emoteCache.isEmpty -> "No roles"
+                guild.emoteCache.isEmpty -> "No emotes"
                 guild.emoteCache.mapNotNull { it.asMention }.joinToString().length > 1024 -> "Too many emotes to display"
                 else -> guild.emoteCache.mapNotNull { it.asMention }.joinToString()
             }

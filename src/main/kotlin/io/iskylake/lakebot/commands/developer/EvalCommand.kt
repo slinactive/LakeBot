@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.weather.LakeWeather
 import io.iskylake.weather.entities.Forecast
 
-import net.dv8tion.jda.core.EmbedBuilder
-import net.dv8tion.jda.core.MessageBuilder
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.MessageEmbed
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.requests.RestAction
+import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.MessageBuilder
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.requests.RestAction
 
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngine
@@ -53,25 +53,23 @@ class EvalCommand : Command {
                 "java.util.regex",
                 "java.net",
                 "javax.script",
-                "net.dv8tion.jda.core",
-                "net.dv8tion.jda.core.audit",
-                "net.dv8tion.jda.core.entities",
-                "net.dv8tion.jda.core.managers",
-                "net.dv8tion.jda.core.utils",
-                "net.dv8tion.jda.core.utils.cache",
-                "net.dv8tion.jda.core.requests",
-                "net.dv8tion.jda.core.requests.restaction",
-                "net.dv8tion.jda.core.requests.restaction.order",
-                "net.dv8tion.jda.core.requests.restaction.pagination",
-                "net.dv8tion.jda.core.exceptions",
-                "net.dv8tion.jda.core.hooks",
-                "net.dv8tion.jda.core.events",
-                "net.dv8tion.jda.core.events.message",
-                "net.dv8tion.jda.core.events.message.react",
-                "net.dv8tion.jda.bot",
-                "net.dv8tion.jda.bot.entities",
-                "net.dv8tion.jda.bot.utils.cache",
-                "net.dv8tion.jda.webhook",
+                "net.dv8tion.jda.api",
+                "net.dv8tion.jda.api.audit",
+                "net.dv8tion.jda.api.entities",
+                "net.dv8tion.jda.api.managers",
+                "net.dv8tion.jda.api.utils",
+                "net.dv8tion.jda.api.utils.cache",
+                "net.dv8tion.jda.api.requests",
+                "net.dv8tion.jda.api.requests.restaction",
+                "net.dv8tion.jda.api.requests.restaction.order",
+                "net.dv8tion.jda.api.requests.restaction.pagination",
+                "net.dv8tion.jda.api.exceptions",
+                "net.dv8tion.jda.api.hooks",
+                "net.dv8tion.jda.api.events",
+                "net.dv8tion.jda.api.events.message",
+                "net.dv8tion.jda.api.events.message.react",
+                "net.dv8tion.jda.api.entities",
+                "net.dv8tion.jda.api.utils.cache",
                 "io.iskylake.lakebot",
                 "io.iskylake.lakebot.audio",
                 "io.iskylake.lakebot.commands",

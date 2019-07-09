@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import io.iskylake.lakebot.entities.extensions.sendError
 import io.iskylake.lakebot.entities.extensions.sendSuccess
 import io.iskylake.lakebot.utils.AudioUtils
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class RestartCommand : Command {
     override val name = "restart"
@@ -32,7 +32,7 @@ class RestartCommand : Command {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()
         } else {
-            if (event.member.isConnected) {
+            if (event.member!!.isConnected) {
                 AudioUtils[event.guild].audioPlayer.playingTrack.position = 0
                 event.sendSuccess("Track has been restarted!").queue()
             } else {

@@ -1,17 +1,17 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package io.iskylake.lakebot.commands.info
@@ -22,13 +22,13 @@ import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.EventWaiter
 import io.iskylake.lakebot.entities.extensions.*
 
-import net.dv8tion.jda.core.Permission
-import net.dv8tion.jda.core.entities.Game
-import net.dv8tion.jda.core.entities.Member
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.User
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
@@ -63,12 +63,12 @@ class UserCommand : Command {
                 }
                 args[0] matches Regex.DISCORD_ID && event.guild.getMemberById(args[0]) !== null -> {
                     val member = event.guild.getMemberById(args[0])
-                    userMenu(event, member)
+                    userMenu(event, member!!)
                 }
                 else -> event.sendError("Couldn't find that user!").queue()
             }
         } else {
-            userMenu(event, event.member)
+            userMenu(event, event.member!!)
         }
     }
     inline fun userInfo(author: User, lazy: () -> Member) = buildEmbed {
@@ -82,14 +82,14 @@ class UserCommand : Command {
         footer(author.effectiveAvatarUrl) { "Requested by ${author.tag}" }
         timestamp()
         field(true, "Online Status:") { member.onlineStatus.name.replace("_", " ").capitalizeAll(true) }
-        field(true, if (member.game !== null) when (member.game) {
-            Game.GameType.LISTENING -> "Listening To:"
-            Game.GameType.STREAMING -> "Streaming:"
-            Game.GameType.WATCHING -> "Watching:"
+        field(true, if (member.activities.isNotEmpty()) when (member.activities.first().type) {
+            Activity.ActivityType.LISTENING -> "Listening To:"
+            Activity.ActivityType.STREAMING -> "Streaming:"
+            Activity.ActivityType.WATCHING -> "Watching:"
             else -> "Playing:"
-        } else "Game Status:") { member.game?.name ?: "None" }
-        field(true, "Creation Date:") { user.creationTime.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
-        field(true, "Join Date:") { member.joinDate.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
+        } else "Game Status:") { member.activities.firstOrNull()?.name ?: "None" }
+        field(true, "Creation Date:") { user.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
+        field(true, "Join Date:") { member.timeJoined.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
         field(true, "ID:") { user.id }
         field(true, "Color:") { member.color?.rgb?.toHex()?.takeLast(6)?.prepend("#") ?: "Default" }
         field(true, "Username:") { user.name.escapeDiscordMarkdown() }

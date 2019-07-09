@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.awt.Color
 
 object Immutable {
     const val DEFAULT_PREFIX = "lb!"
-    const val VERSION = "1.0-ALPHA3"
+    const val VERSION = "1.0-BETA3"
     const val PERMISSIONS = 2146958591L
     const val GITHUB_REPOSITORY = "https://github.com/ISkylakeS/LakeBot"
     const val SUPPORT_INVITE = "https://discord.gg/QsTevwF"

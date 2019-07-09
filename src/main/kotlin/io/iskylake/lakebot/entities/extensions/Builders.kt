@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package io.iskylake.lakebot.entities.extensions
 
-import net.dv8tion.jda.core.*
-import net.dv8tion.jda.core.entities.Game
-import net.dv8tion.jda.core.entities.IMentionable
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.MessageEmbed
-import net.dv8tion.jda.core.hooks.EventListener
+import net.dv8tion.jda.api.*
+import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.entities.IMentionable
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.hooks.EventListener
 
 import java.awt.Color
 import java.time.OffsetDateTime
@@ -33,10 +33,10 @@ inline fun buildEmbed(lazyBuilder: EmbedBuilder.() -> Unit): MessageEmbed = Embe
 inline fun buildMessage(lazyBuilder: MessageBuilder.() -> Unit): Message = MessageBuilder().apply(lazyBuilder).build()
 // JDABuilder Extensions
 operator fun JDABuilder.invoke() = build()
-inline infix fun <T: EventListener> JDABuilder.eventListener(lazy: () -> T) = addEventListener(lazy())
+inline infix fun <T: EventListener> JDABuilder.eventListener(lazy: () -> T) = addEventListeners(lazy())
 inline infix fun JDABuilder.token(lazy: () -> String) = setToken(lazy())
 inline infix fun JDABuilder.onlineStatus(lazy: () -> OnlineStatus) = setStatus(lazy())
-inline infix fun JDABuilder.game(lazy: () -> Game) = setGame(lazy())
+inline infix fun JDABuilder.game(lazy: () -> Activity) = setActivity(lazy())
 // MessageBuilder Extensions
 inline infix fun MessageBuilder.embed(crossinline lazy: EmbedBuilder.() -> Unit) = setEmbed(EmbedBuilder().apply(lazy).build())
 inline infix fun MessageBuilder.content(crossinline lazy: () -> String) = setContent(lazy())

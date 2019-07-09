@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import io.iskylake.lakebot.USERS_WITH_PROCESSES
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 
-import net.dv8tion.jda.core.Permission
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.Role
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.Role
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class MuteRoleCommand : Command {
     override val name = "muterole"
@@ -34,7 +34,7 @@ class MuteRoleCommand : Command {
         |${super.usage(prefix)} <role> ${'\u2014'} sets mute role""".trimMargin()
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         when (Permission.MANAGE_SERVER) {
-            !in event.member.permissions -> event.sendError("You don't have required permissions!").queue()
+            !in event.member!!.permissions -> event.sendError("You don't have required permissions!").queue()
             !in event.guild.selfMember.permissions -> event.sendError("LakeBot doesn't have required permissions!").queue()
             else -> {
                 val arguments = event.argsRaw
@@ -80,7 +80,7 @@ class MuteRoleCommand : Command {
                             }
                         }
                         args[0] matches Regex.DISCORD_ID && event.guild.getRoleById(args[0]) !== null -> {
-                            val role = event.guild.getRoleById(args[0])
+                            val role = event.guild.getRoleById(args[0])!!
                             event.guild.setMuteRole(role)
                             event.sendSuccess("The mute role has been set!").queue()
                             for (channel in event.guild.textChannelCache) {

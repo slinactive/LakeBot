@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package io.iskylake.lakebot.utils
 import khttp.get
 
 import org.json.JSONArray
+
 import java.net.URLEncoder
 
 object TranslateUtils {
@@ -132,7 +133,7 @@ object TranslateUtils {
     fun rawRequest(code: String, text: String): JSONArray {
         val url = "https://translate.googleapis.com/translate_a/single"
         val params = "client=gtx&sl=auto&t=$code&hl=$code&dt=t&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&ie=UTF-8&oe=UTF-8&otf=1&ssel=0&tsel=0&kc=7&q=${URLEncoder.encode(text, "UTF-8")}"
-        val response = get("$url?$params")
+        val response = get("$url?$params", headers = mapOf())
         return response.jsonArray
     }
     fun translate(to: String, text: String): String? = try {

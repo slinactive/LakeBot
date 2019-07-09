@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ import io.iskylake.lakebot.utils.ConfigUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
-import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.OnlineStatus
-import net.dv8tion.jda.core.entities.Game.streaming
-import net.dv8tion.jda.core.entities.Game.watching
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.OnlineStatus
+import net.dv8tion.jda.api.entities.Activity.streaming
+import net.dv8tion.jda.api.entities.Activity.watching
+import net.dv8tion.jda.api.entities.User
 
 import org.reflections.Reflections
 
@@ -65,8 +65,8 @@ fun main() = try {
         Immutable.LOGGER.info("CommandHandler successfully loaded all ${CommandHandler.registeredCommands.size} commands!")
         System.setProperty("lakebot.version", Immutable.VERSION)
         System.setProperty("kotlin.version", KotlinVersion.CURRENT.toString())
-        DISCORD.presence.game = streaming("${Immutable.VERSION} | ${Immutable.DEFAULT_PREFIX}help", "https://twitch.tv/raidlier")
-        DISCORD.presence.status = OnlineStatus.ONLINE
+        DISCORD.presence.activity = streaming("${Immutable.VERSION} | ${Immutable.DEFAULT_PREFIX}help", "https://twitch.tv/raidlier")
+        DISCORD.presence.setStatus(OnlineStatus.ONLINE)
         Immutable.LOGGER.info("LakeBot is successfully loaded!")
     }
 } catch (e: Exception) {

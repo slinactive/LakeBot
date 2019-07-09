@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,14 @@ import kotlin.reflect.full.allSuperclasses
 
 import kotlinx.coroutines.*
 
-import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.hooks.EventListener
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.MessageChannel
-import net.dv8tion.jda.core.entities.User
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
+import net.dv8tion.jda.api.events.Event
+import net.dv8tion.jda.api.hooks.EventListener
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.MessageChannel
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.events.GenericEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 
 /**
  * <b>EventWaiter</b> is designed to await for JDA events after launch, handling them and returning their instances.
@@ -48,25 +49,25 @@ import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
  *  <a href="https://github.com/LaxusBot/Laxus/blob/master/commons/jda/src/main/kotlin/xyz/laxus/jda/listeners/EventWaiter.kt">GitHub Link</a>
  * </p>
  */
-@Author("ISkylake", "TheMonitorLizard (LaxusBot implementation)")
+@Author("ILakeful", "TheMonitorLizard (LaxusBot implementation)")
 object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContext(3, "EventWaiter"), AutoCloseable by newFixedThreadPoolContext(3, "EventWaiter") {
     val tasks by lazy {
         ConcurrentHashMap<KClass<*>, MutableSet<AwaitableTask<*>>>()
     }
-    inline fun <reified E: Event> receiveTask() = tasks[E::class]
-    inline fun <reified E: Event> receiveEvent(
+    inline fun <reified E: GenericEvent> receiveTask() = tasks[E::class]
+    inline fun <reified E: GenericEvent> receiveEvent(
         delay: Long = -1,
         unit: TimeUnit = TimeUnit.SECONDS,
         noinline condition: suspend (E) -> Boolean
     ): Deferred<E?> = receiveEvent(E::class, condition, delay, unit)
-    @Author("ISkylake")
-    suspend inline fun <reified E: Event> receiveEventRaw(
+    @Author("ILakeful")
+    suspend inline fun <reified E: GenericEvent> receiveEventRaw(
             delay: Long = -1,
             unit: TimeUnit = TimeUnit.SECONDS,
             noinline check: suspend (E) -> Boolean
     ): E? = receiveEventRaw(E::class, check, delay, unit)
     /**
-     * Waits a predetermined amount of time for an {@link net.dv8tion.jda.core.events.Event event},
+     * Waits a predetermined amount of time for an {@link net.dv8tion.jda.api.events.Event event},
      * receives and returns it
      *
      * @param <T> the type of awaiting event
@@ -77,8 +78,8 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
      *
      * @return deferred value (non-blocking cancellable future) of possibly-null event instance
      */
-    @Author("ISkylake", "TheMonitorLizard (LaxusBot implementation)")
-    fun <E: Event> receiveEvent(type: KClass<E>, check: suspend (E) -> Boolean, delay: Long = -1, unit: TimeUnit = TimeUnit.SECONDS): Deferred<E?> {
+    @Author("ILakeful", "TheMonitorLizard (LaxusBot implementation)")
+    fun <E: GenericEvent> receiveEvent(type: KClass<E>, check: suspend (E) -> Boolean, delay: Long = -1, unit: TimeUnit = TimeUnit.SECONDS): Deferred<E?> {
         val deferred = CompletableDeferred<E?>()
         val eventSet = taskSetType(type)
         val waiting = AwaitableTask(check, deferred)
@@ -92,15 +93,15 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         }
         return deferred
     }
-    @Author("ISkylake")
-    suspend fun <E: Event> receiveEventRaw(
+    @Author("ILakeful")
+    suspend fun <E: GenericEvent> receiveEventRaw(
             type: KClass<E>,
             check: suspend (E) -> Boolean,
             delay: Long = -1,
             unit: TimeUnit = TimeUnit.SECONDS
     ): E? = receiveEvent(type, check, delay, unit).await()
     /**
-     * Waits for a reaction for {@link net.dv8tion.jda.core.entities.Message message}
+     * Waits for a reaction for {@link net.dv8tion.jda.api.entities.Message message}
      *
      * @param msg the message from which the reaction is received
      * @param author the user from whom the reaction must be received
@@ -109,7 +110,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
      *
      * @return boolean value (true, if user reacted with "\u2705", or false, if user reacted with "\u274E" or reaction wasn't received)
      */
-    @Author("ISkylake")
+    @Author("ILakeful")
     suspend fun awaitConfirmation(msg: Message, author: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES): Boolean {
         msg.addReaction("\u2705").complete()
         msg.addReaction("\u274E").complete()
@@ -118,7 +119,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
             it.user == author && it.messageIdLong == msg.idLong && (emote == "\u2705" || emote == "\u274E")
         }?.reactionEmote?.name == "\u2705"
     }
-    @Author("ISkylake")
+    @Author("ILakeful")
     fun awaitConfirmationAsync(
             msg: Message,
             author: User,
@@ -131,7 +132,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         bool
     }
     /**
-     * Waits for a reaction for {@link net.dv8tion.jda.core.entities.Message message}
+     * Waits for a reaction for {@link net.dv8tion.jda.api.entities.Message message}
      *
      * @param msg the message from which the reaction is received
      * @param author the user from whom the reaction must be received
@@ -140,7 +141,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
      *
      * @return possibly-null boolean value (true, if user reacted with "\u2705", or false, if user reacted with "\u274E")
      */
-    @Author("ISkylake")
+    @Author("ILakeful")
     suspend fun awaitNullableConfirmation(msg: Message, author: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES): Boolean? {
         msg.addReaction("\u2705").complete()
         msg.addReaction("\u274E").complete()
@@ -150,7 +151,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         }?.reactionEmote?.name
         return if (name != null) name == "\u2705" else null
     }
-    @Author("ISkylake")
+    @Author("ILakeful")
     fun awaitNullableConfirmationAsync(
             msg: Message,
             author: User,
@@ -163,7 +164,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         bool
     }
     /**
-     * Waits for an {@link net.dv8tion.jda.core.entities.Message message},
+     * Waits for an {@link net.dv8tion.jda.api.entities.Message message},
      * receives and returns it
      *
      * @param user current user the user from whom the message is received
@@ -171,13 +172,13 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
      *
      * @return possibly-null received message
      */
-    @Author("ISkylake")
+    @Author("ILakeful")
     suspend fun awaitMessage(user: User, channel: MessageChannel, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES): Message? {
         return this.receiveEventRaw<MessageReceivedEvent>(delay, unit) {
             it.author == user && it.channel == channel
         }?.message
     }
-    @Author("ISkylake")
+    @Author("ILakeful")
     fun awaitMessageAsync(
             user: User,
             channel: MessageChannel,
@@ -189,19 +190,19 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
         action(msg)
         msg
     }
-    override fun onEvent(event: Event) {
+    override fun onEvent(event: GenericEvent) {
         CoroutineScope(this).launch {
             val type = event::class
             dispatchEventType(event, type)
             type.allSuperclasses.forEach { dispatchEventType(event, it) }
         }
     }
-    private fun <E: Event> taskSetType(type: KClass<E>): MutableSet<AwaitableTask<E>> {
+    private fun <E: GenericEvent> taskSetType(type: KClass<E>): MutableSet<AwaitableTask<E>> {
         return tasks.computeIfAbsent(type) {
             ConcurrentHashMap.newKeySet()
         } as MutableSet<AwaitableTask<E>>
     }
-    private suspend fun <E: Event> dispatchEventType(event: E, type: KClass<*>) {
+    private suspend fun <E: GenericEvent> dispatchEventType(event: E, type: KClass<*>) {
         val set = tasks[type] ?: return
         val filtered = set.filterTo(hashSetOf()) {
             val waiting = (it as AwaitableTask<E>)
@@ -212,7 +213,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
             tasks -= type
         }
     }
-    class AwaitableTask<in E: Event>(
+    class AwaitableTask<in E: GenericEvent>(
             private val condition: suspend (E) -> Boolean,
             private val completion: CompletableDeferred<in E?>
     ) {

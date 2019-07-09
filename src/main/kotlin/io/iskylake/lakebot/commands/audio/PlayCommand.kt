@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import io.iskylake.lakebot.entities.extensions.isConnected
 import io.iskylake.lakebot.entities.extensions.sendError
 import io.iskylake.lakebot.utils.AudioUtils
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 open class PlayCommand : Command {
     override val name = "play"
@@ -31,11 +31,11 @@ open class PlayCommand : Command {
     override val usage: (String) -> String = { "${super.usage(it)} <query/link>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
-            if (!event.member.isConnected) {
+            if (!event.member!!.isConnected) {
                 event.sendError("You're not in the voice channel!").queue()
             } else {
                 if (!event.guild.selfMember.isConnected) {
-                    event.guild.audioManager.openAudioConnection(event.member.connectedChannel)
+                    event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel)
                 }
                 AudioUtils.loadAndPlay(event.guild, event.textChannel, event.argsRaw!!)
             }

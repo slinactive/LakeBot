@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package io.iskylake.lakebot.entities.extensions
 import io.iskylake.lakebot.Immutable
 import io.iskylake.lakebot.utils.ConfigUtils
 
-import net.dv8tion.jda.core.entities.PrivateChannel
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.api.entities.PrivateChannel
+import net.dv8tion.jda.api.entities.User
 
 import org.bson.Document
 

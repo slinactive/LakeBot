@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import io.iskylake.lakebot.utils.AudioUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-import net.dv8tion.jda.core.events.ReadyEvent
-import net.dv8tion.jda.core.events.channel.text.TextChannelCreateEvent
-import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent
-import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
-import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
-import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMoveEvent
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.events.role.RoleDeleteEvent
-import net.dv8tion.jda.core.exceptions.InsufficientPermissionException
-import net.dv8tion.jda.core.hooks.ListenerAdapter
+import net.dv8tion.jda.api.events.ReadyEvent
+import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.role.RoleDeleteEvent
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException
+import net.dv8tion.jda.api.hooks.ListenerAdapter
 
 import org.bson.Document
 
@@ -47,7 +47,7 @@ object EventHandler : ListenerAdapter() {
         CommandHandler(event)
     } catch (ignored: InsufficientPermissionException) {
     } catch (t: Throwable) {
-        event.jda.asBot().applicationInfo.queue {
+        event.jda.retrieveApplicationInfo().queue {
             it.owner.privateChannel.sendMessage(buildEmbed {
                 color { Immutable.FAILURE }
                 author(t::class.simpleName ?: t.javaClass.simpleName ?: "Unknown Exception") { event.selfUser.effectiveAvatarUrl }
@@ -59,9 +59,9 @@ object EventHandler : ListenerAdapter() {
                     }
                 }
                 field(true, "Arguments:") { event.argsRaw ?: "None" }
-                field(true, "Guild:") { event.guild?.name ?: "Unknown" }
+                field(true, "Guild:") { event.guild.name }
                 field(true, "Author:") { event.author.tag }
-                field(true, "Guild ID:") { event.guild?.id ?: "Unknown" }
+                field(true, "Guild ID:") { event.guild.id }
                 field(true, "Author ID:") { event.author.id }
                 field(title = "Message:") { t.message?.safeSubstring(0, 1024) ?: "None" }
                 timestamp()
@@ -78,7 +78,7 @@ object EventHandler : ListenerAdapter() {
     }
     override fun onReady(event: ReadyEvent) {
         for (guild in event.jda.guildCache.filter { it.muteRole !== null }) {
-            val role = guild.getRoleById(guild.muteRole)
+            val role = guild.getRoleById(guild.muteRole!!)!!
             val members = role.members
             for (member in members) {
                 try {
@@ -88,11 +88,11 @@ object EventHandler : ListenerAdapter() {
                         val ago = muteObject.getLong("time")
                         val muteTime = muteObject.getLong("long")
                         if (System.currentTimeMillis() >= ago + muteTime) {
-                            guild.controller.removeSingleRoleFromMember(member, role).queue()
+                            guild.removeRoleFromMember(member, role).queue()
                         } else {
                             val timer = Timer()
                             timer.schedule(ago + muteTime - System.currentTimeMillis()) {
-                                guild.controller.removeSingleRoleFromMember(member, role).queue()
+                                guild.removeRoleFromMember(member, role).queue()
                             }
                         }
                     }
@@ -105,20 +105,20 @@ object EventHandler : ListenerAdapter() {
     }
     override fun onGuildMemberJoin(event: GuildMemberJoinEvent) {
         if (event.guild.muteRole !== null) {
-            val role = event.guild.getRoleById(event.guild.muteRole)
+            val role = event.guild.getRoleById(event.guild.muteRole!!)!!
             val mute = event.guild.getMute(event.user)
             if (mute !== null) {
                 try {
-                    event.guild.controller.addSingleRoleToMember(event.member, role).queue()
+                    event.guild.addRoleToMember(event.member, role).queue()
                     val muteObject = mute["mute", Document::class.java]
                     val ago = muteObject.getLong("time")
                     val muteTime = muteObject.getLong("long")
                     if (System.currentTimeMillis() >= ago + muteTime) {
-                        event.guild.controller.removeSingleRoleFromMember(event.member, role).queue()
+                        event.guild.removeRoleFromMember(event.member, role).queue()
                     } else {
                         val timer = Timer()
                         timer.schedule(ago + muteTime - System.currentTimeMillis()) {
-                            event.guild.controller.removeSingleRoleFromMember(event.member, role).queue()
+                            event.guild.removeRoleFromMember(event.member, role).queue()
                         }
                     }
                 } catch (ignored: Exception) {
@@ -173,8 +173,8 @@ object EventHandler : ListenerAdapter() {
     override fun onTextChannelCreate(event: TextChannelCreateEvent) {
         if (event.guild.isMuteRoleEnabled) {
             try {
-                val id = event.guild.muteRole
-                val role = event.guild.getRoleById(id)
+                val id = event.guild.muteRole!!
+                val role = event.guild.getRoleById(id)!!
                 val override = event.channel.putPermissionOverride(role)
                 override.deny = 34880
                 override.queue()

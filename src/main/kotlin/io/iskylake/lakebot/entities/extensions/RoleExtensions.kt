@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package io.iskylake.lakebot.entities.extensions
 
-import net.dv8tion.jda.core.entities.Member
-import net.dv8tion.jda.core.entities.Role
+import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.Role
 
 val Role.members: List<Member>
     get() = guild.getMembersWithRoles(this)

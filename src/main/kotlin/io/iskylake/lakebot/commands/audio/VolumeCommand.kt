@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.utils.AudioUtils
 import io.iskylake.lakebot.utils.MusicUtils
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class VolumeCommand : Command {
     override val name = "volume"
@@ -31,7 +31,7 @@ class VolumeCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
         event.sendError("There is no track that is being played now!").queue()
     } else {
-        if (event.member.isConnected) {
+        if (event.member!!.isConnected) {
             if (args.isNotEmpty()) {
                 if (args[0].isInt && args[0].toInt() in 0..100) {
                     val volume = args[0].toInt()

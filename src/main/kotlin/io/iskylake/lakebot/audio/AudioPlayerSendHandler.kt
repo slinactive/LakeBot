@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,34 @@ package io.iskylake.lakebot.audio
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame
 
-import net.dv8tion.jda.core.audio.AudioSendHandler
+import net.dv8tion.jda.api.audio.AudioSendHandler
+
+import java.nio.ByteBuffer
 
 class AudioPlayerSendHandler(private val audioPlayer: AudioPlayer) : AudioSendHandler {
-    private var lastFrame: AudioFrame? = null
+    /*private var lastFrame: AudioFrame? = null
     override fun canProvide(): Boolean {
         if (lastFrame === null) {
             lastFrame = audioPlayer.provide()
         }
         return lastFrame !== null
     }
-    override fun provide20MsAudio(): ByteArray {
+    override fun provide20MsAudio(): ByteBuffer {
         if (lastFrame === null) {
             lastFrame = audioPlayer.provide()
         }
         val data = lastFrame!!.data
         lastFrame = null
-        return data
+        return ByteBuffer.wrap(data)
+    }
+    override fun isOpus() = true*/
+    private var lastFrame: AudioFrame? = null
+    override fun canProvide(): Boolean {
+        lastFrame = audioPlayer.provide()
+        return lastFrame != null
+    }
+    override fun provide20MsAudio(): ByteBuffer {
+        return ByteBuffer.wrap(lastFrame!!.data)
     }
     override fun isOpus() = true
 }

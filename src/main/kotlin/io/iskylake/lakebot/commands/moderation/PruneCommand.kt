@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package io.iskylake.lakebot.commands.moderation
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 
-import net.dv8tion.jda.core.Permission
-import net.dv8tion.jda.core.entities.User
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 import java.util.concurrent.TimeUnit
 
@@ -43,7 +43,7 @@ class PruneCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         when {
             !event.guild.selfMember.hasPermission(Permission.MESSAGE_MANAGE) -> event.sendError("I don't have permissions for that!").queue()
-            !event.member.hasPermission(Permission.MESSAGE_MANAGE) -> event.sendError("You don't have permissions for that!").queue()
+            !event.member!!.hasPermission(Permission.MESSAGE_MANAGE) -> event.sendError("You don't have permissions for that!").queue()
             else -> {
                 if (args.isNotEmpty()) {
                     if (args[0].isInt) {

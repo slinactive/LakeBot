@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.lakebot.utils.AudioUtils
 import io.iskylake.lakebot.utils.TimeUtils
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class JumpForwardCommand : Command {
     override val name = "jumpforward"
@@ -37,7 +37,7 @@ class JumpForwardCommand : Command {
     }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
-            if (!event.member.isConnected) {
+            if (!event.member!!.isConnected) {
                 event.sendError("You're not in the voice channel!").queue()
             } else {
                 if (AudioUtils[event.guild].audioPlayer.playingTrack !== null) {

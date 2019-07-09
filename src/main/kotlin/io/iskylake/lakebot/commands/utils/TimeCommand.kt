@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 import io.iskylake.weather.lakeWeather
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 import khttp.get
 
@@ -39,7 +39,7 @@ class TimeCommand : Command {
                 if (forecast !== null) {
                     val (longitude, latitude) = forecast.coordinates
                     val url = "http://api.geonames.org/timezoneJSON?lat=$latitude&lng=$longitude&username=${Immutable.GEONAME_API_USER}"
-                    val response = get(url).jsonObject
+                    val response = get(url, headers = mapOf()).jsonObject
                     val time = response.getString("time").takeLast(5)
                     val name = "${forecast.city.name}, ${forecast.system.countryCode}"
                     event.sendMessage(buildEmbed {

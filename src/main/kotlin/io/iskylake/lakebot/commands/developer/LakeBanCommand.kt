@@ -1,17 +1,17 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package io.iskylake.lakebot.commands.developer
@@ -19,7 +19,7 @@ package io.iskylake.lakebot.commands.developer
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class LakeBanCommand : Command {
     override val name = "lakeban"
@@ -50,8 +50,8 @@ class LakeBanCommand : Command {
                     }
                 }
             }
-            event.guild.searchMembers(args[1]).isNotEmpty() -> {
-                val user = event.guild.searchMembers(args[1])[0].user
+            event.guild.searchMembers(args[0]).isNotEmpty() -> {
+                val user = event.guild.searchMembers(args[0])[0].user
                 event.sendConfirmation("Are you sure you want to ban this user?").await {
                     val boolean = it.awaitNullableConfirmation(event.author)
                     if (boolean !== null) {

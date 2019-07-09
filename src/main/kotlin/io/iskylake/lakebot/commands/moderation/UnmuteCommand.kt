@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 (c) Alexander "ISkylake" Shevchenko
+ * Copyright 2017-2019 (c) Alexander "ILakeful" Shevchenko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import io.iskylake.lakebot.USERS_WITH_PROCESSES
 import io.iskylake.lakebot.commands.Command
 import io.iskylake.lakebot.entities.extensions.*
 
-import net.dv8tion.jda.core.Permission.*
-import net.dv8tion.jda.core.entities.Member
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.Permission.*
+import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class UnmuteCommand : Command {
     override val name = "unmute"
@@ -34,7 +34,7 @@ class UnmuteCommand : Command {
         val arguments = event.argsRaw
         if (arguments !== null) {
             when {
-                MANAGE_ROLES !in event.member.permissions -> event.sendError("You don't have required permissions!").queue()
+                MANAGE_ROLES !in event.member!!.permissions -> event.sendError("You don't have required permissions!").queue()
                 MANAGE_ROLES !in event.guild.selfMember.permissions -> event.sendError("LakeBot doesn't have required permissions!").queue()
                 !event.guild.isMuteRoleEnabled -> event.sendError("The mute role isn't enabled!").queue()
                 else -> {
@@ -66,7 +66,7 @@ class UnmuteCommand : Command {
                             }
                         }
                         args[0] matches Regex.DISCORD_ID && event.guild.getMemberById(args[0]) !== null -> {
-                            val member = event.guild.getMemberById(args[0])
+                            val member = event.guild.getMemberById(args[0])!!
                             unmuteUser(event) { member }
                         }
                         else -> event.sendError("Couldn't find that user!").queue()
@@ -80,8 +80,8 @@ class UnmuteCommand : Command {
     suspend fun unmuteUser(event: MessageReceivedEvent, lazyMember: () -> Member) {
         val member = lazyMember()
         val user = member.user
-        if (event.member.canInteract(member) && event.guild.selfMember.canInteract(member)) {
-            val role = event.guild.getRoleById(event.guild.muteRole)
+        if (event.member!!.canInteract(member) && event.guild.selfMember.canInteract(member)) {
+            val role = event.guild.getRoleById(event.guild.muteRole!!)!!
             if (role !in member.roles || event.guild.getMute(user) === null) {
                 event.guild.clearMute(user)
                 event.sendError("That user is already unmuted!").queue()
@@ -93,7 +93,7 @@ class UnmuteCommand : Command {
                         if (confirmation) {
                             event.guild.clearMute(user)
                             event.sendSuccess("${user.tag} was successfully unmuted!").queue()
-                            event.guild.controller.removeSingleRoleFromMember(member, role).queue()
+                            event.guild.removeRoleFromMember(member, role).queue()
                         } else {
                             event.sendSuccess("Process was canceled!").queue()
                         }
