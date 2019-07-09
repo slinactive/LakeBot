@@ -1,11 +1,7 @@
-# LakeBot [![Support Server](https://discordapp.com/api/guilds/346332300385976321/embed.png)](https://discord.gg/QsTevwF) [![JitPack](https://jitpack.io/v/ISkylakeS/LakeBot.svg)](https://jitpack.io/#ISkylakeS/LakeBot)
+# LakeBot [![Support Server](https://discordapp.com/api/guilds/346332300385976321/embed.png)](https://discord.gg/QsTevwF) [![JitPack](https://jitpack.io/v/ilakeful/LakeBot.svg)](https://jitpack.io/#ilakeful/LakeBot)
 LakeBot is the next generation of [KabyBot](https://github.com/KabyBot/KabyBot). It is Discord multi-purpose bot coded in 100% [Kotlin](https://kotlinlang.org/).
 
 [![Powered By JDA](http://i.imgur.com/4Fhq6yQ.png)](https://github.com/DV8FromTheWorld/JDA)
-## Development
-As the development has just begun, help from Kotlin programmers (with experience with JDA) wouldn't hurt. If you want to help - contact me in Discord (ILakeful#7473)!
-## Support Server
-[![Support Server](https://discordapp.com/api/guilds/346332300385976321/embed.png?style=banner4)](https://discord.gg/QsTevwF)
 ## Libraries and APIs
 * **[Kotlin](https://github.com/JetBrains/kotlin)** - the programming language LakeBot uses
 * **[Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines)** - library support for Kotlin coroutines
