@@ -24,8 +24,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class RemoveCommand : Command {
     override val name = "remove"
-    override val aliases = listOf("removeat")
-    override val description = "The command that removes the specified song from the queue"
+    override val aliases = listOf("removeat", "unadd", "takeaway", "remove-at", "take-away")
+    override val description = "The command removing the specified song from the queue"
     override val usage: (String) -> String = { "${super.usage(it)} <index>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {

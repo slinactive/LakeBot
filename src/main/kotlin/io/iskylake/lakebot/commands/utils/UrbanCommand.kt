@@ -28,7 +28,8 @@ import java.net.URLEncoder
 
 class UrbanCommand : Command {
     override val name = "urban"
-    override val description = "The command that searches meaning of the specified word on Urban"
+    override val aliases = listOf("ud", "urbandict", "urbandictionary", "urban-dictionary")
+    override val description = "The command looking up the meaning of the specified word on Urban Dictionary"
     override val cooldown = 3L
     override val usage = { it: String -> "${super.usage(it)} <term>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

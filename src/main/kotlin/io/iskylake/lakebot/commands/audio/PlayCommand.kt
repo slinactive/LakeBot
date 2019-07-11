@@ -27,7 +27,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 open class PlayCommand : Command {
     override val name = "play"
-    override val description = "The command that plays song by the specified link"
+    override val aliases = listOf("p", "pr", "playraw", "play-raw")
+    override val description = "The command playing a song by the specified link"
     override val usage: (String) -> String = { "${super.usage(it)} <query/link>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {

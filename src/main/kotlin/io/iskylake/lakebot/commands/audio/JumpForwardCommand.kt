@@ -25,14 +25,14 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class JumpForwardCommand : Command {
     override val name = "jumpforward"
-    override val aliases = listOf("rewindup")
-    override val description = "The command that rewinds a song for a moment that comes at a specified time"
+    override val aliases = listOf("fastforward", "fast-forward")
+    override val description = "The command fast-forwarding a song for a moment that comes at the specified time"
     override val usage: (String) -> String = { "${super.usage(it)} <time>" }
     override val examples = { it: String ->
         mapOf(
-            "$it$name 1m32s" to "rewinds track from 01:05 to 02:37",
-            "$it$name 1h30s" to "rewinds track from 02:24 to 01:02:54",
-            "$it$name 5s" to "rewinds track from 00:06 to 00:11"
+            "$it$name 1m32s" to "fast-forwards track from 01:05 to 02:37",
+            "$it$name 1h30s" to "fast-forwards track from 02:24 to 01:02:54",
+            "$it$name 5s" to "fast-forwards track from 00:06 to 00:11"
         )
     }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

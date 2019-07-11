@@ -49,7 +49,7 @@ class LyricsCommand : Command {
         }
     override val name = "lyrics"
     override val aliases = listOf("genius")
-    override val description = "The command that sends the lyrics of specified or current playing song"
+    override val description = "The command sending the lyrics of the specified or current playing song"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <song name (optional if song is being played now by bot)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw

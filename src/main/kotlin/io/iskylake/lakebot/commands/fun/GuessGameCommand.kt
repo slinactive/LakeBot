@@ -27,14 +27,14 @@ import java.util.*
 
 class GuessGameCommand : Command {
     override val name = "guess"
-    override val aliases = listOf("guessnum", "guessgame", "guessnumber")
-    override val description = "The command that launches a game in which you must guess the number in the range from 5 to the specified number (the limit is 250000). If you want to kill game, type in \"exit\"."
+    override val aliases = listOf("guessnum", "guessgame", "guessnumber", "guess-the-number", "guess-game")
+    override val description = "The command launching a game in which you must guess the number in the range from 5 through the specified number (the limit is 500000). In order to kill the game, type in \"exit\"."
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <limit>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (args.isNotEmpty()) {
             if (args[0].isInt) {
                 val max = args[0].toInt()
-                if (max in 5..250000) {
+                if (max in 5..500000) {
                     val toGuess = Int.random(1..max)
                     val round = 1
                     event.channel.sendMessage(buildEmbed {

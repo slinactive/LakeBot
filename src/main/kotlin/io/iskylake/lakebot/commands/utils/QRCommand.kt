@@ -25,8 +25,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class QRCommand : Command {
     override val name = "qr"
-    override val aliases = listOf("qrcode", "makeqr")
-    override val description = "The command that creates an image with QR code from the given text"
+    override val aliases = listOf("qrcode", "qrgen", "generate-qr", "qr-code")
+    override val description = "The command generating an image with QR code from the specified text"
     override val usage: (String) -> String = { "${super.usage(it)} <text>" }
     override val cooldown = 2L
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

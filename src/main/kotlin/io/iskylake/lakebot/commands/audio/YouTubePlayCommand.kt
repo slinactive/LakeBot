@@ -31,8 +31,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class YouTubePlayCommand : PlayCommand() {
     override val name = "ytplay"
-    override val aliases = listOf("yplay", "youtubeplay", "yp", "ytp")
-    override val description = "The command that plays song from YouTube by the specified query"
+    override val aliases = listOf("yplay", "youtubeplay", "yp", "ytp", "youtube-play")
+    override val description = "The command playing a song from YouTube by the specified query"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member!!.isConnected) {
@@ -43,7 +43,7 @@ class YouTubePlayCommand : PlayCommand() {
                 }
                 try {
                     val results = YouTubeUtils.getResults(event.argsRaw!!)
-                    if (!results.isEmpty()) {
+                    if (results.isNotEmpty()) {
                         val videos = YouTubeUtils.getVideos(event.argsRaw!!)
                         if (!event.argsRaw!!.matches(YouTubeUtils.VIDEO_REGEX)) {
                             val description = buildString {

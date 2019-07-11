@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 class SayCommand : Command {
     override val name = "say"
     override val aliases = listOf("announce")
-    override val description = "The command that sends your message on behalf of the bot"
+    override val description = "The command sending your message on behalf of LakeBot"
     override val usage: (String) -> (String) = { "${super.usage(it)} <content>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {

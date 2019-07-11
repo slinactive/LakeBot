@@ -28,7 +28,8 @@ import java.awt.Color
 
 class ColorCommand : Command {
     override val name = "color"
-    override val description = "The command that sends a short information about the specified color"
+    override val aliases = listOf("colorinfo", "color-info")
+    override val description = "The command sending short information about the specified color"
     override val cooldown = 3L
     override val usage = { it: String -> "${super.usage(it)} <HEX code>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

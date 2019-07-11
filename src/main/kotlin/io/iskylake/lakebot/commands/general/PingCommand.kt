@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 class PingCommand : Command {
     override val name = "ping"
     override val aliases = listOf("delay", "response")
-    override val description = "The command that sends the bot's current response time off from statistics"
+    override val description = "The command sending LakeBot's current response time separately from the statistics"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = event.channel.sendMessage(buildEmbed {
         field(true, "Rest Ping") { "${event.jda.restPing.complete()} ms" }
         field(true, "WebSocket Ping") { "${event.jda.gatewayPing} ms" }

@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class UptimeCommand : Command {
     override val name = "uptime"
-    override val description = "The command that sends bot uptime off from statistics"
+    override val description = "The command sending LakeBot's uptime separately from the statistics"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
             color { Immutable.SUCCESS }

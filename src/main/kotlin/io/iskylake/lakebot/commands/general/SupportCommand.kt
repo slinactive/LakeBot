@@ -24,12 +24,12 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class SupportCommand : Command {
     override val name = "support"
-    override val description = "The command that sends you the link for LakeBot support server"
+    override val description = "The command sending the link to LakeBot support server"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
             color { Immutable.SUCCESS }
             author { "${event.selfUser.name} Support" }
-            description { "Have any questions or just want to chat with developers? Write to the [support server](${Immutable.SUPPORT_INVITE})!" }
+            description { "Have any questions or just want to chat with developers? Join the [support server](${Immutable.SUPPORT_INVITE})!" }
             thumbnail { event.selfUser.effectiveAvatarUrl }
         }
         event.channel.sendMessage(embed).queue()

@@ -32,7 +32,7 @@ object YouTubeUtils {
     @JvmField
     val YOUTUBE = YouTube.Builder(NetHttpTransport(), JacksonFactory()) { _ -> }.setApplicationName("lakebot").build()
     @JvmField
-    val VIDEO_REGEX = "(?:https?://)?(?:youtu\\.be/|(?:www\\.)?youtube\\.com/watch(?:\\.php)?\\?.*v=)([\\w\\d-_]){11}".toRegex()
+    val VIDEO_REGEX = "(?:https?://)?(?:youtu\\.be/|(?:(www\\.)|(m\\.)|(music\\.))?youtube\\.com/watch(?:\\.php)?\\?.*v=)([\\w\\d-_]){11}(?:(?<list>(PL|LL|FL|UU)[\\w\\d-_]+))?".toRegex()
     @Throws(IOException::class)
     fun getResults(query: String, limit: Long = 5): List<SearchResult> {
         val list = YOUTUBE.search().list("id,snippet")
@@ -58,7 +58,7 @@ object YouTubeUtils {
     }
     @Throws(IOException::class)
     fun getLink(query: String): String? {
-        val yt: String? = if (!getVideos(query).isEmpty()) "https://www.youtube.com/watch?v=${getVideos(query)[0].id}" else null
+        val yt: String? = if (getVideos(query).isNotEmpty()) "https://www.youtube.com/watch?v=${getVideos(query)[0].id}" else null
         return if (query matches VIDEO_REGEX) query else yt
     }
     @Throws(IOException::class)

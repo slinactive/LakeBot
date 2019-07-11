@@ -28,9 +28,10 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class MuteRoleCommand : Command {
     override val name = "muterole"
-    override val description = "The command that manages a role for mutes"
+    override val aliases = listOf("mute-role")
+    override val description = "The command managing a mute role"
     override val usage = fun(prefix: String) = """
-        |${super.usage(prefix)} ${'\u2014'} disables mute role if it's enabled
+        |${super.usage(prefix)} ${'\u2014'} disables mute role if it iss enabled
         |${super.usage(prefix)} <role> ${'\u2014'} sets mute role""".trimMargin()
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         when (Permission.MANAGE_SERVER) {

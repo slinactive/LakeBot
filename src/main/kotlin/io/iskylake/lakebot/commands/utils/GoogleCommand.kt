@@ -32,7 +32,7 @@ import java.net.URLEncoder
 class GoogleCommand : Command {
     override val name = "google"
     override val aliases = listOf("search")
-    override val description = "The command that searches something in Google by the specified query"
+    override val description = "The command searching something in Google by the specified query"
     override val cooldown = 3L
     override val usage = { it: String -> "${super.usage(it)} <query>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

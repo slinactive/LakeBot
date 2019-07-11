@@ -28,7 +28,7 @@ import java.net.URL
 
 class InvertCommand : Command {
     override val name = "invert"
-    override val description = "The command that inverts attached image or avatar of specified user"
+    override val description = "The command inverting colors of the attached image or the avatar of the specified user"
     override val aliases = listOf("negative", "negate")
     override val cooldown = 3L
     override val usage: (String) -> String = {

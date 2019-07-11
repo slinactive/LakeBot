@@ -23,7 +23,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class LakeBanCommand : Command {
     override val name = "lakeban"
-    override val description = "The command that gives user LakeBan (after which they can't use LakeBot)"
+    override val description = "The command giving the user LakeBan (after which they can't use LakeBot)"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user> <reason>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (args.size > 1) {
         when {

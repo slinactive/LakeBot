@@ -27,8 +27,8 @@ import net.dv8tion.jda.internal.utils.Helpers
 class ChooseCommand : Command {
     override val name = "choose"
     override val aliases = listOf("random")
-    override val description = "The command that randomly selects one of the specified arguments"
-    override val usage = fun(prefix: String) = "${super.usage(prefix)} argument1 | argument2 | ... | argumentN"
+    override val description = "The command selecting one of the specified options in a random way"
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} option1 | option2 | ... | optionN"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {

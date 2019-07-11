@@ -32,8 +32,8 @@ import java.util.concurrent.TimeUnit
 
 class ServerCommand : Command {
     override val name = "server"
-    override val aliases = listOf("serverinfo", "servermenu", "guild", "guildinfo")
-    override val description = "The command that sends complete information about current server"
+    override val aliases = listOf("serverinfo", "servermenu", "guild", "guildinfo", "server-info", "server-menu", "guild-info")
+    override val description = "The command sending complete information about the server"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (event.guild.iconUrl !== null) {
         serverMenu(event)
     } else {

@@ -28,7 +28,7 @@ import kotlin.math.*
 
 class CalculatorCommand : Command {
     override val name = "calculator"
-    override val description = "The command that evaluates specified mathematical expression and sends the result"
+    override val description = "The command executing the specified mathematical expression and sending its result"
     override val aliases = listOf("calculate", "calc", "math", "lakemath")
     override val cooldown = 2L
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <expression>"

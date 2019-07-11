@@ -24,6 +24,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import io.iskylake.lakebot.Immutable
 
 import io.iskylake.lakebot.audio.GuildMusicManager
 import io.iskylake.lakebot.entities.extensions.*
@@ -38,7 +39,7 @@ object AudioUtils {
     @JvmField
     val MUSIC_MANAGERS = mutableMapOf<Long, GuildMusicManager>()
     init {
-        PLAYER_MANAGER.setPlayerCleanupThreshold(30000)
+        PLAYER_MANAGER.setPlayerCleanupThreshold(90000)
         PLAYER_MANAGER.configuration.resamplingQuality = AudioConfiguration.ResamplingQuality.LOW
         PLAYER_MANAGER.configuration.opusEncodingQuality = 10
         val youtube = YoutubeAudioSourceManager()
@@ -55,21 +56,18 @@ object AudioUtils {
         return manager
     }
     fun loadAndPlay(guild: Guild, channel: TextChannel, trackUrl: String) {
-        fun play(musicManager: GuildMusicManager, track: AudioTrack) {
-            musicManager.trackScheduler += track
-        }
         val musicManager = this[guild]
         PLAYER_MANAGER.loadItemOrdered(musicManager, trackUrl, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
+                musicManager.trackScheduler += track
                 channel.sendSuccess("[${track.info.title}](${track.info.uri}) has been added to queue!").queue()
-                play(musicManager, track)
             }
             override fun playlistLoaded(playlist: AudioPlaylist) {
+                for (track in playlist.tracks) {
+                    musicManager.trackScheduler += track
+                }
                 val description = "${if (!playlist.isSearchResult) "[${playlist.name}]($trackUrl)" else playlist.name} has been added to queue!"
                 channel.sendSuccess(description).queue()
-                for (track in playlist.tracks) {
-                    play(musicManager, track)
-                }
             }
             override fun noMatches() = channel.sendError("Nothing found by $trackUrl!").queue()
             override fun loadFailed(exception: FriendlyException) = channel.sendError("This track can't be played!").queue()

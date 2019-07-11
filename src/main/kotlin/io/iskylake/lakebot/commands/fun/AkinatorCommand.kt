@@ -48,8 +48,8 @@ class AkinatorCommand : Command {
             "turkish" to Server.Language.TURKISH
     )
     override val name = "akinator"
-    override val description = """The command that launches Akinator game.
-        |After game launch you should answer with **YES**, **NO**, **DONT KNOW**, **PROBABLY** or **PROBABLY NOT** while Akinator won't guess you character. Type in **BACK** if you want to return to previous question. Type in "exit" to kill current game. Type in "aliases" to get more variants of answers.
+    override val description = """The command launching Akinator game.
+        |After the game launch you're supposed to answer with **YES**, **NO**, **DONT KNOW**, **PROBABLY**, or **PROBABLY NOT** until Akinator guesses your character. Type in **BACK** in order to return to previous question. Type in "exit" in order to terminate the current game. Type in "aliases" in order to get more ways of answering.
     """.trimMargin()
     override val usage = { it: String -> "${super.usage(it)} <language (optional)>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
@@ -117,7 +117,7 @@ class AkinatorCommand : Command {
                                 "probably not", "pn", "unlikely" -> Answer.PROBABLY_NOT
                                 else -> Answer.DONT_KNOW
                             }
-                            if (content == "back" || content == "return" || content == "b") {
+                            /*if (content == "back" || content == "return" || content == "b") {
                                 //if (wrapper.currentQuestion?.step != 0) {
                                     wrapper.undoAnswer()
                                 //}
@@ -131,8 +131,8 @@ class AkinatorCommand : Command {
                                 color { Immutable.SUCCESS }
                             }).await {
                                 awaitAnswer(event, wrapper)
-                            }
-                            /*event.channel.sendMessage(buildEmbed {
+                            }*/
+                            event.channel.sendMessage(buildEmbed {
                                 if (content == "back" || content == "return" || content == "b") {
                                     val q = if (wrapper.currentQuestion?.step != 0) wrapper.undoAnswer()!! else wrapper.currentQuestion!!
                                     author { "Question #${q.step + 1}:" }
@@ -148,7 +148,7 @@ class AkinatorCommand : Command {
                                 }
                             }).await {
                                 awaitAnswer(event, wrapper)
-                            }*/
+                            }
                         } else {
                             val guess = wrapper.guesses.first { it.probability > 0.825 }
                             val embed = buildEmbed {

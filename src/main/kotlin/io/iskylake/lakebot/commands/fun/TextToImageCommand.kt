@@ -25,8 +25,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class TextToImageCommand : Command {
     override val name = "tti"
-    override val aliases = listOf("texttoimage")
-    override val description = "The command that turns your text into an image"
+    override val aliases = listOf("texttoimage", "text-to-image")
+    override val description = "The command converting your text into an image"
     override val usage: (String) -> String = { "${super.usage(it)} <text>" }
     override val cooldown = 3L
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

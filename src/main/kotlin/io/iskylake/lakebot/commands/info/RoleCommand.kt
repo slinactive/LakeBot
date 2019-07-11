@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit
 
 class RoleCommand : Command {
     override val name = "role"
-    override val aliases = listOf("roleinfo", "rolemenu")
-    override val description = "The command that sends complete information about specified role"
+    override val aliases = listOf("roleinfo", "rolemenu", "role-info", "role-menu")
+    override val description = "The command sending complete information about the specified role"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <role>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw

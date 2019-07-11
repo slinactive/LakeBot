@@ -25,8 +25,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class JumpBackCommand : Command {
     override val name = "jumpback"
-    override val aliases = listOf("rewindto", "returnto")
-    override val description = "The command that rewinds the song back"
+    override val aliases = listOf("windback", "returnto", "jumpbackward", "rewind", "jump-back", "wind-back", "return-to", "jump-backward")
+    override val description = "The command rewinding the song back"
     override val usage: (String) -> String = { "${super.usage(it)} <time>" }
     override val examples = { it: String ->
         mapOf(

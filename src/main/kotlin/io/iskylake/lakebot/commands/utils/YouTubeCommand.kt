@@ -31,8 +31,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class YouTubeCommand : Command {
     override val name = "youtube"
-    override val aliases = listOf("yt", "ytsearch", "youtubesearch", "yts", "ys")
-    override val description = "The command that searches videos on YouTube by the specified query"
+    override val aliases = listOf("yt", "ytsearch", "youtubesearch", "yts", "ys", "youtube-search")
+    override val description = "The command searching for videos on YouTube by the specified query"
     override val cooldown = 5L
     override val usage = { it: String -> "${super.usage(it)} <query>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

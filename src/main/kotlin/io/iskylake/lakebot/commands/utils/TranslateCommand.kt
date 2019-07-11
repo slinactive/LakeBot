@@ -25,8 +25,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class TranslateCommand : Command {
     override val name = "translate"
-    override val description = "The command that translates specified text into specified language and sends the result"
-    override val aliases = listOf("translator")
+    override val description = "The command translating the specified text into the specified language and sending the result"
+    override val aliases = listOf("translator", "translation")
     override val cooldown = 2L
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <language> <text>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

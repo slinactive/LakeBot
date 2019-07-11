@@ -27,9 +27,9 @@ import khttp.get
 import java.net.URLEncoder
 
 class ShortenerCommand : Command {
-    override val name = "shortener"
-    override val aliases = listOf("shorten", "shortenlink", "shorturl")
-    override val description = "The command that creates short URL from your link"
+    override val name = "shorten"
+    override val aliases = listOf("shortener", "urlshortener", "shortenlink", "shorturl", "shortenedurl", "url-shortener", "shorten-link", "short-url", "shortened-url")
+    override val description = "The command shortening the specified link"
     override val cooldown = 3L
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (args.isNotEmpty()) {
         try {

@@ -63,13 +63,13 @@ object ImageUtils {
     }
     fun getColorImage(c: Color, width: Int = 150, height: Int = 150): ByteArray {
         val bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-        val g = bufferedImage.createGraphics()
-        g.color = c
-        g.fillRect(0, 0, width, height)
-        g.dispose()
-        val b = ByteArrayOutputStream()
-        ImageIO.write(bufferedImage, "png", b)
-        return b.toByteArray()
+        val graphics = bufferedImage.createGraphics()
+        graphics.color = c
+        graphics.fillRect(0, 0, width, height)
+        graphics.dispose()
+        val byteout = ByteArrayOutputStream()
+        ImageIO.write(bufferedImage, "png", byteout)
+        return byteout.toByteArray()
     }
     fun getQRCode(from: String): ByteArray {
         val byteout = QRCode.from(from).withSize(768, 768).to(ImageType.PNG).stream()
@@ -77,32 +77,38 @@ object ImageUtils {
     }
     fun getImagedText(content: List<String>): ByteArray {
         var bufferedImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
-        var g = bufferedImage.createGraphics()
-        val font = Font("SF Pro Display", Font.BOLD, 22)
-        g.font = font
-        g.dispose()
-        val width = g.fontMetrics.stringWidth(content.sortedWith(compareBy { it.count() }).last()) + 5
-        val height = content.size * font.size + font.size / 2
+        var graphics = bufferedImage.createGraphics()
+        val font = Font("SF Pro Display", Font.BOLD, 15)
+        graphics.font = font
+        val fm = graphics.fontMetrics
+        val width = fm.stringWidth(content.sortedWith(compareBy { it.count() }).last()) + 3
+        val height = fm.height * content.size
+        graphics.dispose()
         bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
-        g = bufferedImage.createGraphics()
-        g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY)
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY)
-        g.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE)
-        g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
-        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON )
-        g.background = Color(255, 255, 255, 0)
-        g.clearRect(0, 0, width, height)
-        g.font = font
-        for ((i, c) in content.withIndex()) {
-            g.drawString(c, 0, g.fontMetrics.ascent * (i + 1))
+        graphics = bufferedImage.createGraphics()
+        graphics.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY)
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+        graphics.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY)
+        graphics.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE)
+        graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
+        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+        graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+        //g.font = font
+        //fm = g.fontMetrics
+        //g.background = Color(255, 255, 255, 0)
+        //g.clearRect(0, 0, width, height)
+        graphics.font = font
+        var index = fm.ascent
+        for (line in content) {
+            //g.drawString(line, 0, fm.ascent * (index + 1))
+            graphics.drawString(line, 0, index)
+            index += fm.height
         }
-        g.dispose()
-        val b = ByteArrayOutputStream()
-        ImageIO.write(bufferedImage, "png", b)
-        return b.toByteArray()
+        graphics.dispose()
+        val byteout = ByteArrayOutputStream()
+        ImageIO.write(bufferedImage, "png", byteout)
+        return byteout.toByteArray()
     }
 }

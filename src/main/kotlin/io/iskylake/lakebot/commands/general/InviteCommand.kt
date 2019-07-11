@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class InviteCommand : Command {
     override val name = "invite"
-    override val description = "The command that sends you the link for invite LakeBot to your server"
+    override val description = "The command sending the link for inviting LakeBot to your server"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
             color { Immutable.SUCCESS }

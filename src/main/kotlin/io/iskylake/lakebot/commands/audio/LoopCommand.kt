@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 class LoopCommand : Command {
     override val name = "loop"
     override val aliases = listOf("repeat")
-    override val description = "The command that enables or disables looping"
+    override val description = "The command either enabling or disabling repeat mode of the song or the queue"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()

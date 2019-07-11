@@ -78,7 +78,7 @@ class HelpCommand : Command {
                         field(title = "Description:") { command.description }
                         if (command.aliases.isNotEmpty()) {
                             field(title = "Aliases:") {
-                                command.aliases.joinToString()
+                                command.aliases.sorted().joinToString()
                             }
                         }
                         field(title = "Category:") { command.category() }

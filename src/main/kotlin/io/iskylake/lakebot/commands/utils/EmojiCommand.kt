@@ -25,9 +25,9 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import java.time.format.DateTimeFormatter
 
 class EmojiCommand : Command {
-    override val name = "emoji"
-    override val aliases = listOf("emote", "char", "character", "symbol")
-    override val description = "The command that sends information about specified emoji, custom emote or symbol"
+    override val name = "char"
+    override val aliases = listOf("emote", "emoji", "character", "symbol")
+    override val description = "The command sending information about the specified emoji, emote (custom emoji), or symbol"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <symbol/emote>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
@@ -42,7 +42,7 @@ class EmojiCommand : Command {
                     field(true, "ID:") { emote.id }
                     field(true, "Animated:") { if (emote.isAnimated) "Yes" else "No" }
                     field(true, "Creation Date:") { emote.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
-                    field(true, "Guild:") { emote.guild!!.name.escapeDiscordMarkdown() }
+                    field(true, "Guild:") { emote.guild?.name?.escapeDiscordMarkdown() ?: "Unknown Guild" }
                     field(true, "Mention:") { "`${emote.asMention}`" }
                 }
                 event.channel.sendMessage(embed).queue()

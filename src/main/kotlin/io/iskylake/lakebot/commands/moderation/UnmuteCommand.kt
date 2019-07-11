@@ -28,7 +28,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class UnmuteCommand : Command {
     override val name = "unmute"
-    override val description = "The command that unmutes the specified member"
+    override val description = "The command unmuting the specified member"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw

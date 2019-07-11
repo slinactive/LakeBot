@@ -26,7 +26,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class ShutdownCommand : Command {
     override val name = "shutdown"
-    override val description = "The command that shutdowns LakeBot"
+    override val aliases = listOf("turnoff", "sd", "turn-off")
+    override val description = "The command shutting down LakeBot"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         event.sendConfirmation("Are you sure you want to shutdown ${event.selfUser.name}?").await {
             val confirmation = it.awaitNullableConfirmation(event.author)

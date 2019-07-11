@@ -27,7 +27,8 @@ import khttp.get
 
 class TimeCommand : Command {
     override val name = "time"
-    override val description = "The command that sends specified location's current time"
+    override val aliases = listOf("timezone")
+    override val description = "The command sending the specified location's current time and timezone"
     override val cooldown = 3L
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <location>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

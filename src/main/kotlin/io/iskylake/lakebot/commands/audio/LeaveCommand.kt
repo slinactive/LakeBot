@@ -23,6 +23,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class LeaveCommand : Command {
     override val name = "leave"
-    override val description = "The command, after which the bot leaves your voice channel"
+    override val aliases = listOf("l", "leavevc", "exit", "exitvc")
+    override val description = "The command making LakeBot leaving the voice channel"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = AudioUtils.leaveChannel { event }
 }

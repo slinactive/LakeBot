@@ -29,7 +29,7 @@ import kotlin.math.round
 
 class WeatherCommand : Command {
     override val name = "weather"
-    override val description = "The command that displays weather in the specified city/town"
+    override val description = "The command sending information about the weather in the specified settlement"
     override val cooldown = 3L
     override val usage = { it: String -> "${super.usage(it)} <city/town>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {

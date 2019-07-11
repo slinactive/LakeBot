@@ -44,11 +44,11 @@ task stage(dependsOn: ["build", "clean"])
 build.mustRunAfter clean
 
 group "io.iskylake.lakebot"
-version "1.0-BETA3"
+version "1.0-BETA4"
 
 apply plugin: "kotlin"
 
-sourceCompatibility = 1.8
+sourceCompatibility = 9
 
 repositories {
     mavenCentral()
@@ -80,20 +80,20 @@ dependencies {
     compile "com.google.apis:google-api-services-youtube:v3-rev212-1.25.0"
     compile "org.jsoup:jsoup:1.11.2"
     compile "org.reflections:reflections:0.9.11"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-script-runtime:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-compiler:$kotlin_version"
-    runtime "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+    runtime "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-script-util:$kotlin_version"
     testCompile group: "junit", name: "junit", version: "4.12"
 }
 
 compileKotlin {
     //kotlinOptions.freeCompilerArgs = ["-Xjvm-default=enable"]
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "9"
 }
 compileTestKotlin {
     //kotlinOptions.freeCompilerArgs = ["-Xjvm-default=enable"]
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "9"
 }

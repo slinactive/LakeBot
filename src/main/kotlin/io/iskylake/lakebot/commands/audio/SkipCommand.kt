@@ -26,7 +26,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class SkipCommand : Command {
     override val name = "skip"
-    override val description = "The command that plays the next track from current queue"
+    override val aliases = listOf("omit")
+    override val description = "The command playing the next track from the current queue"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()

@@ -27,7 +27,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 class PauseCommand : Command {
     override val name = "pause"
     override val aliases = listOf("suspend")
-    override val description = "The command that pauses the song that is currently playing"
+    override val description = "The command pausing the currently playing song"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
             event.sendError("There is no track that is being played now!").queue()

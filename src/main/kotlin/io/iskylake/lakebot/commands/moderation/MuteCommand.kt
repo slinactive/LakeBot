@@ -33,7 +33,7 @@ import kotlin.concurrent.schedule
 
 class MuteCommand : Command {
     override val name = "mute"
-    override val description = "The command that mutes the specified member"
+    override val description = "The command giving a mute to the specified member"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user> <time> <reason>"
     override val examples = fun(prefix: String) = mapOf("$prefix$name ILakeful 1w12h flood" to "mutes ILakeful for 7.5 days because of flood")
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
@@ -43,7 +43,7 @@ class MuteCommand : Command {
                 MANAGE_ROLES !in event.member!!.permissions -> event.sendError("You don't have required permissions!").queue()
                 MANAGE_ROLES !in event.guild.selfMember.permissions -> event.sendError("LakeBot doesn't have required permissions!").queue()
                 arguments.size in 1..2 -> event.sendError("You didn't specify reason or time!").queue()
-                "([1-9][0-9]*)([smhw])".toRegex().findAll(arguments[1]).toList().isEmpty() -> event.sendError("That's not a valid format of time!").queue()
+                "([1-9][0-9]*)([smhdw])".toRegex().findAll(arguments[1]).toList().isEmpty() -> event.sendError("That's not a valid format of time!").queue()
                 TimeUtils.parseTime(arguments[1]) > TimeUtils.weeksToMillis(2) -> event.sendError("You can indicate the time until 2 weeks!").queue()
                 !event.guild.isMuteRoleEnabled -> event.sendError("The mute role isn't enabled!").queue()
                 else -> {

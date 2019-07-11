@@ -35,8 +35,8 @@ import java.util.concurrent.TimeUnit
 
 class UserCommand : Command {
     override val name = "user"
-    override val aliases = listOf("userinfo", "usermenu")
-    override val description = "The command that sends complete information about your account or the account of the specified user"
+    override val aliases = listOf("userinfo", "usermenu", "user-info", "user-menu")
+    override val description = "The command sending complete information about your account or an account of the specified user"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user (optional)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
@@ -95,8 +95,8 @@ class UserCommand : Command {
         field(true, "Username:") { user.name.escapeDiscordMarkdown() }
         field(true, "Nickname:") { member.nickname?.escapeDiscordMarkdown() ?: "No Nickname" }
         field(title = "Join Order:") { member.joinOrder }
-        field(hasPermissions, "Join Position:") { "#${member.joinPosition}" }
         if (hasPermissions) {
+            field(true, "Join Position:") { "#${member.joinPosition}" }
             field(true, "Acknowledgements:") {
                 when {
                     member.isOwner -> "Server Owner"
@@ -105,15 +105,17 @@ class UserCommand : Command {
                     else -> "Unknown"
                 }
             }
+        } else {
+            field(roles.size <= 2, "Join Position:") { "#${member.joinPosition}" }
         }
-        field(roles.size > 2, if (roles.isEmpty()) "Roles:" else "Roles (${roles.size}):") {
+        field(roles.size <= 2, if (roles.isEmpty()) "Roles:" else "Roles (${roles.size}):") {
             when {
                 roles.isEmpty() -> "No roles"
                 roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString().length > 1024 -> "Too many roles to display"
                 else -> roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString()
             }
         }
-        if (member.roles.isNotEmpty()) {
+        if (roles.size >= 2) {
             field(true, "Highest Role:") { roles[0].name.escapeDiscordMarkdown() }
         }
         if (member.keyPermissions.isNotEmpty()) {
@@ -122,8 +124,8 @@ class UserCommand : Command {
     }
     suspend fun userMenu(event: MessageReceivedEvent, member: Member) = event.channel.sendMessage(buildEmbed {
         color { Immutable.SUCCESS }
-        author { "Select The Action:" }
-        description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Avatar" }
+        author { "Select the Action:" }
+        description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get an Avatar" }
     }).await {
         USERS_WITH_PROCESSES += event.author
         it.addReaction("\u0031\u20E3").complete()

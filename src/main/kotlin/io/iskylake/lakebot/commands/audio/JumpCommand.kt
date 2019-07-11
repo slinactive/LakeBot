@@ -27,12 +27,12 @@ import java.time.Duration
 
 class JumpCommand : Command {
     companion object {
-        val TIMECODE_REGEX = "(?:(?<hours>\\d{1,2}):)?(?:(?<minutes>\\d{1,2}):)?(?<seconds>\\d{1,2})".toRegex()
+        val TIME_CODE_REGEX = "(?:(?<hours>\\d{1,2}):)?(?:(?<minutes>\\d{1,2}):)?(?<seconds>\\d{1,2})".toRegex()
     }
     override val name = "jump"
-    override val aliases = listOf("rewind")
-    override val description = "The command that rewinds currently playing track by the specified timecode"
-    override val usage: (String) -> String = { "${super.usage(it)} <timecode>" }
+    override val aliases = listOf("settime", "set-time")
+    override val description = "The command setting the specified time for the currently playing track"
+    override val usage: (String) -> String = { "${super.usage(it)} <time>" }
     override val examples = { it: String ->
         mapOf(
             "$it$name 00:05" to "rewinds track to 00:05",
@@ -48,9 +48,9 @@ class JumpCommand : Command {
             } else {
                 if (AudioUtils[event.guild].audioPlayer.playingTrack !== null) {
                     val arguments = event.argsRaw!!
-                    if (arguments matches TIMECODE_REGEX) {
+                    if (arguments matches TIME_CODE_REGEX) {
                         try {
-                            val finder = TIMECODE_REGEX.find(arguments)!!
+                            val finder = TIME_CODE_REGEX.find(arguments)!!
                             var hours = finder.groups["hours"]?.value?.toLong()
                             var minutes = finder.groups["minutes"]?.value?.toLong()
                             val seconds = finder.groups["seconds"]!!.value.toLong()

@@ -25,8 +25,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class VolumeCommand : Command {
     override val name = "volume"
-    override val aliases = listOf("setvolume", "volumelevel")
-    override val description = "The command that allows volume control on the bot side"
+    override val aliases = listOf("setvolume", "volumelevel", "volumerate", "set-volume", "volume-level", "volume-rate")
+    override val description = "The command allowing volume control on the bot side"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <volume>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
         event.sendError("There is no track that is being played now!").queue()

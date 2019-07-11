@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 class PruneCommand : Command {
     override val name = "prune"
-    override val aliases = listOf("purge", "clear")
+    override val aliases = listOf("purge", "clearmessages", "clear-messages")
     override val usage: (String) -> String = {
         val command = "${super.usage(it)} <count>"
         val dash = '\u2014'
@@ -39,7 +39,7 @@ class PruneCommand : Command {
             |$command bots $dash clears messages from bots
         """.trimMargin()
     }
-    override val description = "The command that deletes a specified amount of messages (from 1 to 1000)"
+    override val description = "The command deleting the specified amount of messages (from 1 to 1000)"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         when {
             !event.guild.selfMember.hasPermission(Permission.MESSAGE_MANAGE) -> event.sendError("I don't have permissions for that!").queue()

@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class EmotesCommand : Command {
     override val name = "emotes"
-    override val description = "The command that sends the list of emotes of this server"
+    override val description = "The command sending the list of emotes (custom emojis) of the server"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (!event.guild.emoteCache.isEmpty) {
             val emotes = event.guild.emoteCache.mapNotNull { it.asMention }.joinToString()

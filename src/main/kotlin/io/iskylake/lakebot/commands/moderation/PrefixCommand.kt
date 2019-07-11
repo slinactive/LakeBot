@@ -24,9 +24,9 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class PrefixCommand : Command {
     override val name = "prefix"
-    override val aliases = listOf("setprefix")
+    override val aliases = listOf("setprefix", "set-prefix")
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <prefix>"
-    override val description = "The command that changes command prefix for this server"
+    override val description = "The command changing the server's command prefix"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (Permission.MANAGE_SERVER in event.member!!.permissions || event.author.isLBDeveloper) {
         if (args.isNotEmpty()) {
             val newPrefix = args[0].toLowerCase()

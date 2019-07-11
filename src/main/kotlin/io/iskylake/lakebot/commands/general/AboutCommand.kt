@@ -30,7 +30,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 class AboutCommand : Command {
     override val name = "about"
     override val aliases = listOf("info", "stats")
-    override val description = "The command that sends complete information about the bot"
+    override val description = "The command sending complete information about LakeBot"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
             color { Immutable.SUCCESS }
