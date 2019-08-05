@@ -85,10 +85,10 @@ class UrbanCommand : Command {
                         }
                         field(title = "Author:") { author }
                         field(true, "Likes:") {
-                            "${event.jda.getEmoteById(391954570735124480)!!.asMention} \u2014 $like"
+                            "${event.jda.getEmoteById(391954570735124480)?.asMention ?: "\uD83D\uDC4D"} \u2014 $like"
                         }
                         field(true, "Dislikes:") {
-                            "${event.jda.getEmoteById(391954570705895434)!!.asMention} \u2014 $dislike"
+                            "${event.jda.getEmoteById(391954570705895434)?.asMention ?: "\uD83D\uDC4E"} \u2014 $dislike"
                         }
                         footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                         timestamp()
@@ -96,7 +96,7 @@ class UrbanCommand : Command {
                     event.channel.sendMessage(embed).queue()
                 }
             } catch (e: Exception) {
-                event.sendFailure("Something went wrong!").queue()
+                event.sendFailure("Something went wrong! ${e::class.simpleName}: ${e.message}").queue()
             }
         } else {
             event.sendFailure("You specified no query!").queue()
