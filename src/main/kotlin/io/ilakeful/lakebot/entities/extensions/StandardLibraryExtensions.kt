@@ -56,7 +56,7 @@ operator fun Short.not() = inv()
 infix fun String.append(str: String): String = "$this$str"
 infix fun String.appendln(str: String): String = append("$str\n")
 infix fun String.prepend(str: String): String = "$str$this"
-infix fun String.prependln(str: String): String = append("\n$str")
+infix fun String.prependln(str: String): String = "$str\n$this"
 val String.isByte: Boolean
     get() = toByteOrNull() !== null
 val String.isShort: Boolean
