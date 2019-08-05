@@ -92,4 +92,9 @@ fun String.safeSubstring(begin: Int = 0, end: Int = this.count()) = try {
 }
 fun String.removeContent(content: String) = replace(content, "")
 fun String.removeContent(regex: RegularExpression) = replace(regex, "")
-fun String.escapeDiscordMarkdown() = replace("*", "\\*").replace("_", "\\_").replace("~", "\\~").replace("`", "\\`")
+fun String.escapeDiscordMarkdown() = this
+        .replace("*", "\\*")
+        .replace("_", "\\_")
+        .replace("~", "\\~")
+        .replace("`", "\\`")
+        .replace("||", "\\|\\|")
