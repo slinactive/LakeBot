@@ -72,6 +72,7 @@ class LoopCommand : Command {
                                     event.sendSuccess(text = "Queue looping is enabled!").queue()
                                 } else {
                                     scheduler.isLoop = true
+                                    scheduler.isQueueLoop = false
                                     event.sendSuccess(text = "Single repeating is enabled!").queue()
                                 }
                             }
@@ -80,9 +81,11 @@ class LoopCommand : Command {
                                 when {
                                     scheduler.isLoop -> {
                                         scheduler.isLoop = false
+                                        scheduler.isQueueLoop = false
                                         event.sendSuccess(text = "Single repeating is disabled!").queue()
                                     }
                                     scheduler.isQueueLoop -> {
+                                        scheduler.isLoop = false
                                         scheduler.isQueueLoop = false
                                         event.sendSuccess(text = "Queue looping is disabled!").queue()
                                     }
