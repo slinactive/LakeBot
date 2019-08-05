@@ -29,19 +29,21 @@ class SkipCommand : Command {
     override val aliases = listOf("omit")
     override val description = "The command playing the next track from the current queue"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
-            event.sendFailure("There is no track that is being played now!").queue()
-        } else {
+        val manager = AudioUtils[event.guild]
+        val playing = manager.audioPlayer.playingTrack
+        if (playing !== null) {
             if (event.member!!.isConnected) {
-                AudioUtils.skipTrack { event.guild }
+                manager.trackScheduler.nextTrack()
                 try {
-                    event.sendSuccess("Skipped to next track ([${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri}))!").queue()
+                    event.channel.sendSuccess("Skipped to the next track ([${playing.info.title}](${playing.info.uri}))!").queue()
                 } catch (e: Exception) {
-                    event.sendSuccess("Playback was successfully stopped!").queue()
+                    event.channel.sendSuccess("Playback was successfully stopped!").queue()
                 }
             } else {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             }
+        } else {
+            event.channel.sendFailure("No track is currently playing!").queue()
         }
     }
 }

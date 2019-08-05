@@ -72,11 +72,6 @@ object AudioUtils {
             override fun loadFailed(exception: FriendlyException) = channel.sendFailure("This track can't be played!").queue()
         })
     }
-    inline fun skipTrack(crossinline g: () -> Guild) {
-        val manager = this[g()]
-        manager.trackScheduler.queue -= manager.audioPlayer.playingTrack
-        manager.trackScheduler.nextTrack()
-    }
     inline fun joinChannel(crossinline e: () -> MessageReceivedEvent) {
         val event = e()
         when {

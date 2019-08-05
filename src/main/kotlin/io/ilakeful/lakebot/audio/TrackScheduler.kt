@@ -50,9 +50,6 @@ class TrackScheduler(private val player: AudioPlayer) : AudioEventAdapter() {
             }
         }
     }
-    override fun onTrackStart(player: AudioPlayer, track: AudioTrack) {
-        queue += track
-    }
     override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
         if (endReason.mayStartNext) {
             when {
@@ -65,13 +62,9 @@ class TrackScheduler(private val player: AudioPlayer) : AudioEventAdapter() {
                     val clone = track.makeClone()
                     clone.userData = track.userData
                     queue.offer(clone)
-                    queue -= track
                     nextTrack()
                 }
-                else -> {
-                    queue -= track
-                    nextTrack()
-                }
+                else -> nextTrack()
             }
         }
     }
