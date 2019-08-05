@@ -36,27 +36,43 @@ class QueueCommand : Command {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null && AudioUtils[event.guild].trackScheduler.queue.isEmpty()) {
             event.sendFailure("Queue is empty!").queue()
         } else {
-            val queue = AudioUtils[event.guild].trackScheduler.queue
-            queue -= AudioUtils[event.guild].audioPlayer.playingTrack
-            if (queue.isNotEmpty()) {
-                val paginator = buildPaginator<AudioTrack> {
-                    event { event }
-                    size { 10 }
-                    list { queue.toList() }
-                    embed { num, pages ->
-                        for (track in pages[num - 1]) {
-                            appendln {
-                                "**${elements.indexOf(track) + 1}. [${track.info.title}](${track.info.uri}) (${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})**"
+            if (AudioUtils[event.guild].audioPlayer.playingTrack !== null) {
+                val queue = AudioUtils[event.guild].trackScheduler.queue
+                queue -= AudioUtils[event.guild].audioPlayer.playingTrack
+                if (queue.isNotEmpty()) {
+                    val paginator = buildPaginator<AudioTrack> {
+                        event { event }
+                        size { 10 }
+                        list { queue.toList() }
+                        embed { num, pages ->
+                            for (track in pages[num - 1]) {
+                                appendln {
+                                    "**${elements.indexOf(track) + 1}. [${track.info.title}](${track.info.uri}) (${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})**"
+                                }
+                            }
+                            color { Immutable.SUCCESS }
+                            author("LakePlayer") { event.selfUser.effectiveAvatarUrl }
+                            field(title = "Total Songs:") {
+                                "${AudioUtils[event.guild].trackScheduler.queue.size + 1} songs"
+                            }
+                            field(title = "Total Duration:") {
+                                TimeUtils.asDuration(AudioUtils[event.guild].trackScheduler.queue.map { it.duration }.filter { it != Long.MAX_VALUE }.sum())
+                            }
+                            field(title = "Looping:") {
+                                MusicUtils.getLoopingMode(AudioUtils[event.guild].trackScheduler)
+                            }
+                            field(title = "Volume") { "${AudioUtils[event.guild].audioPlayer.volume}%" }
+                            field(title = "Now Playing:") {
+                                "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
+                            }
+                            footer(event.author.effectiveAvatarUrl) {
+                                "Page $num/${pages.size} | Requested by ${event.author.tag}"
                             }
                         }
-                        color { Immutable.SUCCESS }
-                        author("LakePlayer") { event.selfUser.effectiveAvatarUrl }
-                        field(title = "Total Songs:") {
-                            "${AudioUtils[event.guild].trackScheduler.queue.size + 1} songs"
-                        }
-                        field(title = "Total Duration:") {
-                            TimeUtils.asDuration(AudioUtils[event.guild].trackScheduler.queue.map { it.duration }.filter { it != Long.MAX_VALUE }.sum())
-                        }
+                    }
+                    paginator(args.firstOrNull()?.toInt() ?: 1)
+                } else {
+                    val embed = buildEmbed {
                         field(title = "Looping:") {
                             MusicUtils.getLoopingMode(AudioUtils[event.guild].trackScheduler)
                         }
@@ -64,25 +80,14 @@ class QueueCommand : Command {
                         field(title = "Now Playing:") {
                             "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
                         }
-                        footer(event.author.effectiveAvatarUrl) {
-                            "Page $num/${pages.size} | Requested by ${event.author.tag}"
-                        }
+                        color { Immutable.SUCCESS }
+                        author("LakePlayer") { event.selfUser.effectiveAvatarUrl }
                     }
+                    event.channel.sendMessage(embed).queue()
                 }
-                paginator(args.firstOrNull()?.toInt() ?: 1)
             } else {
-                val embed = buildEmbed {
-                    field(title = "Looping:") {
-                        MusicUtils.getLoopingMode(AudioUtils[event.guild].trackScheduler)
-                    }
-                    field(title = "Volume") { "${AudioUtils[event.guild].audioPlayer.volume}%" }
-                    field(title = "Now Playing:") {
-                        "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
-                    }
-                    color { Immutable.SUCCESS }
-                    author("LakePlayer") { event.selfUser.effectiveAvatarUrl }
-                }
-                event.channel.sendMessage(embed).queue()
+                event.sendFailure("Queue is empty!").queue()
+                AudioUtils.clear(event.guild)
             }
         }
     }
