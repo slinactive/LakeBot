@@ -27,6 +27,7 @@ import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -80,7 +81,9 @@ object ImageUtils {
     fun getImagedText(content: List<String>): ByteArray {
         var bufferedImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
         var graphics = bufferedImage.createGraphics()
-        val font = Font("SF Pro Display", Font.BOLD, 15)
+        val font = Font
+                .createFont(Font.TRUETYPE_FONT, File("src/main/resources/LakeBot-San-Francisco-Font.otf"))
+                .deriveFont(21f)
         graphics.font = font
         val fm = graphics.fontMetrics
         val width = fm.stringWidth(content.sortedWith(compareBy { it.count() }).last()) + 3
@@ -97,14 +100,9 @@ object ImageUtils {
         graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
         graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
-        //g.font = font
-        //fm = g.fontMetrics
-        //g.background = Color(255, 255, 255, 0)
-        //g.clearRect(0, 0, width, height)
         graphics.font = font
         var index = fm.ascent
         for (line in content) {
-            //g.drawString(line, 0, fm.ascent * (index + 1))
             graphics.drawString(line, 0, index)
             index += fm.height
         }
