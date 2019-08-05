@@ -70,12 +70,12 @@ repositories {
 }
 
 dependencies {
-    implementation(group = "net.dv8tion", name = "JDA", version = "4.BETA.0_24") { exclude(module = "opus-java") }
+    implementation(group = "net.dv8tion", name = "JDA", version = "4.BETA.0_33") { exclude(module = "opus-java") }
     implementation(group = "org.slf4j", name = "slf4j-simple", version = "1.8.0-beta4")
     implementation(group = "org.json", name = "json", version = "20180813")
     implementation(group = "com.github.kenglxn.QRGen", name = "javase", version = "2.5.0")
     implementation(group = "com.github.ilakeful", name = "lakeweather", version = "0.1.6")
-    implementation(group = "com.sedmelluq", name = "lavaplayer", version = "1.3.17")
+    implementation(group = "com.sedmelluq", name = "lavaplayer", version = "1.3.19")
     implementation(group = "com.google.guava", name = "guava", version = "28.0-jre")
     implementation(group = "khttp", name = "khttp", version = "1.0.0")
     implementation(group = "com.github.markozajc", name = "akiwrapper", version = "1.4.2")
