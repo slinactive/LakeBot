@@ -43,7 +43,7 @@ class TrackScheduler(private val player: AudioPlayer) : AudioEventAdapter() {
     fun nextTrack() {
         val trackToPlay = queue.poll()
         if (trackToPlay !== null) {
-            player.playTrack(if (queue.count { it == trackToPlay } > 1) trackToPlay.makeClone() else trackToPlay)
+            player.playTrack(trackToPlay)
         } else {
             if (player.playingTrack !== null) {
                 player.destroy()
@@ -62,18 +62,22 @@ class TrackScheduler(private val player: AudioPlayer) : AudioEventAdapter() {
                     player.playTrack(clone)
                 }
                 isQueueLoop -> {
-                    nextTrack()
                     val clone = track.makeClone()
                     clone.userData = track.userData
                     queue.offer(clone)
+                    queue -= track
+                    nextTrack()
                 }
-                else -> nextTrack()
+                else -> {
+                    queue -= track
+                    nextTrack()
+                }
             }
         }
     }
     override fun onTrackException(player: AudioPlayer, track: AudioTrack, exception: FriendlyException) {
-        Immutable.LOGGER.error("Playback exception!")
-        Immutable.LOGGER.error(exception.message)
+        Immutable.LOGGER.info("Playback exception!")
+        Immutable.LOGGER.info(exception.message)
     }
     fun clearQueue() = queue.clear()
     inline fun receiveQueue(block: (MutableList<AudioTrack>) -> Unit) {
