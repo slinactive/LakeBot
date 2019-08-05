@@ -40,13 +40,10 @@ class HelpCommand : Command {
                 }
                 timestamp()
                 footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
-                val categories = mutableMapOf<CommandCategory, List<Command>>()
+                val categories = mutableMapOf<CommandCategory, MutableList<Command>>()
                 for (command in CommandHandler.registeredCommands) {
                     val category = command.category
-                    var edit = categories[category]
-                    if (edit == null) {
-                        edit = mutableListOf()
-                    }
+                    val edit: MutableList<Command> = categories[category] ?: mutableListOf()
                     edit += command
                     categories += category to edit
                 }
@@ -63,7 +60,7 @@ class HelpCommand : Command {
             if (emote !== null) {
                 event.message.addReaction(emote).queue()
             } else {
-                event.message.addReaction("\\u2705").queue()
+                event.message.addReaction("\u2705").queue()
             }
             event.author.privateChannel.sendMessage(embed).queue(null) {
                 event.channel.sendMessage(embed).queue()
@@ -105,9 +102,7 @@ class HelpCommand : Command {
                             }
                         }
                         timestamp()
-                        footer(event.author.effectiveAvatarUrl) {
-                            "Requested by ${event.author.tag}"
-                        }
+                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                     }
                     event.channel.sendMessage(embed).queue()
                 } else {
