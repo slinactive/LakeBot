@@ -32,7 +32,7 @@ object YouTubeUtils {
     @JvmField
     val YOUTUBE = YouTube.Builder(NetHttpTransport(), JacksonFactory()) { _ -> }.setApplicationName("lakebot").build()
     @JvmField
-    val VIDEO_REGEX = "(?:https?://)?(?:youtu\\.be/|(?:(www\\.)|(m\\.)|(music\\.))?youtube\\.com/watch(?:\\.php)?\\?.*v=)([\\w\\d-_]){11}(?:(?<list>(PL|LL|FL|UU)[\\w\\d-_]+))?".toRegex()
+    val VIDEO_REGEX = "^((?:https?:)?//)?((?:www|m(?:usic)?)\\.)?((?:youtube\\.com|youtu.be))(/(?:[\\w\\-]+\\?v=|embed/|v/)?)([\\w\\-]+)(\\S+)?\$".toRegex()
     @Throws(IOException::class)
     fun getResults(query: String, limit: Long = 5): List<SearchResult> {
         val list = YOUTUBE.search().list("id,snippet")
