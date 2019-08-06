@@ -50,6 +50,25 @@ class LakeBanCommand : Command {
                     }
                 }
             }
+            event.jda.getUserByTag(args[0]) !== null -> {
+                val user = event.jda.getUserByTag(args[0])!!
+                event.channel.sendConfirmation("Are you sure you want to ban this user?").await {
+                    val boolean = it.awaitNullableConfirmation(event.author)
+                    if (boolean !== null) {
+                        if (boolean) {
+                            user.putLakeBan(event.argsRaw!!.split("\\s+".toRegex(), 2)[1])
+                            event.sendSuccess("${user.tag} got LakeBan!").queue()
+                            it.delete().queue()
+                        } else {
+                            event.sendSuccess("Successfully canceled!").queue()
+                            it.delete().queue()
+                        }
+                    } else {
+                        event.sendFailure("Time is up!").queue()
+                        it.delete().queue()
+                    }
+                }
+            }
             event.guild.searchMembers(args[0]).isNotEmpty() -> {
                 val user = event.guild.searchMembers(args[0])[0].user
                 event.sendConfirmation("Are you sure you want to ban this user?").await {

@@ -45,14 +45,20 @@ class InvertCommand : Command {
                     event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(it)), "inverted.png").queue()
                 }
             } catch (t: Throwable) {
-                if (event.message.mentionedMembers.isNotEmpty()) {
-                    val avatar = "${event.message.mentionedMembers[0].user.effectiveAvatarUrl}?size=2048"
-                    event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
-                } else if (event.guild.searchMembers(event.argsRaw!!).isNotEmpty()) {
-                    val avatar = "${event.guild.searchMembers(event.argsRaw!!)[0].user.effectiveAvatarUrl}?size=2048"
-                    event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
-                } else {
-                    event.sendFailure("That user can't be found!").queue()
+                when {
+                    event.message.mentionedMembers.isNotEmpty() -> {
+                        val avatar = "${event.message.mentionedMembers[0].user.effectiveAvatarUrl}?size=2048"
+                        event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
+                    }
+                    event.guild.getMemberByTag(event.argsRaw!!) !== null -> {
+                        val avatar = "${event.jda.getUserByTag(event.argsRaw!!)!!.effectiveAvatarUrl}?size=2048"
+                        event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
+                    }
+                    event.guild.searchMembers(event.argsRaw!!).isNotEmpty() -> {
+                        val avatar = "${event.guild.searchMembers(event.argsRaw!!)[0].user.effectiveAvatarUrl}?size=2048"
+                        event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
+                    }
+                    else -> event.sendFailure("The user cannot be found!").queue()
                 }
             }
         } else {

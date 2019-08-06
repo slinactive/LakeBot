@@ -36,6 +36,15 @@ class LakeUnbanCommand : Command {
                     event.sendSuccess("User was unbanned successfully!").queue()
                 }
             }
+            event.jda.getUserByTag(event.argsRaw!!) !== null -> {
+                val user = event.jda.getUserByTag(event.argsRaw!!)!!
+                if (user.lakeBan === null) {
+                    event.sendFailure("This user isn't banned!").queue()
+                } else {
+                    user.clearLakeBan()
+                    event.sendSuccess("User was unbanned successfully!").queue()
+                }
+            }
             event.guild.searchMembers(event.argsRaw!!).isNotEmpty() -> {
                 val user = event.guild.searchMembers(event.argsRaw!!)[0].user
                 if (user.lakeBan === null) {

@@ -26,6 +26,7 @@ import org.bson.Document
 
 val User.privateChannel: PrivateChannel
     get() = this.openPrivateChannel().complete()
+@Deprecated("Deprecated since 1.0", replaceWith = ReplaceWith("User#asTag"))
 val User.tag: String
     get() = "${this.name}#${this.discriminator}"
 val User.lakeBan: Document?

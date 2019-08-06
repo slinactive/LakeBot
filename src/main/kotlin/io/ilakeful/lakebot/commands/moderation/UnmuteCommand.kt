@@ -47,6 +47,14 @@ class UnmuteCommand : Command {
                                 event.sendFailure("Couldn't find that user!").queue()
                             }
                         }
+                        args[0] matches Regex.DISCORD_ID && event.guild.getMemberById(args[0]) !== null -> {
+                            val member = event.guild.getMemberById(args[0])!!
+                            unmuteUser(event) { member }
+                        }
+                        event.guild.getMemberByTag(args[0]) !== null -> {
+                            val member = event.guild.getMemberByTag(args[0])!!
+                            unmuteUser(event) { member }
+                        }
                         event.guild.searchMembers(arguments).isNotEmpty() -> {
                             val list = event.guild.searchMembers(arguments).take(5)
                             if (list.size > 1) {
@@ -64,10 +72,6 @@ class UnmuteCommand : Command {
                             } else {
                                 unmuteUser(event) { list.first() }
                             }
-                        }
-                        args[0] matches Regex.DISCORD_ID && event.guild.getMemberById(args[0]) !== null -> {
-                            val member = event.guild.getMemberById(args[0])!!
-                            unmuteUser(event) { member }
                         }
                         else -> event.sendFailure("Couldn't find that user!").queue()
                     }

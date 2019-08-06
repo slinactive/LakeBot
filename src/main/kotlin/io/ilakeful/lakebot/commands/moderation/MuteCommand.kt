@@ -58,6 +58,14 @@ class MuteCommand : Command {
                                 event.sendFailure("Couldn't find that user!").queue()
                             }
                         }
+                        arguments[0] matches Regex.DISCORD_ID && event.guild.getMemberById(arguments[0]) !== null -> {
+                            val member = event.guild.getMemberById(arguments[0])!!
+                            muteUser(event, time, reason) { member }
+                        }
+                        event.guild.getMemberByTag(arguments[0]) !== null -> {
+                            val member = event.guild.getMemberByTag(arguments[0])!!
+                            muteUser(event, time, reason) { member }
+                        }
                         event.guild.searchMembers(arguments[0]).isNotEmpty() -> {
                             val list = event.guild.searchMembers(arguments[0]).take(5)
                             if (list.size > 1) {
@@ -75,10 +83,6 @@ class MuteCommand : Command {
                             } else {
                                 muteUser(event, time, reason) { list.first() }
                             }
-                        }
-                        arguments[0] matches Regex.DISCORD_ID && event.guild.getMemberById(arguments[0]) !== null -> {
-                            val member = event.guild.getMemberById(arguments[0])!!
-                            muteUser(event, time, reason) { member }
                         }
                         else -> event.sendFailure("Couldn't find that user!").queue()
                     }
