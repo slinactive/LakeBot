@@ -43,14 +43,6 @@ fun Guild.searchMembers(target: String): List<Member> {
         getPriority(target, it.user.name)
     }).reversed()
 }
-fun Guild.getMemberByTag(target: String): Member? {
-    val user = jda.getUserByTag(target)
-    return if (user !== null) {
-        if (isMember(user)) {
-            getMember(user)
-        } else null
-    } else null
-}
 fun Guild.searchRoles(target: String): List<Role> {
     val list = roleCache.filter {
         getPriority(target, it.name) > 0
