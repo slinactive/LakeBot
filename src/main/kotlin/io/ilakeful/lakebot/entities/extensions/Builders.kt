@@ -16,6 +16,10 @@
 
 package io.ilakeful.lakebot.entities.extensions
 
+import com.markozajc.akiwrapper.Akiwrapper
+import com.markozajc.akiwrapper.AkiwrapperBuilder
+import com.markozajc.akiwrapper.core.entities.Server
+
 import net.dv8tion.jda.api.*
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.entities.IMentionable
@@ -31,13 +35,14 @@ import java.time.temporal.TemporalAccessor
 inline fun buildJDA(accountType: AccountType = AccountType.BOT, lazyBuilder: JDABuilder.() -> Unit): JDA = JDABuilder(accountType).apply(lazyBuilder)()
 inline fun buildEmbed(lazyBuilder: EmbedBuilder.() -> Unit): MessageEmbed = EmbedBuilder().apply(lazyBuilder).build()
 inline fun buildMessage(lazyBuilder: MessageBuilder.() -> Unit): Message = MessageBuilder().apply(lazyBuilder).build()
-// JDABuilder Extensions
+inline fun buildAkiwrapper(lazyBuilder: AkiwrapperBuilder.() -> Unit): Akiwrapper = AkiwrapperBuilder().apply(lazyBuilder)()
+// JDABuilder extensions
 operator fun JDABuilder.invoke() = build()
 inline infix fun <T: EventListener> JDABuilder.eventListener(lazy: () -> T) = addEventListeners(lazy())
 inline infix fun JDABuilder.token(lazy: () -> String) = setToken(lazy())
 inline infix fun JDABuilder.onlineStatus(lazy: () -> OnlineStatus) = setStatus(lazy())
 inline infix fun JDABuilder.game(lazy: () -> Activity) = setActivity(lazy())
-// MessageBuilder Extensions
+// MessageBuilder extensions
 inline infix fun MessageBuilder.embed(crossinline lazy: EmbedBuilder.() -> Unit) = setEmbed(EmbedBuilder().apply(lazy).build())
 inline infix fun MessageBuilder.content(crossinline lazy: () -> String) = setContent(lazy())
 inline infix fun MessageBuilder.append(crossinline lazy: () -> CharSequence) = append(lazy())
@@ -45,7 +50,7 @@ inline infix fun MessageBuilder.appendln(crossinline lazy: () -> CharSequence) =
 inline infix fun MessageBuilder.mention(crossinline lazy: () -> IMentionable) = append(lazy())
 inline infix fun MessageBuilder.tts(crossinline lazy: () -> Boolean) = setTTS(lazy())
 operator fun MessageBuilder.invoke() = build()
-// EmbedBuilder Extensions
+// EmbedBuilder extensions
 fun EmbedBuilder.setTimestamp() = setTimestamp(OffsetDateTime.now())
 fun EmbedBuilder.timestamp(lazy: () -> TemporalAccessor = { OffsetDateTime.now() }) = setTimestamp(lazy())
 inline infix fun EmbedBuilder.description(crossinline lazy: () -> String) = setDescription(lazy())
@@ -64,3 +69,10 @@ inline fun EmbedBuilder.footer(url: String? = null, crossinline lazy: () -> Stri
 inline fun EmbedBuilder.field(inline: Boolean = false, title: String, crossinline desc: () -> String) = addField(title, desc(), inline)
 inline fun MessageEmbed.edit(crossinline lazy: EmbedBuilder.() -> Unit) = EmbedBuilder(this).apply(lazy)()
 operator fun EmbedBuilder.invoke() = build()
+// AkiwrapperBuilder extensions
+inline infix fun AkiwrapperBuilder.localization(crossinline lazy: () -> Server.Language) = setLocalization(lazy())
+inline infix fun AkiwrapperBuilder.filterProfanity(crossinline lazy: () -> Boolean) = setFilterProfanity(lazy())
+inline infix fun AkiwrapperBuilder.server(crossinline lazy: () -> Server) = setServer(lazy())
+inline infix fun AkiwrapperBuilder.userAgent(crossinline lazy: () -> String) = setUserAgent(lazy())
+inline infix fun AkiwrapperBuilder.name(crossinline lazy: () -> String) = setName(lazy())
+operator fun AkiwrapperBuilder.invoke(): Akiwrapper = build()

@@ -18,6 +18,7 @@ package io.ilakeful.lakebot.entities.extensions
 
 import net.dv8tion.jda.api.entities.MessageChannel
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.EmbedBuilder
 
 import io.ilakeful.lakebot.Immutable
 import io.ilakeful.lakebot.entities.EventWaiter
@@ -25,6 +26,7 @@ import io.ilakeful.lakebot.entities.EventWaiter
 import java.util.concurrent.TimeUnit
 
 suspend fun MessageChannel.awaitMessage(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) = EventWaiter.awaitMessage(user, this, delay, unit)
+fun MessageChannel.sendEmbed(lazyBuilder: EmbedBuilder.() -> Unit) = this.sendMessage(buildEmbed(lazyBuilder))
 fun MessageChannel.sendSuccess(text: String) = this.sendMessage(buildEmbed {
     color { Immutable.SUCCESS }
     author { "Success!" }

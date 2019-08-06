@@ -18,7 +18,6 @@ package io.ilakeful.lakebot.commands.`fun`
 
 import com.markozajc.akiwrapper.Akiwrapper
 import com.markozajc.akiwrapper.Akiwrapper.Answer
-import com.markozajc.akiwrapper.AkiwrapperBuilder
 import com.markozajc.akiwrapper.core.entities.Server
 
 import io.ilakeful.lakebot.Immutable
@@ -55,45 +54,56 @@ class AkinatorCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         try {
             val language = languages[args.firstOrNull()?.toLowerCase() ?: "english"] ?: throw IllegalArgumentException("That's invalid language!")
-            val api = AkiwrapperBuilder()
-                    .setLocalization(language)
-                    .setFilterProfanity(!event.textChannel.isNSFW)
-                    .build()
-            event.channel.sendMessage(buildEmbed {
+            val api = buildAkiwrapper {
+                localization { language }
+                filterProfanity { !event.textChannel.isNSFW }
+            }
+            val declined = mutableSetOf<Long>()
+            event.channel.sendEmbed {
                 author { "Question #${api.currentQuestion!!.step + 1}:" }
                 description { api.currentQuestion!!.question.capitalize() }
                 footer { "Type in \"exit\" to kill the process" }
                 color { Immutable.SUCCESS }
-            }).await {
+            }.await {
                 USERS_WITH_PROCESSES += event.author
-                awaitAnswer(event, api)
+                awaitAnswer(event, api, declined)
             }
         } catch (e: Exception) {
-            event.sendFailure(e.message ?: "Something went wrong!").queue()
+            event.channel.sendFailure(e.message ?: "Something went wrong!").queue()
         }
     }
-    private suspend fun awaitAnswer(event: MessageReceivedEvent, wrapper: Akiwrapper) {
+    private suspend fun awaitAnswer(event: MessageReceivedEvent, wrapper: Akiwrapper, declined: MutableSet<Long>) {
         val content = event.channel.awaitMessage(event.author)?.contentRaw?.toLowerCase()
         if (content !== null) {
-            val possibleAnswers = setOf("help", "back", "b", "return", "alias", "aliases", "y", "n", "d", "p", "pn", "dk", "perhaps", "likely", "unlikely", "nope", "yes", "yup", "yep", "yeah", "yea", "no", "no u", "nah", "dont know", "dunno", "idk", "don't know", "probably", "probably not", "exit")
+            val possibleAnswers = setOf(
+                    "help",
+                    "back", "b", "return",
+                    "alias", "aliases",
+                    "y", "yes", "yup", "yep", "yeah", "yea",
+                    "n", "no", "no u", "nope", "nah",
+                    "d", "dk", "dont know", "dunno", "idk", "don't know",
+                    "p", "probably", "perhaps", "likely",
+                    "pn", "probably not", "unlikely",
+                    "exit"
+            )
             if (content in possibleAnswers) {
                 when (content) {
-                    "exit" -> event.sendConfirmation("Are you sure you want to exit?").await {
+                    "exit" -> event.channel.sendConfirmation("Are you sure you want to exit?").await {
                         val bool = it.awaitNullableConfirmation(event.author)
                         if (bool !== null) {
                             if (bool) {
                                 it.delete().queue()
-                                event.sendSuccess("Successfully stopped!").queue()
+                                event.channel.sendSuccess("Successfully stopped!").queue()
                                 USERS_WITH_PROCESSES -= event.author
                             } else {
                                 it.delete().queue()
-                                event.sendSuccess("Let's go!").await {
-                                    awaitAnswer(event, wrapper)
+                                event.channel.sendSuccess("Let's go!").await {
+                                    awaitAnswer(event, wrapper, declined)
                                 }
                             }
                         }
                     }
-                    "alias", "aliases" -> event.sendMessage(buildEmbed {
+                    "alias", "aliases" -> event.channel.sendEmbed {
                         color { Immutable.SUCCESS }
                         author("Aliases For Answers:") { event.selfUser.effectiveAvatarUrl }
                         field(title = "Yes:") { "\u2022 Yeah\n\u2022 Yep\n\u2022 Yup\n\u2022 Y\n\u2022 Yea" }
@@ -102,74 +112,100 @@ class AkinatorCommand : Command {
                         field(title = "Probably:") { "\u2022 P\n\u2022 Perhaps\n\u2022 Likely" }
                         field(title = "Probably Not:") { "\u2022 PN\n\u2022 Unlikely" }
                         field(title = "Back:") { "\u2022 Return\n\u2022 B" }
-                    }).await { awaitAnswer(event, wrapper) }
+                    }.await { awaitAnswer(event, wrapper, declined) }
                     "help" -> {
                         CommandHandler["help"]!!(event, arrayOf(name))
-                        awaitAnswer(event, wrapper)
+                        awaitAnswer(event, wrapper, declined)
                     }
                     else -> {
-                        if (wrapper.currentQuestion !== null && wrapper.guesses.filter { it.probability > 0.825 }.isEmpty()) {
-                            val answer = when (content) {
-                                "yes", "yeah", "yep", "yup", "y", "yea" -> Answer.YES
-                                "no", "nah", "no u", "n", "nope" -> Answer.NO
-                                "dont know", "idk", "dunno", "don't know", "d" -> Answer.DONT_KNOW
-                                "probably", "p", "perhaps", "likely" -> Answer.PROBABLY
-                                "probably not", "pn", "unlikely" -> Answer.PROBABLY_NOT
-                                else -> Answer.DONT_KNOW
-                            }
-                            /*if (content == "back" || content == "return" || content == "b") {
-                                //if (wrapper.currentQuestion?.step != 0) {
-                                    wrapper.undoAnswer()
-                                //}
-                            } else {
-                                wrapper.answerCurrentQuestion(answer)
-                            }
-                            event.channel.sendMessage(buildEmbed {
-                                author { "Question #${wrapper.currentQuestion!!.step + 1}:" }
-                                description { wrapper.currentQuestion!!.question.capitalize() }
+                        val guess = wrapper.guesses.firstOrNull { it.probability >= 0.85 && it.idLong !in declined }
+                        val answer = when (content) {
+                            "yes", "yeah", "yep", "yup", "y", "yea" -> Answer.YES
+                            "no", "nah", "no u", "n", "nope" -> Answer.NO
+                            "dont know", "idk", "dunno", "don't know", "d" -> Answer.DONT_KNOW
+                            "probably", "p", "perhaps", "likely" -> Answer.PROBABLY
+                            "probably not", "pn", "unlikely" -> Answer.PROBABLY_NOT
+                            else -> Answer.DONT_KNOW
+                        }
+                        val backCheck = content == "back" || content == "return" || content == "b"
+                        if (wrapper.currentQuestion !== null && guess === null && !backCheck) {
+                            event.channel.sendEmbed {
+                                val question = wrapper.answerCurrentQuestion(answer)
+                                author { "Question #${question!!.step + 1}:" }
+                                description { question!!.question.capitalize() }
                                 footer { "Type in \"exit\" to kill the process" }
                                 color { Immutable.SUCCESS }
-                            }).await {
-                                awaitAnswer(event, wrapper)
-                            }*/
-                            event.channel.sendMessage(buildEmbed {
-                                if (content == "back" || content == "return" || content == "b") {
-                                    val q = if (wrapper.currentQuestion?.step != 0) wrapper.undoAnswer()!! else wrapper.currentQuestion!!
-                                    author { "Question #${q.step + 1}:" }
-                                    description { q.question.capitalize() }
-                                    footer { "Type in \"exit\" to kill the process" }
-                                    color { Immutable.SUCCESS }
-                                } else {
-                                    val q = wrapper.answerCurrentQuestion(answer)!!
-                                    author { "Question #${q.step + 1}:" }
-                                    description { q.question.capitalize() }
-                                    footer { "Type in \"exit\" to kill the process" }
-                                    color { Immutable.SUCCESS }
-                                }
-                            }).await {
-                                awaitAnswer(event, wrapper)
+                            }.await {
+                                awaitAnswer(event, wrapper, declined)
                             }
                         } else {
-                            val guess = wrapper.guesses.first { it.probability > 0.825 }
-                            val embed = buildEmbed {
-                                field(true, "Name:") { guess.name }
-                                field(true, "Description:") { guess.description?.capitalize() ?: "None" }
-                                image { guess.image?.toString() }
-                                color { Immutable.SUCCESS }
+                            when {
+                                backCheck -> {
+                                    event.channel.sendEmbed {
+                                        val question = if (wrapper.currentQuestion?.step != 0) wrapper.undoAnswer() else wrapper.currentQuestion
+                                        author { "Question #${question!!.step + 1}:" }
+                                        description { question!!.question.capitalize() }
+                                        footer { "Type in \"exit\" to kill the process" }
+                                        color { Immutable.SUCCESS }
+                                    }.await {
+                                        awaitAnswer(event, wrapper, declined)
+                                    }
+                                }
+                                guess !== null -> {
+                                    event.channel.sendEmbed {
+                                        field(true, "Name:") { guess.name }
+                                        field(true, "Description:") { guess.description?.capitalize() ?: "None" }
+                                        image { guess.image?.toString() }
+                                        color { Immutable.SUCCESS }
+                                    }.await {
+                                        event.channel.sendEmbed {
+                                            author { "Guess Review!" }
+                                            description { "Is that the character?" }
+                                            color { Immutable.SUCCESS }
+                                        }.await {
+                                            val bool = it.awaitNullableConfirmation(event.author)
+                                            if (bool !== null) {
+                                                if (bool) {
+                                                    it.delete().queue()
+                                                    USERS_WITH_PROCESSES -= event.author
+                                                } else {
+                                                    it.delete().queue()
+                                                    declined += guess.idLong
+                                                    event.channel.sendEmbed {
+                                                        val question = if (content == "back" || content == "return" || content == "b") {
+                                                            if (wrapper.currentQuestion?.step != 0) wrapper.undoAnswer() else wrapper.currentQuestion
+                                                        } else wrapper.answerCurrentQuestion(answer)
+                                                        author { "Question #${question!!.step + 1}:" }
+                                                        description { question!!.question.capitalize() }
+                                                        footer { "Type in \"exit\" to kill the process" }
+                                                        color { Immutable.SUCCESS }
+                                                    }.await {
+                                                        awaitAnswer(event, wrapper, declined)
+                                                    }
+                                                }
+                                            } else {
+                                                it.delete().queue()
+                                                USERS_WITH_PROCESSES -= event.author
+                                            }
+                                        }
+                                    }
+                                }
+                                wrapper.currentQuestion === null -> {
+                                    USERS_WITH_PROCESSES -= event.author
+                                    event.channel.sendFailure("You win! Akinator was unable to guess the character!").queue()
+                                }
                             }
-                            event.channel.sendMessage(embed).queue()
-                            USERS_WITH_PROCESSES -= event.author
                         }
                     }
                 }
             } else {
-                event.sendFailure("Incorrect answer! Use `aliases` or `help` to get documentation!").await {
-                    awaitAnswer(event, wrapper)
+                event.channel.sendFailure("Incorrect answer! Use `aliases` or `help` to get documentation!").await {
+                    awaitAnswer(event, wrapper, declined)
                 }
             }
         } else {
             USERS_WITH_PROCESSES -= event.author
-            event.sendFailure("Time is up!").queue()
+            event.channel.sendFailure("Time is up!").queue()
         }
     }
 }
