@@ -30,11 +30,11 @@ class SkipCommand : Command {
     override val description = "The command playing the next track from the current queue"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val manager = AudioUtils[event.guild]
-        val playing = manager.audioPlayer.playingTrack
-        if (playing !== null) {
+        if (manager.audioPlayer.playingTrack !== null) {
             if (event.member!!.isConnected) {
                 manager.trackScheduler.nextTrack()
                 try {
+                    val playing = manager.audioPlayer.playingTrack
                     event.channel.sendSuccess("Skipped to the next track ([${playing.info.title}](${playing.info.uri}))!").queue()
                 } catch (e: Exception) {
                     event.channel.sendSuccess("Playback was successfully stopped!").queue()
