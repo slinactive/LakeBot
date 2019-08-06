@@ -99,7 +99,7 @@ class TicTacToeCommand : Command {
         }
     }
     override val name = "tictactoe"
-    override val description = "The command allowing you to challenge someone to play tic-tac-toe"
+    override val description = "The command allowing you to challenge someone to the tic-tac-toe game"
     override val aliases = listOf("ttt", "tic-tac-toe")
     override val usage: (String) -> String = { "${super.usage(it)} <user>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
@@ -117,7 +117,7 @@ class TicTacToeCommand : Command {
                     event.channel.sendMessage(opponent.asMention).embed(buildEmbed {
                         color { Immutable.CONFIRMATION }
                         author { "Warning!" }
-                        description { "You were challenged by ${starter.asMention} to play tic-tac-toe! Want to accept the challenge?" }
+                        description { "You were challenged by ${starter.asMention} to the tic-tac-toe game! Want to accept the challenge?" }
                     }).await {
                         val isWillingToPlay = EventWaiter.awaitNullableConfirmation(it, opponent)
                         if (isWillingToPlay !== null) {
@@ -167,7 +167,7 @@ class TicTacToeCommand : Command {
             when {
                 content.isInt && content.toInt() in 1..9 -> {
                     try {
-                        val (row, column) = TicTacToe.COORDS[content.toInt()]!!
+                        val (row, column) = TicTacToe.COORDS.getValue(content.toInt())
                         val sign = if (ttt.currentTurn == author) cross else nought
                         ttt.turn(row, column, sign)
                         if (!ttt.isOver) {
