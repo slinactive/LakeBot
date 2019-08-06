@@ -16,12 +16,10 @@
 
 package io.ilakeful.lakebot.entities.handlers
 
+import io.ilakeful.lakebot.Immutable
 import io.ilakeful.lakebot.USERS_WITH_PROCESSES
 import io.ilakeful.lakebot.commands.Command
-import io.ilakeful.lakebot.entities.extensions.isLBDeveloper
-import io.ilakeful.lakebot.entities.extensions.lakeBan
-import io.ilakeful.lakebot.entities.extensions.prefix
-import io.ilakeful.lakebot.entities.extensions.sendFailure
+import io.ilakeful.lakebot.entities.extensions.*
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -58,6 +56,20 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
     }
     internal operator fun invoke(event: MessageReceivedEvent) {
         if (!event.author.isBot && !event.author.isFake && event.channelType.isGuild && event.message.type == MessageType.DEFAULT) {
+            if (event.message.contentRaw == event.selfUser.asMention) {
+                event.jda.retrieveApplicationInfo().queue {
+                    event.channel.sendEmbed {
+                        color { Immutable.SUCCESS }
+                        author("Welcome!") { event.selfUser.effectiveAvatarUrl }
+                        description {
+                            "Hello! Welcome to ${event.selfUser.name}! Let's get started! " +
+                                    "To get documentation, type in the \"${event.guild.prefix}help\" command. " +
+                                    "If you have any questions, try to contact ${it.owner.asTag}!"
+                        }
+                    }.queue()
+                }
+                return
+            }
             if (event.message.contentRaw.startsWith(event.guild.prefix, true)) {
                 val args = event.message.contentRaw.split("\\s".toRegex(), 2)
                 val command = this[args[0].toLowerCase().substring(event.guild.prefix.length)]
