@@ -27,7 +27,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 class ShuffleCommand : Command {
     override val name = "shuffle"
     override val aliases = listOf("rq", "randomize-queue")
-    override val description = "null"
+    override val description = "The command shuffling the current queue"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val manager = AudioUtils[event.guild]
         if (manager.audioPlayer.playingTrack !== null) {
