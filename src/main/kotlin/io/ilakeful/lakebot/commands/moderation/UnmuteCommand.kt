@@ -51,8 +51,8 @@ class UnmuteCommand : Command {
                             val member = event.guild.getMemberById(args[0])!!
                             unmuteUser(event) { member }
                         }
-                        event.guild.getMemberByTag(args[0]) !== null -> {
-                            val member = event.guild.getMemberByTag(args[0])!!
+                        event.guild.getMemberByTagSafely(args[0]) !== null -> {
+                            val member = event.guild.getMemberByTagSafely(args[0])!!
                             unmuteUser(event) { member }
                         }
                         event.guild.searchMembers(arguments).isNotEmpty() -> {

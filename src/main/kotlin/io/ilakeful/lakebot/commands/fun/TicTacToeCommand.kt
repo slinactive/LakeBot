@@ -108,7 +108,7 @@ class TicTacToeCommand : Command {
                 val starter = event.author
                 val opponent = when {
                     event.message.mentionedMembers.isNotEmpty() -> event.message.mentionedMembers.first().user
-                    event.guild.getMemberByTag(args[0]) !== null -> event.jda.getUserByTag(args[0])!!
+                    event.guild.getMemberByTagSafely(args[0]) !== null -> event.jda.getUserByTagSafely(args[0])!!
                     event.guild.searchMembers(args[0]).isNotEmpty() -> event.guild.searchMembers(args[0]).first().user
                     else -> throw IllegalArgumentException("Couldn't find this user!")
                 }

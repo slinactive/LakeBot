@@ -50,8 +50,8 @@ class LakeBanCommand : Command {
                     }
                 }
             }
-            event.jda.getUserByTag(args[0]) !== null -> {
-                val user = event.jda.getUserByTag(args[0])!!
+            event.jda.getUserByTagSafely(args[0]) !== null -> {
+                val user = event.jda.getUserByTagSafely(args[0])!!
                 event.channel.sendConfirmation("Are you sure you want to ban this user?").await {
                     val boolean = it.awaitNullableConfirmation(event.author)
                     if (boolean !== null) {

@@ -43,7 +43,7 @@ class UserCommand : Command {
         if (arguments !== null) {
             when {
                 event.message.mentionedMembers.isNotEmpty() -> userMenu(event, event.message.mentionedMembers[0])
-                event.guild.getMemberByTag(arguments) !== null -> userMenu(event, event.guild.getMemberByTag(arguments)!!)
+                event.guild.getMemberByTagSafely(arguments) !== null -> userMenu(event, event.guild.getMemberByTagSafely(arguments)!!)
                 event.guild.searchMembers(arguments).isNotEmpty() -> {
                     val list = event.guild.searchMembers(arguments).take(5)
                     if (list.size > 1) {

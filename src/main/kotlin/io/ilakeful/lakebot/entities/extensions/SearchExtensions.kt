@@ -35,6 +35,16 @@ fun JDA.searchGuilds(target: String): List<Guild> {
         getPriority(target, it.name)
     }).reversed()
 }
+fun JDA.getUserByTagSafely(tag: String): User? = try {
+    getUserByTag(tag)
+} catch (e: Exception) {
+    null
+}
+fun Guild.getMemberByTagSafely(tag: String): Member? = try {
+    getMemberByTag(tag)
+} catch (e: Exception) {
+    null
+}
 fun Guild.searchMembers(target: String): List<Member> {
     val list = memberCache.filter {
         getPriority(target, it.user.name) > 0

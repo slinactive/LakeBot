@@ -17,9 +17,7 @@
 package io.ilakeful.lakebot.commands.`fun`
 
 import io.ilakeful.lakebot.commands.Command
-import io.ilakeful.lakebot.entities.extensions.argsRaw
-import io.ilakeful.lakebot.entities.extensions.searchMembers
-import io.ilakeful.lakebot.entities.extensions.sendFailure
+import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.utils.ImageUtils
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
@@ -50,8 +48,8 @@ class InvertCommand : Command {
                         val avatar = "${event.message.mentionedMembers[0].user.effectiveAvatarUrl}?size=2048"
                         event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
                     }
-                    event.guild.getMemberByTag(event.argsRaw!!) !== null -> {
-                        val avatar = "${event.jda.getUserByTag(event.argsRaw!!)!!.effectiveAvatarUrl}?size=2048"
+                    event.guild.getMemberByTagSafely(event.argsRaw!!) !== null -> {
+                        val avatar = "${event.jda.getUserByTagSafely(event.argsRaw!!)!!.effectiveAvatarUrl}?size=2048"
                         event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
                     }
                     event.guild.searchMembers(event.argsRaw!!).isNotEmpty() -> {
@@ -62,7 +60,7 @@ class InvertCommand : Command {
                 }
             }
         } else {
-            if (!event.message.attachments.isEmpty()) {
+            if (event.message.attachments.isNotEmpty()) {
                 val attachment = event.message.attachments[0]
                 if (attachment.isImage) {
                     val att = "${attachment.url}?size=2048"

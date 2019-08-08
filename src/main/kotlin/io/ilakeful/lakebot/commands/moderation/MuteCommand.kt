@@ -62,8 +62,8 @@ class MuteCommand : Command {
                             val member = event.guild.getMemberById(arguments[0])!!
                             muteUser(event, time, reason) { member }
                         }
-                        event.guild.getMemberByTag(arguments[0]) !== null -> {
-                            val member = event.guild.getMemberByTag(arguments[0])!!
+                        event.guild.getMemberByTagSafely(arguments[0]) !== null -> {
+                            val member = event.guild.getMemberByTagSafely(arguments[0])!!
                             muteUser(event, time, reason) { member }
                         }
                         event.guild.searchMembers(arguments[0]).isNotEmpty() -> {
