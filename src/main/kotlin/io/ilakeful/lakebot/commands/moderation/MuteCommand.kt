@@ -117,7 +117,9 @@ class MuteCommand : Command {
                         }
                         event.sendSuccess("${user.tag} was successfully muted!").queue()
                         event.guild.addRoleToMember(member, role).queue()
-                        user.privateChannel.sendMessage(embed).queue(null) { _ -> }
+                        user.openPrivateChannel().queue { channel ->
+                            channel.sendMessage(embed).queue(null) {}
+                        }
                         val timer = Timer()
                         timer.schedule(time) {
                             try {

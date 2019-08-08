@@ -62,8 +62,10 @@ class HelpCommand : Command {
             } else {
                 event.message.addReaction("\u2705").queue()
             }
-            event.author.privateChannel.sendMessage(embed).queue(null) {
-                event.channel.sendMessage(embed).queue()
+            event.author.openPrivateChannel().queue {
+                it.sendMessage(embed).queue(null) {
+                    event.channel.sendMessage(embed).queue()
+                }
             }
         } else {
             val command = CommandHandler[args[0]]

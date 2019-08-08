@@ -48,25 +48,28 @@ object EventHandler : ListenerAdapter() {
     } catch (ignored: InsufficientPermissionException) {
     } catch (t: Throwable) {
         event.jda.retrieveApplicationInfo().queue {
-            it.owner.privateChannel.sendMessage(buildEmbed {
-                color { Immutable.FAILURE }
-                author(t::class.simpleName ?: t.javaClass.simpleName ?: "Unknown Exception") { event.selfUser.effectiveAvatarUrl }
-                field(true, "Command:") {
-                    try {
-                        event.message.contentRaw.split("\\s+".toRegex(), 2)[0]
-                    } catch (e: Exception) {
-                        "Unknown command"
+            it.owner.openPrivateChannel().queue { channel ->
+                channel.sendEmbed {
+                    color { Immutable.FAILURE }
+                    author(t::class.simpleName ?: t.javaClass.simpleName
+                    ?: "Unknown Exception") { event.selfUser.effectiveAvatarUrl }
+                    field(true, "Command:") {
+                        try {
+                            event.message.contentRaw.split("\\s+".toRegex(), 2)[0]
+                        } catch (e: Exception) {
+                            "Unknown command"
+                        }
                     }
-                }
-                field(true, "Arguments:") { event.argsRaw ?: "None" }
-                field(true, "Guild:") { event.guild.name }
-                field(true, "Author:") { event.author.tag }
-                field(true, "Guild ID:") { event.guild.id }
-                field(true, "Author ID:") { event.author.id }
-                field(title = "Message:") { t.message?.safeSubstring(0, 1024) ?: "None" }
-                timestamp()
-                thumbnail { event.selfUser.effectiveAvatarUrl }
-            })
+                    field(true, "Arguments:") { event.argsRaw ?: "None" }
+                    field(true, "Guild:") { event.guild.name }
+                    field(true, "Author:") { event.author.asTag }
+                    field(true, "Guild ID:") { event.guild.id }
+                    field(true, "Author ID:") { event.author.id }
+                    field(title = "Message:") { t.message?.safeSubstring(0, 1024) ?: "None" }
+                    timestamp()
+                    thumbnail { event.selfUser.effectiveAvatarUrl }
+                }.queue()
+            }
         }
     }
     override fun onRoleDelete(event: RoleDeleteEvent) {

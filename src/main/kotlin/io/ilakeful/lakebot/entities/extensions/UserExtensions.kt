@@ -19,13 +19,10 @@ package io.ilakeful.lakebot.entities.extensions
 import io.ilakeful.lakebot.Immutable
 import io.ilakeful.lakebot.utils.ConfigUtils
 
-import net.dv8tion.jda.api.entities.PrivateChannel
 import net.dv8tion.jda.api.entities.User
 
 import org.bson.Document
 
-val User.privateChannel: PrivateChannel
-    get() = this.openPrivateChannel().complete()
 @Deprecated("Deprecated since 1.0", replaceWith = ReplaceWith("User#asTag"))
 val User.tag: String
     get() = "${this.name}#${this.discriminator}"
