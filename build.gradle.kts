@@ -48,7 +48,7 @@ application {
     mainClassName = "io.ilakeful.lakebot.LakeBotKt"
     applicationName = "lakebot"
     group = "io.ilakeful.lakebot"
-    version = "1.0-BETA8"
+    version = "1.0-BETA9"
 }
 
 java {
