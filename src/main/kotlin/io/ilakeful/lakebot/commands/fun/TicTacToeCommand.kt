@@ -114,7 +114,7 @@ class TicTacToeCommand : Command {
                     else -> throw IllegalArgumentException("Couldn't find this user!")
                 }
                 if (!opponent.isBot && !opponent.isFake && opponent != event.author) {
-                    val process = WaiterProcess(mutableListOf(starter, opponent), event.textChannel)
+                    val process = WaiterProcess(mutableListOf(starter, opponent), event.textChannel, this)
                     WAITER_PROCESSES += process
                     event.channel.sendMessage(opponent.asMention).embed(buildEmbed {
                         color { Immutable.CONFIRMATION }

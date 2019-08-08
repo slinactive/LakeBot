@@ -40,7 +40,7 @@ class RoleCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
-            val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+            val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
             when {
                 event.message.mentionedRoles.isNotEmpty() -> roleMenu(event, event.message.mentionedRoles[0], process)
                 event.guild.searchRoles(arguments).isNotEmpty() -> {

@@ -66,7 +66,7 @@ class AkinatorCommand : Command {
                 footer { "Type in \"exit\" to kill the process" }
                 color { Immutable.SUCCESS }
             }.await {
-                val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+                val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
                 WAITER_PROCESSES += process
                 awaitAnswer(event, api, declined, process)
             }

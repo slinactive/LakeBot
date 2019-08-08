@@ -58,8 +58,8 @@ class YouTubeCommand : Command {
                         }
                     }
                     event.channel.sendMessage(embed).await {
-                        val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
-                        WAITER_PROCESSES += WaiterProcess(mutableListOf(event.author), event.textChannel)
+                        val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
+                        WAITER_PROCESSES += process
                         awaitInt(event, videos, it, process)
                     }
                 } else {

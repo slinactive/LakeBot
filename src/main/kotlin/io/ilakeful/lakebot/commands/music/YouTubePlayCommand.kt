@@ -66,7 +66,7 @@ class YouTubePlayCommand : PlayCommand() {
                                 }
                             }).await {
                                 try {
-                                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+                                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
                                     WAITER_PROCESSES += process
                                     this.awaitInt(event, videos, it, process)
                                 } catch (e: Exception) {

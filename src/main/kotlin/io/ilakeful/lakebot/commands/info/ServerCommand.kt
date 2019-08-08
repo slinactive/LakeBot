@@ -92,7 +92,7 @@ class ServerCommand : Command {
         author { "Select The Action:" }
         description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Avatar" }
     }).await {
-        val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+        val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
         WAITER_PROCESSES += process
         it.addReaction("\u0031\u20E3").complete()
         it.addReaction("\u0032\u20E3").complete()

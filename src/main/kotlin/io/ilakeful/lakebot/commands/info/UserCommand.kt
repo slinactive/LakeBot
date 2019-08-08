@@ -41,7 +41,7 @@ class UserCommand : Command {
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user (optional)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
-        val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+        val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
         if (arguments !== null) {
             when {
                 event.message.mentionedMembers.isNotEmpty() -> userMenu(event, event.message.mentionedMembers[0], process)

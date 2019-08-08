@@ -16,11 +16,13 @@
 
 package io.ilakeful.lakebot.entities
 
+import io.ilakeful.lakebot.commands.Command
+
 import java.util.UUID
 
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.entities.User
 
-data class WaiterProcess(val users: MutableList<User>, val channel: TextChannel) {
+data class WaiterProcess(val users: MutableList<User>, val channel: TextChannel, val command: Command?) {
     val id = UUID.randomUUID().toString()
 }

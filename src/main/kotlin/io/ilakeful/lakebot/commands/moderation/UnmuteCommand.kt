@@ -67,7 +67,7 @@ class UnmuteCommand : Command {
                                     }
                                     footer { "Type in \"exit\" to kill the process" }
                                 }).await {
-                                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+                                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
                                     WAITER_PROCESSES += process
                                     selectUser(event, it, list, process)
                                 }
