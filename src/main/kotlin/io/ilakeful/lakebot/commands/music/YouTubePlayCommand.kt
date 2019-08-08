@@ -19,7 +19,8 @@ package io.ilakeful.lakebot.commands.music
 import com.google.api.services.youtube.model.Video
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.utils.AudioUtils
 import io.ilakeful.lakebot.utils.TimeUtils
@@ -65,8 +66,9 @@ class YouTubePlayCommand : PlayCommand() {
                                 }
                             }).await {
                                 try {
-                                    USERS_WITH_PROCESSES += event.author
-                                    this.awaitInt(event, videos, it)
+                                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+                                    WAITER_PROCESSES += process
+                                    this.awaitInt(event, videos, it, process)
                                 } catch (e: Exception) {
                                     event.sendFailure("Something went wrong searching YouTube!").queue()
                                 }
@@ -85,7 +87,7 @@ class YouTubePlayCommand : PlayCommand() {
             event.sendFailure("You specified no link/query!").queue()
         }
     }
-    private suspend fun awaitInt(event: MessageReceivedEvent, videos: List<Video>, msg: Message) {
+    private suspend fun awaitInt(event: MessageReceivedEvent, videos: List<Video>, msg: Message, process: WaiterProcess) {
         val c = event.channel.awaitMessage(event.author)?.contentRaw
         if (c !== null) {
             if (c.isInt) {
@@ -95,20 +97,20 @@ class YouTubePlayCommand : PlayCommand() {
                     val video = videos[index]
                     val link = "https://youtu.be/${video.id}"
                     AudioUtils.loadAndPlay(event.guild, event.textChannel, link)
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                 } else {
-                    event.sendFailure("Try again!").await { awaitInt(event, videos, msg) }
+                    event.sendFailure("Try again!").await { awaitInt(event, videos, msg, process) }
                 }
             } else if (c.toLowerCase() == "exit") {
                 msg.delete().queue()
-                USERS_WITH_PROCESSES -= event.author
+                WAITER_PROCESSES -= process
                 event.sendSuccess("Process successfully stopped!").queue()
             } else {
-                event.sendFailure("Try again!").await { awaitInt(event, videos, msg) }
+                event.sendFailure("Try again!").await { awaitInt(event, videos, msg, process) }
             }
         } else {
             msg.delete().queue()
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
             event.sendFailure("Time is up!").queue()
         }
     }

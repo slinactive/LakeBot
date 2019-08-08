@@ -17,8 +17,9 @@
 package io.ilakeful.lakebot.commands.music
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.entities.pagination.buildPaginator
 import io.ilakeful.lakebot.utils.AudioUtils
@@ -52,6 +53,7 @@ class LyricsCommand : Command {
     override val description = "The command sending the lyrics of the specified or current playing song"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <song name (optional if song is being played now by bot)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
+        val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
         val arguments = event.argsRaw
         if (arguments !== null) {
             val songs = searchSongs(arguments)
@@ -64,8 +66,8 @@ class LyricsCommand : Command {
                         appendln { "${index + 1}. ${song.author} - ${song.title}" }
                     }
                 }).await {
-                    USERS_WITH_PROCESSES += event.author
-                    selectSong(event, it, songs)
+                    WAITER_PROCESSES += process
+                    selectSong(event, it, songs, process)
                 }
             } else {
                 event.sendFailure("Couldn't find that track!").queue()
@@ -84,8 +86,8 @@ class LyricsCommand : Command {
                         appendln { "${index + 1}. ${song.author} - ${song.title}" }
                     }
                 }).await {
-                    USERS_WITH_PROCESSES += event.author
-                    selectSong(event, it, songs)
+                    WAITER_PROCESSES += process
+                    selectSong(event, it, songs, process)
                 }
             } else {
                 event.sendFailure("Couldn't find that track!").queue()
@@ -99,14 +101,14 @@ class LyricsCommand : Command {
             val doc = Jsoup.connect(link).userAgent(Immutable.USER_AGENT).get()
             return doc.selectFirst(".lyrics").wholeText().replace(Regex("<(br)(?:(?:\\s+)?/)?>"), "\n")
         }
-    private suspend fun selectSong(event: MessageReceivedEvent, msg: Message, songs: List<Song>) {
+    private suspend fun selectSong(event: MessageReceivedEvent, msg: Message, songs: List<Song>, process: WaiterProcess) {
         val c = event.channel.awaitMessage(event.author)?.contentRaw
         if (c !== null) {
             if (c.isInt) {
                 if (c.toInt() in 1..songs.size) {
                     msg.delete().queue()
                     val song = songs[c.toInt() - 1]
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                     if (song.lyrics.length > 2048) {
                         val paginator = buildPaginator<Char> {
                             size { 2048 }
@@ -135,18 +137,18 @@ class LyricsCommand : Command {
                         }).queue()
                     }
                 } else {
-                    event.sendFailure("Try again!").await { selectSong(event, msg, songs) }
+                    event.sendFailure("Try again!").await { selectSong(event, msg, songs, process) }
                 }
             } else if (c.toLowerCase() == "exit") {
                 msg.delete().queue()
-                USERS_WITH_PROCESSES -= event.author
+                WAITER_PROCESSES -= process
                 event.sendSuccess("Process successfully stopped!").queue()
             } else {
-                event.sendFailure("Try again!").await { selectSong(event, msg, songs) }
+                event.sendFailure("Try again!").await { selectSong(event, msg, songs, process) }
             }
         } else {
             msg.delete().queue()
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
             event.sendFailure("Time is up!").queue()
         }
     }

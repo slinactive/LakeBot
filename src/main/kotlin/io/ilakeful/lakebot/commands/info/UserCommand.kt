@@ -17,9 +17,10 @@
 package io.ilakeful.lakebot.commands.info
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.EventWaiter
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.Permission
@@ -40,10 +41,11 @@ class UserCommand : Command {
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user (optional)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
+        val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
         if (arguments !== null) {
             when {
-                event.message.mentionedMembers.isNotEmpty() -> userMenu(event, event.message.mentionedMembers[0])
-                event.guild.getMemberByTagSafely(arguments) !== null -> userMenu(event, event.guild.getMemberByTagSafely(arguments)!!)
+                event.message.mentionedMembers.isNotEmpty() -> userMenu(event, event.message.mentionedMembers[0], process)
+                event.guild.getMemberByTagSafely(arguments) !== null -> userMenu(event, event.guild.getMemberByTagSafely(arguments)!!, process)
                 event.guild.searchMembers(arguments).isNotEmpty() -> {
                     val list = event.guild.searchMembers(arguments).take(5)
                     if (list.size > 1) {
@@ -55,21 +57,21 @@ class UserCommand : Command {
                             }
                             footer { "Type in \"exit\" to kill the process" }
                         }).await {
-                            USERS_WITH_PROCESSES += event.author
-                            selectUser(event, it, list)
+                            WAITER_PROCESSES += process
+                            selectUser(event, it, list, process)
                         }
                     } else {
-                        userMenu(event, list[0])
+                        userMenu(event, list[0], process)
                     }
                 }
                 args[0] matches Regex.DISCORD_ID && event.guild.getMemberById(args[0]) !== null -> {
                     val member = event.guild.getMemberById(args[0])
-                    userMenu(event, member!!)
+                    userMenu(event, member!!, process)
                 }
                 else -> event.sendFailure("Couldn't find that user!").queue()
             }
         } else {
-            userMenu(event, event.member!!)
+            userMenu(event, event.member!!, process)
         }
     }
     inline fun userInfo(author: User, lazy: () -> Member) = buildEmbed {
@@ -123,12 +125,12 @@ class UserCommand : Command {
             field(title = "Key Permissions:") { member.keyPermissions.mapNotNull { it.getName() }.joinToString() }
         }
     }
-    suspend fun userMenu(event: MessageReceivedEvent, member: Member) = event.channel.sendMessage(buildEmbed {
+    suspend fun userMenu(event: MessageReceivedEvent, member: Member, process: WaiterProcess) = event.channel.sendMessage(buildEmbed {
         color { Immutable.SUCCESS }
         author { "Select the Action:" }
         description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get an Avatar" }
     }).await {
-        USERS_WITH_PROCESSES += event.author
+        //WAITER_PROCESSES += process
         it.addReaction("\u0031\u20E3").complete()
         it.addReaction("\u0032\u20E3").complete()
         it.addReaction("\u274C").complete()
@@ -141,7 +143,7 @@ class UserCommand : Command {
             when (e.reactionEmote.name) {
                 "\u0031\u20E3" -> {
                     it.delete().queue()
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                     val embed = userInfo(event.author) { member }
                     event.channel.sendMessage(embed).queue()
                 }
@@ -154,41 +156,41 @@ class UserCommand : Command {
                         footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                     }
                     event.channel.sendMessage(embed).queue()
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                 }
                 "\u274C" -> {
                     it.delete().queue()
                     event.sendSuccess("Process successfully stopped!").queue()
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                 }
             }
         } else {
             it.delete().queue()
             event.sendFailure("Time is up!").queue()
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
         }
     }
-    suspend fun selectUser(event: MessageReceivedEvent, msg: Message, members: List<Member>) {
+    suspend fun selectUser(event: MessageReceivedEvent, msg: Message, members: List<Member>, process: WaiterProcess) {
         val c = event.channel.awaitMessage(event.author)?.contentRaw
         if (c !== null) {
             if (c.isInt) {
                 if (c.toInt() in 1..members.size) {
                     msg.delete().queue()
-                    userMenu(event, members[c.toInt() - 1])
-                    USERS_WITH_PROCESSES -= event.author
+                    userMenu(event, members[c.toInt() - 1], process)
+                    //WAITER_PROCESSES -= process
                 } else {
-                    event.sendFailure("Try again!").await { selectUser(event, msg, members) }
+                    event.sendFailure("Try again!").await { selectUser(event, msg, members, process) }
                 }
             } else if (c.toLowerCase() == "exit") {
                 msg.delete().queue()
-                USERS_WITH_PROCESSES -= event.author
+                WAITER_PROCESSES -= process
                 event.sendSuccess("Process successfully stopped!").queue()
             } else {
-                event.sendFailure("Try again!").await { selectUser(event, msg, members) }
+                event.sendFailure("Try again!").await { selectUser(event, msg, members, process) }
             }
         } else {
             msg.delete().queue()
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
             event.sendFailure("Time is up!").queue()
         }
     }

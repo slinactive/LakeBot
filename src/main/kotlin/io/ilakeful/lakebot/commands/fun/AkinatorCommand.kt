@@ -21,8 +21,9 @@ import com.markozajc.akiwrapper.Akiwrapper.Answer
 import com.markozajc.akiwrapper.core.entities.Server
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.entities.handlers.CommandHandler
 
@@ -65,14 +66,20 @@ class AkinatorCommand : Command {
                 footer { "Type in \"exit\" to kill the process" }
                 color { Immutable.SUCCESS }
             }.await {
-                USERS_WITH_PROCESSES += event.author
-                awaitAnswer(event, api, declined)
+                val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+                WAITER_PROCESSES += process
+                awaitAnswer(event, api, declined, process)
             }
         } catch (e: Exception) {
             event.channel.sendFailure(e.message ?: "Something went wrong!").queue()
         }
     }
-    private suspend fun awaitAnswer(event: MessageReceivedEvent, wrapper: Akiwrapper, declined: MutableSet<Long>) {
+    private suspend fun awaitAnswer(
+            event: MessageReceivedEvent,
+            wrapper: Akiwrapper,
+            declined: MutableSet<Long>,
+            process: WaiterProcess
+    ) {
         val content = event.channel.awaitMessage(event.author)?.contentRaw?.toLowerCase()
         if (content !== null) {
             val possibleAnswers = setOf(
@@ -94,11 +101,11 @@ class AkinatorCommand : Command {
                             if (bool) {
                                 it.delete().queue()
                                 event.channel.sendSuccess("Successfully stopped!").queue()
-                                USERS_WITH_PROCESSES -= event.author
+                                WAITER_PROCESSES -= process
                             } else {
                                 it.delete().queue()
                                 event.channel.sendSuccess("Let's go!").await {
-                                    awaitAnswer(event, wrapper, declined)
+                                    awaitAnswer(event, wrapper, declined, process)
                                 }
                             }
                         }
@@ -112,10 +119,10 @@ class AkinatorCommand : Command {
                         field(title = "Probably:") { "\u2022 P\n\u2022 Perhaps\n\u2022 Likely" }
                         field(title = "Probably Not:") { "\u2022 PN\n\u2022 Unlikely" }
                         field(title = "Back:") { "\u2022 Return\n\u2022 B" }
-                    }.await { awaitAnswer(event, wrapper, declined) }
+                    }.await { awaitAnswer(event, wrapper, declined, process) }
                     "help" -> {
                         CommandHandler["help"]!!(event, arrayOf(name))
-                        awaitAnswer(event, wrapper, declined)
+                        awaitAnswer(event, wrapper, declined, process)
                     }
                     else -> {
                         val guess = wrapper.guesses.firstOrNull { it.probability >= 0.85 && it.idLong !in declined }
@@ -136,7 +143,7 @@ class AkinatorCommand : Command {
                                 footer { "Type in \"exit\" to kill the process" }
                                 color { Immutable.SUCCESS }
                             }.await {
-                                awaitAnswer(event, wrapper, declined)
+                                awaitAnswer(event, wrapper, declined, process)
                             }
                         } else {
                             when {
@@ -148,7 +155,7 @@ class AkinatorCommand : Command {
                                         footer { "Type in \"exit\" to kill the process" }
                                         color { Immutable.SUCCESS }
                                     }.await {
-                                        awaitAnswer(event, wrapper, declined)
+                                        awaitAnswer(event, wrapper, declined, process)
                                     }
                                 }
                                 guess !== null -> {
@@ -167,7 +174,7 @@ class AkinatorCommand : Command {
                                             if (bool !== null) {
                                                 if (bool) {
                                                     it.delete().queue()
-                                                    USERS_WITH_PROCESSES -= event.author
+                                                    WAITER_PROCESSES -= process
                                                 } else {
                                                     it.delete().queue()
                                                     declined += guess.idLong
@@ -180,18 +187,18 @@ class AkinatorCommand : Command {
                                                         footer { "Type in \"exit\" to kill the process" }
                                                         color { Immutable.SUCCESS }
                                                     }.await {
-                                                        awaitAnswer(event, wrapper, declined)
+                                                        awaitAnswer(event, wrapper, declined, process)
                                                     }
                                                 }
                                             } else {
                                                 it.delete().queue()
-                                                USERS_WITH_PROCESSES -= event.author
+                                                WAITER_PROCESSES -= process
                                             }
                                         }
                                     }
                                 }
                                 wrapper.currentQuestion === null -> {
-                                    USERS_WITH_PROCESSES -= event.author
+                                    WAITER_PROCESSES -= process
                                     event.channel.sendFailure("You win! Akinator was unable to guess the character!").queue()
                                 }
                             }
@@ -200,11 +207,11 @@ class AkinatorCommand : Command {
                 }
             } else {
                 event.channel.sendFailure("Incorrect answer! Use `aliases` or `help` to get documentation!").await {
-                    awaitAnswer(event, wrapper, declined)
+                    awaitAnswer(event, wrapper, declined, process)
                 }
             }
         } else {
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
             event.channel.sendFailure("Time is up!").queue()
         }
     }

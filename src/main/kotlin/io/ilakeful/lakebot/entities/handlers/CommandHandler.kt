@@ -17,7 +17,7 @@
 package io.ilakeful.lakebot.entities.handlers
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.extensions.*
 
@@ -78,7 +78,8 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
                         command.isDeveloper && !event.author.isLBDeveloper -> event.sendFailure("You don't have permissions to execute this command!").queue()
                         event.author.lakeBan !== null -> event.sendFailure("${event.author.asMention}, sorry! You can't execute this command because you got LakeBan for `${event.author.lakeBan?.getString("reason")}`!").queue()
                         else -> {
-                            if (event.author !in USERS_WITH_PROCESSES) {
+                            val processOfTheUser = WAITER_PROCESSES.firstOrNull { event.author in it.users && event.textChannel == it.channel }
+                            if (processOfTheUser === null) {
                                 CoroutineScope(this).launch {
                                     if (command.cooldown > 0) {
                                         val key = "${command.name}|${event.author.id}"

@@ -17,8 +17,9 @@
 package io.ilakeful.lakebot.commands.`fun`
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
@@ -41,8 +42,9 @@ class GuessGameCommand : Command {
                         footer { "Type in \"exit\" to kill the process" }
                         color { Immutable.SUCCESS }
                     }).await {
-                        USERS_WITH_PROCESSES += event.author
-                        awaitInt(round, toGuess, event)
+                        val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+                        WAITER_PROCESSES += process
+                        awaitInt(round, toGuess, event, process)
                     }
                 } else {
                     event.sendFailure("The number is not in the correct range!").queue()
@@ -54,7 +56,12 @@ class GuessGameCommand : Command {
             event.sendFailure("You specified no content!").queue()
         }
     }
-    private suspend fun awaitInt(round: Int, toGuess: Int, event: MessageReceivedEvent) {
+    private suspend fun awaitInt(
+            round: Int,
+            toGuess: Int,
+            event: MessageReceivedEvent,
+            process: WaiterProcess
+    ) {
         var attempt = round
         val content = event.channel.awaitMessage(event.author)?.contentRaw
         if (content !== null) {
@@ -64,7 +71,7 @@ class GuessGameCommand : Command {
                     when {
                         input == toGuess -> {
                             event.channel.sendSuccess("GG! Game took $attempt attempt${if (attempt == 1) "" else "s"}!").queue()
-                            USERS_WITH_PROCESSES -= event.author
+                            WAITER_PROCESSES -= process
                         }
                         input > toGuess -> {
                             attempt++
@@ -72,7 +79,7 @@ class GuessGameCommand : Command {
                                 color { Immutable.FAILURE }
                                 description { "It's too large!" }
                                 author { "Attempt #$attempt" }
-                            }).await { awaitInt(attempt, toGuess, event) }
+                            }).await { awaitInt(attempt, toGuess, event, process) }
                         }
                         input < toGuess -> {
                             attempt++
@@ -80,18 +87,18 @@ class GuessGameCommand : Command {
                                 color { Immutable.FAILURE }
                                 description { "It's too small!" }
                                 author { "Attempt #$attempt" }
-                            }).await { awaitInt(attempt, toGuess, event) }
+                            }).await { awaitInt(attempt, toGuess, event, process) }
                         }
                     }
                 }
                 content.toLowerCase() == "exit" -> {
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                     event.sendSuccess("Process successfully stopped!").queue()
                 }
-                else -> event.sendFailure("Try again!").await { awaitInt(attempt, toGuess, event) }
+                else -> event.sendFailure("Try again!").await { awaitInt(attempt, toGuess, event, process) }
             }
         } else {
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
             event.sendFailure("Time is up!").queue()
         }
     }

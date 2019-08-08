@@ -17,10 +17,11 @@
 package io.ilakeful.lakebot.commands.info
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.commands.utils.ColorCommand
 import io.ilakeful.lakebot.entities.EventWaiter
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.utils.ImageUtils
 
@@ -39,8 +40,9 @@ class RoleCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
+            val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
             when {
-                event.message.mentionedRoles.isNotEmpty() -> roleMenu(event, event.message.mentionedRoles[0])
+                event.message.mentionedRoles.isNotEmpty() -> roleMenu(event, event.message.mentionedRoles[0], process)
                 event.guild.searchRoles(arguments).isNotEmpty() -> {
                     val list = event.guild.searchRoles(arguments).take(5)
                     if (list.size > 1) {
@@ -52,16 +54,16 @@ class RoleCommand : Command {
                             }
                             footer { "Type in \"exit\" to kill the process" }
                         }).await {
-                            USERS_WITH_PROCESSES += event.author
-                            selectRole(event, it, list)
+                            WAITER_PROCESSES += process
+                            selectRole(event, it, list, process)
                         }
                     } else {
-                        roleMenu(event, list[0])
+                        roleMenu(event, list[0], process)
                     }
                 }
                 args[0] matches Regex.DISCORD_ID && event.guild.getRoleById(args[0]) !== null -> {
                     val role = event.guild.getRoleById(args[0])
-                    roleMenu(event, role!!)
+                    roleMenu(event, role!!, process)
                 }
                 else -> event.sendFailure("Couldn't find that role!").queue()
             }
@@ -90,8 +92,8 @@ class RoleCommand : Command {
             field(title = "Key Permissions:") { role.keyPermissions.mapNotNull { it.getName() }.joinToString() }
         }
     }
-    suspend fun roleMenu(event: MessageReceivedEvent, role: Role) = if (role.color === null) {
-        USERS_WITH_PROCESSES -= event.author
+    suspend fun roleMenu(event: MessageReceivedEvent, role: Role, process: WaiterProcess) = if (role.color === null) {
+        WAITER_PROCESSES -= process
         val embed = roleInfo(event.author) { role }
         event.channel.sendMessage(embed).queue()
     } else {
@@ -100,7 +102,7 @@ class RoleCommand : Command {
             author { "Select The Action:" }
             description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Color Information" }
         }).await {
-            USERS_WITH_PROCESSES += event.author
+            WAITER_PROCESSES += process
             it.addReaction("\u0031\u20E3").complete()
             it.addReaction("\u0032\u20E3").complete()
             it.addReaction("\u274C").complete()
@@ -113,7 +115,7 @@ class RoleCommand : Command {
                 when (e.reactionEmote.name) {
                     "\u0031\u20E3" -> {
                         it.delete().queue()
-                        USERS_WITH_PROCESSES -= event.author
+                        WAITER_PROCESSES -= process
                         val embed = roleInfo(event.author) { role }
                         val color = ImageUtils.getColorImage(role.color!!, 250, 250)
                         event.channel.sendMessage(embed).addFile(color, "${role.color!!.rgb.toHex().takeLast(6)}.png").queue()
@@ -121,42 +123,42 @@ class RoleCommand : Command {
                     "\u0032\u20E3" -> {
                         it.delete().queue()
                         ColorCommand()(event, arrayOf(role.color!!.rgb.toHex().takeLast(6)))
-                        USERS_WITH_PROCESSES -= event.author
+                        WAITER_PROCESSES -= process
                     }
                     "\u274C" -> {
                         it.delete().queue()
                         event.sendSuccess("Process successfully stopped!").queue()
-                        USERS_WITH_PROCESSES -= event.author
+                        WAITER_PROCESSES -= process
                     }
                 }
             } else {
                 it.delete().queue()
                 event.sendFailure("Time is up!").queue()
-                USERS_WITH_PROCESSES -= event.author
+                WAITER_PROCESSES -= process
             }
         }
     }
-    suspend fun selectRole(event: MessageReceivedEvent, msg: Message, roles: List<Role>) {
+    suspend fun selectRole(event: MessageReceivedEvent, msg: Message, roles: List<Role>, process: WaiterProcess) {
         val c = event.channel.awaitMessage(event.author)?.contentRaw
         if (c !== null) {
             if (c.isInt) {
                 if (c.toInt() in 1..roles.size) {
                     msg.delete().queue()
-                    roleMenu(event, roles[c.toInt() - 1])
-                    USERS_WITH_PROCESSES -= event.author
+                    roleMenu(event, roles[c.toInt() - 1], process)
+                    WAITER_PROCESSES -= process
                 } else {
-                    event.sendFailure("Try again!").await { selectRole(event, msg, roles) }
+                    event.sendFailure("Try again!").await { selectRole(event, msg, roles, process) }
                 }
             } else if (c.toLowerCase() == "exit") {
                 msg.delete().queue()
-                USERS_WITH_PROCESSES -= event.author
+                WAITER_PROCESSES -= process
                 event.sendSuccess("Process successfully stopped!").queue()
             } else {
-                event.sendFailure("Try again!").await { selectRole(event, msg, roles) }
+                event.sendFailure("Try again!").await { selectRole(event, msg, roles, process) }
             }
         } else {
             msg.delete().queue()
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
             event.sendFailure("Time is up!").queue()
         }
     }

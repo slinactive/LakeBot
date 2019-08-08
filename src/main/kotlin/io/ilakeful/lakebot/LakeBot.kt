@@ -20,6 +20,7 @@ import com.mongodb.MongoClient
 
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.EventWaiter
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.entities.handlers.CommandHandler
 import io.ilakeful.lakebot.entities.handlers.EventHandler
@@ -32,13 +33,12 @@ import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity.streaming
 import net.dv8tion.jda.api.entities.Activity.watching
-import net.dv8tion.jda.api.entities.User
 
 import org.reflections.Reflections
 
 import kotlin.system.exitProcess
 
-val USERS_WITH_PROCESSES = mutableSetOf<User>()
+val WAITER_PROCESSES = mutableSetOf<WaiterProcess>()
 lateinit var DISCORD: JDA
 private lateinit var client: MongoClient
 fun main() = try {

@@ -19,8 +19,9 @@ package io.ilakeful.lakebot.commands.utils
 import com.google.api.services.youtube.model.Video
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.utils.TimeUtils
 import io.ilakeful.lakebot.utils.YouTubeUtils
@@ -57,8 +58,9 @@ class YouTubeCommand : Command {
                         }
                     }
                     event.channel.sendMessage(embed).await {
-                        USERS_WITH_PROCESSES += event.author
-                        awaitInt(event, videos, it)
+                        val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+                        WAITER_PROCESSES += WaiterProcess(mutableListOf(event.author), event.textChannel)
+                        awaitInt(event, videos, it, process)
                     }
                 } else {
                     event.sendFailure("Couldn't find that in YouTube!").queue()
@@ -70,7 +72,7 @@ class YouTubeCommand : Command {
             event.sendFailure("You specified no query!").queue()
         }
     }
-    private suspend fun awaitInt(event: MessageReceivedEvent, videos: List<Video>, msg: Message) {
+    private suspend fun awaitInt(event: MessageReceivedEvent, videos: List<Video>, msg: Message, process: WaiterProcess) {
         val c = event.channel.awaitMessage(event.author)?.contentRaw
         if (c !== null) {
             if (c.isInt) {
@@ -109,20 +111,20 @@ class YouTubeCommand : Command {
                             thumbnail?.url
                         }
                     }.let { event.sendMessage(it).queue() }
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                 } else {
-                    event.sendFailure("Try again!").await { awaitInt(event, videos, msg) }
+                    event.sendFailure("Try again!").await { awaitInt(event, videos, msg, process) }
                 }
             } else if (c.toLowerCase() == "exit") {
                 msg.delete().queue()
-                USERS_WITH_PROCESSES -= event.author
+                WAITER_PROCESSES -= process
                 event.sendSuccess("Process successfully stopped!").queue()
             } else {
-                event.sendFailure("Try again!").await { awaitInt(event, videos, msg) }
+                event.sendFailure("Try again!").await { awaitInt(event, videos, msg, process) }
             }
         } else {
             msg.delete().queue()
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
             event.sendFailure("Time is up!").queue()
         }
     }

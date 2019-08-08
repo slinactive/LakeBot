@@ -17,8 +17,9 @@
 package io.ilakeful.lakebot.commands.moderation
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.Permission
@@ -64,8 +65,9 @@ class MuteRoleCommand : Command {
                                     }
                                     footer { "Type in \"exit\" to kill the process" }
                                 }).await {
-                                    USERS_WITH_PROCESSES += event.author
-                                    selectRole(event, it, list)
+                                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+                                    WAITER_PROCESSES += process
+                                    selectRole(event, it, list, process)
                                 }
                             } else {
                                 event.guild.setMuteRole(list[0])
@@ -120,7 +122,7 @@ class MuteRoleCommand : Command {
             }
         }
     }
-    suspend fun selectRole(event: MessageReceivedEvent, msg: Message, roles: List<Role>) {
+    suspend fun selectRole(event: MessageReceivedEvent, msg: Message, roles: List<Role>, process: WaiterProcess) {
         val c = event.channel.awaitMessage(event.author)?.contentRaw
         if (c !== null) {
             if (c.isInt) {
@@ -136,20 +138,20 @@ class MuteRoleCommand : Command {
                         } catch (ignored: Exception) {
                         }
                     }
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                 } else {
-                    event.sendFailure("Try again!").await { selectRole(event, msg, roles) }
+                    event.sendFailure("Try again!").await { selectRole(event, msg, roles, process) }
                 }
             } else if (c.toLowerCase() == "exit") {
                 msg.delete().queue()
-                USERS_WITH_PROCESSES -= event.author
+                WAITER_PROCESSES -= process
                 event.sendSuccess("Process successfully stopped!").queue()
             } else {
-                event.sendFailure("Try again!").await { selectRole(event, msg, roles) }
+                event.sendFailure("Try again!").await { selectRole(event, msg, roles, process) }
             }
         } else {
             msg.delete().queue()
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
             event.sendFailure("Time is up!").queue()
         }
     }

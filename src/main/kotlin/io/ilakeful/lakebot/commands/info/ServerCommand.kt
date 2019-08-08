@@ -17,9 +17,10 @@
 package io.ilakeful.lakebot.commands.info
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.EventWaiter
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.OnlineStatus
@@ -91,7 +92,8 @@ class ServerCommand : Command {
         author { "Select The Action:" }
         description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Avatar" }
     }).await {
-        USERS_WITH_PROCESSES += event.author
+        val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+        WAITER_PROCESSES += process
         it.addReaction("\u0031\u20E3").complete()
         it.addReaction("\u0032\u20E3").complete()
         it.addReaction("\u274C").complete()
@@ -104,7 +106,7 @@ class ServerCommand : Command {
             when (e.reactionEmote.name) {
                 "\u0031\u20E3" -> {
                     it.delete().queue()
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                     val embed = serverInfo(event.author) { event.guild }
                     event.channel.sendMessage(embed).queue()
                 }
@@ -116,18 +118,18 @@ class ServerCommand : Command {
                         footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
                     }
                     event.channel.sendMessage(embed).queue()
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                 }
                 "\u274C" -> {
                     it.delete().queue()
                     event.sendSuccess("Process successfully stopped!").queue()
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                 }
             }
         } else {
             it.delete().queue()
             event.sendFailure("Time is up!").queue()
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
         }
     }
 }

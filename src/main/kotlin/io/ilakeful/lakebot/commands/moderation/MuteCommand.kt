@@ -17,8 +17,9 @@
 package io.ilakeful.lakebot.commands.moderation
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.utils.TimeUtils
 
@@ -77,8 +78,9 @@ class MuteCommand : Command {
                                     }
                                     footer { "Type in \"exit\" to kill the process" }
                                 }).await {
-                                    USERS_WITH_PROCESSES += event.author
-                                    selectUser(event, it, list, time, reason)
+                                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel)
+                                    WAITER_PROCESSES += process
+                                    selectUser(event, it, list, time, reason, process)
                                 }
                             } else {
                                 muteUser(event, time, reason) { list.first() }
@@ -139,27 +141,34 @@ class MuteCommand : Command {
             event.sendFailure("You can't mute that user!").queue()
         }
     }
-    suspend fun selectUser(event: MessageReceivedEvent, msg: Message, members: List<Member>, time: Long, reason: String) {
+    suspend fun selectUser(
+            event: MessageReceivedEvent,
+            msg: Message,
+            members: List<Member>,
+            time: Long,
+            reason: String,
+            process: WaiterProcess
+    ) {
         val c = event.channel.awaitMessage(event.author)?.contentRaw
         if (c !== null) {
             if (c.isInt) {
                 if (c.toInt() in 1..members.size) {
                     msg.delete().queue()
                     muteUser(event, time, reason) { members[c.toInt() - 1] }
-                    USERS_WITH_PROCESSES -= event.author
+                    WAITER_PROCESSES -= process
                 } else {
-                    event.sendFailure("Try again!").await { selectUser(event, msg, members, time, reason) }
+                    event.sendFailure("Try again!").await { selectUser(event, msg, members, time, reason, process) }
                 }
             } else if (c.toLowerCase() == "exit") {
                 msg.delete().queue()
-                USERS_WITH_PROCESSES -= event.author
+                WAITER_PROCESSES -= process
                 event.sendSuccess("Process successfully stopped!").queue()
             } else {
-                event.sendFailure("Try again!").await { selectUser(event, msg, members, time, reason) }
+                event.sendFailure("Try again!").await { selectUser(event, msg, members, time, reason, process) }
             }
         } else {
             msg.delete().queue()
-            USERS_WITH_PROCESSES -= event.author
+            WAITER_PROCESSES -= process
             event.sendFailure("Time is up!").queue()
         }
     }

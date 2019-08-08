@@ -17,9 +17,10 @@
 package io.ilakeful.lakebot.commands.`fun`
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.USERS_WITH_PROCESSES
+import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.EventWaiter
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.entities.User
@@ -113,8 +114,8 @@ class TicTacToeCommand : Command {
                     else -> throw IllegalArgumentException("Couldn't find this user!")
                 }
                 if (!opponent.isBot && !opponent.isFake && opponent != event.author) {
-                    USERS_WITH_PROCESSES += starter
-                    USERS_WITH_PROCESSES += opponent
+                    val process = WaiterProcess(mutableListOf(starter, opponent), event.textChannel)
+                    WAITER_PROCESSES += process
                     event.channel.sendMessage(opponent.asMention).embed(buildEmbed {
                         color { Immutable.CONFIRMATION }
                         author { "Warning!" }
@@ -129,19 +130,18 @@ class TicTacToeCommand : Command {
                                     description { "${ttt.printableBoard}It's ${starter.asMention}'s turn!" }
                                     color { Immutable.SUCCESS }
                                 }).await {
-                                    awaitTurn(ttt, event, starter, opponent, TTT_CROSS, TTT_NOUGHT)
+                                    awaitTurn(ttt, event, starter, opponent, TTT_CROSS, TTT_NOUGHT, process)
                                 }
                             } else {
                                 it.delete().queue()
                                 event.channel.sendSuccess("The challenge was declined!").queue()
-                                USERS_WITH_PROCESSES -= starter
-                                USERS_WITH_PROCESSES -= opponent
+                                WAITER_PROCESSES -= process
                             }
                         } else {
                             it.delete().queue()
                             event.channel.sendFailure("Time is up!").queue()
-                            USERS_WITH_PROCESSES -= starter
-                            USERS_WITH_PROCESSES -= opponent
+                            WAITER_PROCESSES -= process
+                            WAITER_PROCESSES -= process
                         }
                     }
                 } else {
@@ -160,7 +160,8 @@ class TicTacToeCommand : Command {
             author: User,
             mentioned: User,
             cross: String,
-            nought: String
+            nought: String,
+            process: WaiterProcess
     ) {
         val awaitedMessage = EventWaiter.awaitMessage(ttt.currentTurn, event.channel, 30, TimeUnit.SECONDS)
         if (awaitedMessage !== null) {
@@ -178,15 +179,14 @@ class TicTacToeCommand : Command {
                                     description { "${ttt.printableBoard}It's ${ttt.currentTurn.asMention}'s turn!" }
                                     color { Immutable.SUCCESS }
                                 }).await {
-                                    awaitTurn(ttt, event, author, mentioned, cross, nought)
+                                    awaitTurn(ttt, event, author, mentioned, cross, nought, process)
                                 }
                             } else {
                                 event.channel.sendMessage(buildEmbed {
                                     description { "${ttt.printableBoard}It's a draw!" }
                                     color { Immutable.SUCCESS }
                                 }).queue {
-                                    USERS_WITH_PROCESSES -= author
-                                    USERS_WITH_PROCESSES -= mentioned
+                                    WAITER_PROCESSES -= process
                                 }
                             }
                         } else {
@@ -194,43 +194,40 @@ class TicTacToeCommand : Command {
                                 description { "${ttt.printableBoard}And ${ttt.currentTurn.asMention} wins! Well done!" }
                                 color { Immutable.FAILURE }
                             }).queue {
-                                USERS_WITH_PROCESSES -= author
-                                USERS_WITH_PROCESSES -= mentioned
+                                WAITER_PROCESSES -= process
                             }
                         }
                     } catch (e: IllegalArgumentException) {
                         event.channel.sendFailure("The gap is already taken!").await {
-                            awaitTurn(ttt, event, author, mentioned, cross, nought)
+                            awaitTurn(ttt, event, author, mentioned, cross, nought, process)
                         }
                     }
                 }
                 content.toLowerCase() == "exit" -> {
                     event.channel.sendConfirmation("Are you sure you want to exit?").await {
-                        val isWillingToExit = EventWaiter.awaitNullableConfirmation(it, event.author)
+                        val isWillingToExit = EventWaiter.awaitNullableConfirmation(it, ttt.currentTurn)
                         if (isWillingToExit !== null) {
                             if (isWillingToExit) {
                                 it.delete().queue()
                                 event.channel.sendSuccess("The process was finished!").queue()
-                                USERS_WITH_PROCESSES -= author
-                                USERS_WITH_PROCESSES -= mentioned
+                                WAITER_PROCESSES -= process
                             } else {
                                 it.delete().queue()
                                 event.channel.sendSuccess("Let's carry on!").queue()
-                                awaitTurn(ttt, event, author, mentioned, cross, nought)
+                                awaitTurn(ttt, event, author, mentioned, cross, nought, process)
                             }
                         }
                     }
                 }
                 else -> {
                     event.channel.sendFailure("Try again!").await {
-                        awaitTurn(ttt, event, author, mentioned, cross, nought)
+                        awaitTurn(ttt, event, author, mentioned, cross, nought, process)
                     }
                 }
             }
         } else {
             event.channel.sendFailure("Time is up!").queue()
-            USERS_WITH_PROCESSES -= author
-            USERS_WITH_PROCESSES -= mentioned
+            WAITER_PROCESSES -= process
         }
     }
 }
