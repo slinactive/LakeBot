@@ -141,7 +141,6 @@ class TicTacToeCommand : Command {
                             it.delete().queue()
                             event.channel.sendFailure("Time is up!").queue()
                             WAITER_PROCESSES -= process
-                            WAITER_PROCESSES -= process
                         }
                     }
                 } else {
