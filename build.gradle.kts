@@ -82,6 +82,7 @@ dependencies {
     implementation(group = "org.mongodb", name = "mongo-java-driver", version = "3.7.0-rc0")
     implementation(group = "com.google.apis", name = "google-api-services-youtube", version = "v3-rev212-1.25.0")
     implementation(group = "org.jsoup", name = "jsoup", version = "1.12.1")
+    implementation(group = "commons-validator", name = "commons-validator", version = "1.6")
     implementation(group = "org.reflections", name = "reflections", version = "0.9.11")
     implementation(kotlin("stdlib"))
     implementation(kotlin("stdlib-jdk8", version = kotlinVersion))
