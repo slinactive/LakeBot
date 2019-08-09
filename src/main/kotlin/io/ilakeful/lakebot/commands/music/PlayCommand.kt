@@ -33,7 +33,7 @@ open class PlayCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member!!.isConnected) {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             } else {
                 if (!event.guild.selfMember.isConnected) {
                     event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel)
@@ -41,7 +41,19 @@ open class PlayCommand : Command {
                 AudioUtils.loadAndPlay(event.guild, event.textChannel, event.argsRaw!!)
             }
         } else {
-            event.sendFailure("You specified no link/query!").queue()
+            val attachment = event.message.attachments.firstOrNull()
+            if (attachment !== null) {
+                if (!event.member!!.isConnected) {
+                    event.channel.sendFailure("You are not connected to the voice channel!").queue()
+                } else {
+                    if (!event.guild.selfMember.isConnected) {
+                        event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel)
+                    }
+                    AudioUtils.loadAndPlay(event.guild, event.textChannel, attachment.url)
+                }
+            } else {
+                event.channel.sendFailure("You specified no link/query and attached no file!").queue()
+            }
         }
     }
 }
