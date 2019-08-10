@@ -59,7 +59,7 @@ fun main() = try {
             CommandHandler += commandWrapper.getDeclaredConstructor().newInstance()
         }
         Immutable.LOGGER.info("CommandHandler successfully loaded all ${CommandHandler.registeredCommands.size} commands!")
-        System.setProperty("lakebot.version", Immutable.VERSION)
+        System.setProperty("lakebot.version", Immutable.VERSION.toString())
         System.setProperty("kotlin.version", KotlinVersion.CURRENT.toString())
         DISCORD.presence.activity = streaming("${Immutable.VERSION} | ${Immutable.DEFAULT_PREFIX}help", "https://twitch.tv/raidlier")
         DISCORD.presence.setStatus(OnlineStatus.ONLINE)

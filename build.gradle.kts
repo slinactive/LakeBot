@@ -48,7 +48,7 @@ application {
     mainClassName = "io.ilakeful.lakebot.LakeBotKt"
     applicationName = "lakebot"
     group = "io.ilakeful.lakebot"
-    version = "1.0-BETA10"
+    version = Version(1, 0, 0, Version.Stability.BETA, 11).toString()
 }
 
 java {
@@ -121,4 +121,26 @@ task("stage") {
 }
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+data class Version(
+        val major: Int,
+        val minor: Int,
+        val patch: Int?,
+        val stability: Stability = Stability.STABLE,
+        val unstable: Int? = null
+) {
+    override fun toString() = arrayOf(
+            major,
+            minor,
+            if (patch == 0) null else patch
+    ).filterNotNull().joinToString(separator = ".") + stability.let {
+        val suffix = it.suffix
+        if (suffix !== null && (unstable !== null && unstable != 0)) {
+            "-$suffix$unstable"
+        } else ""
+    }
+    enum class Stability(val suffix: String?) {
+        STABLE(null), BETA("BETA"), ALPHA("ALPHA")
+    }
 }
