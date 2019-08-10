@@ -83,6 +83,7 @@ class EvalCommand : Command {
                 "io.ilakeful.lakebot.commands.utils",
                 "io.ilakeful.lakebot.entities",
                 "io.ilakeful.lakebot.entities.annotations",
+                "io.ilakeful.lakebot.entities.applemusic",
                 "io.ilakeful.lakebot.entities.extensions",
                 "io.ilakeful.lakebot.entities.handlers",
                 "io.ilakeful.lakebot.entities.pagination",
