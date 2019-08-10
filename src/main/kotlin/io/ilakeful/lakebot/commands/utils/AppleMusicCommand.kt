@@ -19,15 +19,18 @@ package io.ilakeful.lakebot.commands.utils
 import io.ilakeful.lakebot.Immutable
 import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
-import io.ilakeful.lakebot.commands.CommandCategory
 import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.applemusic.*
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.utils.TimeUtils
+
 import khttp.get
+
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+
 import org.json.JSONObject
+
 import java.net.URLEncoder
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -38,38 +41,38 @@ class AppleMusicCommand : Command {
     }
     override val name = "applemusic"
     override val aliases = listOf("apple-music", "am", "itunes")
-    override val description = "null"
-    override val category = CommandCategory.BETA
+    override val description = "The command searching for the specified song on Apple Music and sending the brief information about it"
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <song name>"
     private fun searchForSongsAsJSONArray(query: String, limit: Int = 5)
             = get("$API_BASE?term=${URLEncoder.encode(query, "UTF-8")}" +
             "&country=US" +
             "&media=music" +
-            "&entity=musicTrack", headers = emptyMap()).jsonObject.getJSONArray("results").take(limit)
-    private fun jsonToSong(json: JSONObject): Song {
-        return buildSong {
-            title { json.getString("trackName") }
-            author {
-                name { json.getString("artistName") }
-                id { json.getLong("artistId") }
-                url { json.getString("artistViewUrl") }
-            }
-            album {
-                title { json.getString("collectionName") }
-                titleCensored { json.getString("collectionCensoredName") }
-                url { json.getString("collectionViewUrl") }
-                id { json.getLong("collectionId") }
-                count { json.getInt("trackCount") }
-                explicit { json.getString("collectionExplicitness") == "explicit" }
-            }
-            url { json.getString("trackViewUrl") }
-            id { json.getLong("trackId") }
-            artwork { json.optString("artworkUrl100", null) }
-            releaseDate { OffsetDateTime.parse(json.getString("releaseDate")) }
-            genre { json.getString("primaryGenreName") }
-            number { json.getInt("trackNumber") }
-            duration { json.getLong("trackTimeMillis") }
-            explicit { json.getString("trackExplicitness") == "explicit" }
+            "&entity=musicTrack", headers = emptyMap()).jsonObject.getJSONArray("results")
+            .filter { (it as JSONObject).optString("kind", null) == "song" }
+            .take(limit)
+    private fun jsonToSong(json: JSONObject): Song = buildSong {
+        title { json.getString("trackName") }
+        author {
+            name { json.getString("artistName") }
+            id { json.getLong("artistId") }
+            url { json.getString("artistViewUrl") }
         }
+        album {
+            title { json.getString("collectionName") }
+            titleCensored { json.getString("collectionCensoredName") }
+            url { json.getString("collectionViewUrl") }
+            id { json.getLong("collectionId") }
+            count { json.getInt("trackCount") }
+            explicit { json.getString("collectionExplicitness") == "explicit" }
+        }
+        url { json.getString("trackViewUrl") }
+        id { json.getLong("trackId") }
+        artwork { json.optString("artworkUrl100", null) }
+        releaseDate { OffsetDateTime.parse(json.getString("releaseDate")) }
+        genre { json.getString("primaryGenreName") }
+        number { json.getInt("trackNumber") }
+        duration { json.getLong("trackTimeMillis") }
+        explicit { json.getString("trackExplicitness") == "explicit" }
     }
     private fun searchForSongs(query: String): List<Song> = searchForSongsAsJSONArray(query)
             .map { jsonToSong(it as JSONObject) }
@@ -99,7 +102,11 @@ class AppleMusicCommand : Command {
                     val song = results.first()
                     sendSongInfo(event, song)
                 }
+            } else {
+                event.channel.sendFailure("No results found by the query!").queue()
             }
+        } else {
+            event.channel.sendFailure("You haven't specified any required arguments!").queue()
         }
     }
     private fun sendSongInfo(event: MessageReceivedEvent, song: Song) = event.channel.sendEmbed {
