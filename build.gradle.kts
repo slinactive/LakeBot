@@ -48,7 +48,7 @@ application {
     mainClassName = "io.ilakeful.lakebot.LakeBotKt"
     applicationName = "lakebot"
     group = "io.ilakeful.lakebot"
-    version = Version(1, 0, 0, Version.Stability.BETA, 11).toString()
+    version = Version(1, 0, stability = Version.Stability.BETA, unstable = 11).toString()
 }
 
 java {
@@ -70,7 +70,7 @@ repositories {
 }
 
 dependencies {
-    implementation(group = "net.dv8tion", name = "JDA", version = "4.BETA.0_33") { exclude(module = "opus-java") }
+    implementation(group = "net.dv8tion", name = "JDA", version = "4.0.0_39") { exclude(module = "opus-java") }
     implementation(group = "org.slf4j", name = "slf4j-simple", version = "1.8.0-beta4")
     implementation(group = "org.json", name = "json", version = "20180813")
     implementation(group = "com.github.kenglxn.QRGen", name = "javase", version = "2.5.0")
@@ -126,7 +126,7 @@ tasks.withType<KotlinCompile> {
 data class Version(
         val major: Int,
         val minor: Int,
-        val patch: Int?,
+        val patch: Int = 0,
         val stability: Stability = Stability.STABLE,
         val unstable: Int? = null
 ) {

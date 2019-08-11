@@ -19,7 +19,7 @@ package io.ilakeful.lakebot.entities
 data class Version(
         val major: Int,
         val minor: Int,
-        val patch: Int?,
+        val patch: Int = 0,
         val stability: Stability = Stability.STABLE,
         val unstable: Int? = null
 ) {
