@@ -28,9 +28,7 @@ import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
-import java.util.Timer
-
-import kotlin.concurrent.schedule
+import java.util.concurrent.TimeUnit
 
 class MuteCommand : Command {
     override val name = "mute"
@@ -115,22 +113,22 @@ class MuteCommand : Command {
                             field(timeAsText.length < 27, "Time:") { timeAsText }
                             timestamp()
                         }
-                        event.sendSuccess("${user.tag} was successfully muted!").queue()
-                        event.guild.addRoleToMember(member, role).queue()
-                        event.guild.kickVoiceMember(member).queue()
-                        user.openPrivateChannel().queue { channel ->
-                            channel.sendMessage(embed).queue(null) {}
-                        }
-                        val timer = Timer()
-                        timer.schedule(time) {
-                            try {
-                                if (role in member.roles) {
-                                    event.guild.removeRoleFromMember(member, role).queue()
+                        event.guild.addRoleToMember(member, role).queue {
+                            event.channel.sendSuccess("${user.asTag} was successfully muted!").queue()
+                            if (VOICE_MOVE_OTHERS in event.selfMember!!.permissions) {
+                                if (member.isConnected) {
+                                    event.guild.kickVoiceMember(member).queue()
                                 }
-                            } catch (ignored: Exception) {
-                            } finally {
-                                event.guild.clearMute(user)
                             }
+                            user.openPrivateChannel().queue { channel ->
+                                channel.sendMessage(embed).queue(null) {}
+                            }
+                            event.guild.removeRoleFromMember(member, role).queueAfter(
+                                    time,
+                                    TimeUnit.MILLISECONDS,
+                                    { event.guild.clearMute(user) },
+                                    { event.guild.clearMute(user) }
+                            )
                         }
                     } else {
                         event.sendSuccess("Process was canceled!").queue()

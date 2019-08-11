@@ -39,10 +39,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter
 
 import org.bson.Document
 
-import java.util.Timer
 import java.util.concurrent.TimeUnit
-
-import kotlin.concurrent.schedule
 
 object EventHandler : ListenerAdapter() {
     override fun onMessageReceived(event: MessageReceivedEvent) = try {
@@ -75,10 +72,8 @@ object EventHandler : ListenerAdapter() {
         }
     }
     override fun onRoleDelete(event: RoleDeleteEvent) {
-        if (event.guild.muteRole !== null) {
-            if (event.guild.muteRole == event.role.id) {
-                event.guild.clearMuteRole()
-            }
+        if (event.guild.muteRole === event.role.id) {
+            event.guild.clearMuteRole()
         }
     }
     override fun onReady(event: ReadyEvent) {
@@ -86,24 +81,25 @@ object EventHandler : ListenerAdapter() {
             val role = guild.getRoleById(guild.muteRole!!)!!
             val members = role.members
             for (member in members) {
-                try {
-                    val mute = guild.getMute(member.user)
-                    if (mute !== null) {
-                        val muteObject = mute["mute", Document::class.java]
-                        val ago = muteObject.getLong("time")
-                        val muteTime = muteObject.getLong("long")
-                        if (System.currentTimeMillis() >= ago + muteTime) {
-                            guild.removeRoleFromMember(member, role).queue()
-                        } else {
-                            val timer = Timer()
-                            timer.schedule(ago + muteTime - System.currentTimeMillis()) {
-                                guild.removeRoleFromMember(member, role).queue()
-                            }
-                        }
+                val mute = guild.getMute(member.user)
+                if (mute !== null) {
+                    val muteObject = mute["mute", Document::class.java]
+                    val ago = muteObject.getLong("time")
+                    val muteTime = muteObject.getLong("long")
+                    val restAction = guild.removeRoleFromMember(member, role)
+                    if (System.currentTimeMillis() >= ago + muteTime) {
+                        restAction.queue(
+                                { guild.clearMute(member.user) },
+                                { guild.clearMute(member.user) }
+                        )
+                    } else {
+                        restAction.queueAfter(
+                                ago + muteTime - System.currentTimeMillis(),
+                                TimeUnit.MILLISECONDS,
+                                { guild.clearMute(member.user) },
+                                { guild.clearMute(member.user) }
+                        )
                     }
-                } catch (ignored: Exception) {
-                } finally {
-                    guild.clearMute(member.user)
                 }
             }
         }
@@ -113,22 +109,23 @@ object EventHandler : ListenerAdapter() {
             val role = event.guild.getRoleById(event.guild.muteRole!!)!!
             val mute = event.guild.getMute(event.user)
             if (mute !== null) {
-                try {
-                    event.guild.addRoleToMember(event.member, role).queue()
-                    val muteObject = mute["mute", Document::class.java]
-                    val ago = muteObject.getLong("time")
-                    val muteTime = muteObject.getLong("long")
-                    if (System.currentTimeMillis() >= ago + muteTime) {
-                        event.guild.removeRoleFromMember(event.member, role).queue()
-                    } else {
-                        val timer = Timer()
-                        timer.schedule(ago + muteTime - System.currentTimeMillis()) {
-                            event.guild.removeRoleFromMember(event.member, role).queue()
-                        }
-                    }
-                } catch (ignored: Exception) {
-                } finally {
-                    event.guild.clearMute(event.user)
+                event.guild.addRoleToMember(event.member, role).queue()
+                val muteObject = mute["mute", Document::class.java]
+                val ago = muteObject.getLong("time")
+                val muteTime = muteObject.getLong("long")
+                val restAction = event.guild.removeRoleFromMember(event.member, role)
+                if (System.currentTimeMillis() >= ago + muteTime) {
+                    restAction.queue(
+                            { event.guild.clearMute(event.user) },
+                            { event.guild.clearMute(event.user) }
+                    )
+                } else {
+                    restAction.queueAfter(
+                            ago + muteTime - System.currentTimeMillis(),
+                            TimeUnit.MILLISECONDS,
+                            { event.guild.clearMute(event.user) },
+                            { event.guild.clearMute(event.user) }
+                    )
                 }
             }
         }
