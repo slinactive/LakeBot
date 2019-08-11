@@ -66,6 +66,7 @@ class AppleMusicCommand : Command {
             explicit { json.getString("collectionExplicitness") == "explicit" }
         }
         url { json.getString("trackViewUrl") }
+        previewUrl { json.getString("previewUrl") }
         id { json.getLong("trackId") }
         artwork { json.optString("artworkUrl100", null) }
         releaseDate { OffsetDateTime.parse(json.getString("releaseDate")) }
@@ -113,6 +114,7 @@ class AppleMusicCommand : Command {
         color { Immutable.SUCCESS }
         author("${song.author.name} - ${song.title}", song.url) { song.artwork ?: event.selfUser.effectiveAvatarUrl }
         thumbnail { song.artwork ?: event.selfUser.effectiveAvatarUrl }
+        description { "Want to play the track's preview? [Here's the link!](${song.previewUrl})"}
         field(true, "Artist:") { "[${song.author.name}](${song.author.url})" }
         field(true, "Song:") { "[${song.title}](${song.url})" }
         field(true, "Album:") { "[${song.album.title}](${song.album.url})" }

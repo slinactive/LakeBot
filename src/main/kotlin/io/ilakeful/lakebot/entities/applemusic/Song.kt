@@ -23,6 +23,7 @@ data class Song(
         val author: SongAuthor,
         val album: SongAlbum,
         val url: String,
+        val previewUrl: String,
         val id: Long,
         val artwork: String?,
         val releaseDate: OffsetDateTime,
@@ -36,6 +37,7 @@ class SongBuilder {
     lateinit var authorProperty: SongAuthor
     lateinit var albumProperty: SongAlbum
     lateinit var urlProperty: String
+    lateinit var preview: String
     lateinit var dateProperty: OffsetDateTime
     lateinit var genreProperty: String
     var idProperty: Long = 0
@@ -54,6 +56,9 @@ class SongBuilder {
     }
     inline infix fun url(lazyUrl: () -> String) {
         urlProperty = lazyUrl()
+    }
+    inline infix fun previewUrl(lazyPreview: () -> String) {
+        preview = lazyPreview()
     }
     inline infix fun releaseDate(lazyDate: () -> OffsetDateTime) {
         dateProperty = lazyDate()
@@ -81,6 +86,7 @@ class SongBuilder {
             && ::albumProperty.isInitialized
             && ::authorProperty.isInitialized
             && ::urlProperty.isInitialized
+            && ::preview.isInitialized
             && ::dateProperty.isInitialized
             && ::genreProperty.isInitialized
             && numberProperty > 0
@@ -92,6 +98,7 @@ class SongBuilder {
                 authorProperty,
                 albumProperty,
                 urlProperty,
+                preview,
                 idProperty,
                 artworkProperty,
                 dateProperty,
