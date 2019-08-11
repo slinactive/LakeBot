@@ -19,6 +19,7 @@ package io.ilakeful.lakebot.commands.utils
 import io.ilakeful.lakebot.Immutable
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.extensions.*
+import io.ilakeful.lakebot.utils.PerspectiveApiUtils
 
 import khttp.get
 
@@ -38,35 +39,39 @@ class UrbanCommand : Command {
             try {
                 val base = "http://api.urbandictionary.com/v0"
                 val endpoint = "$base/define?term=${URLEncoder.encode(arguments, "UTF-8")}"
-                val response = get(endpoint, headers = mapOf())
+                val response = get(endpoint, headers = emptyMap())
                 val json = response.jsonObject
                 if (json.getJSONArray("list").toList().isEmpty()) {
                     event.sendFailure("Couldn't find that on Urban!").queue()
                 } else {
+                    val result = json.getJSONArray("list").getJSONObject(0)
+                    val word: String = result.getString("word")
+                    val meaning: String by lazy {
+                        var meaning = result.getString("definition")
+                        for (res in Regex("\\[([^]]+)]").findAll(meaning)) {
+                            val param = URLEncoder.encode(res.value.removePrefix("[").removeSuffix("]"), "UTF-8")
+                            meaning = meaning.replace(res.value, "${res.value}(https://www.urbandictionary.com/define.php?term=$param)")
+                        }
+                        meaning
+                    }
+                    val example: String by lazy {
+                        var example = result.getString("example")
+                        for (res in Regex("\\[([^]]+)]").findAll(example)) {
+                            val param = URLEncoder.encode(res.value.removePrefix("[").removeSuffix("]"), "UTF-8")
+                            example = example.replace(res.value, "${res.value}(https://www.urbandictionary.com/define.php?term=$param)")
+                        }
+                        example
+                    }
+                    val author: String = result.getString("author")
+                    val like: Int = result.getInt("thumbs_up")
+                    val dislike: Int = result.getInt("thumbs_down")
+                    val link = "https://www.urbandictionary.com/define.php?term=${URLEncoder.encode(arguments, "UTF-8")}"
+                    val hasFoundNsfw = arrayOf(result.getString("definition"), result.getString("example"))
+                            .filter { it.isNotEmpty() }
+                            .map { PerspectiveApiUtils.probability(it) }
+                            .any { it >= 0.9f }
                     val embed = buildEmbed {
-                        val result = json.getJSONArray("list").getJSONObject(0)
-                        val word: String = result.getString("word")
-                        val meaning: String by lazy {
-                            var meaning = result.getString("definition")
-                            for (res in Regex("\\[([^]]+)]").findAll(meaning)) {
-                                val param = URLEncoder.encode(res.value.removePrefix("[").removeSuffix("]"), "UTF-8")
-                                meaning = meaning.replace(res.value, "${res.value}(https://www.urbandictionary.com/define.php?term=$param)")
-                            }
-                            meaning
-                        }
-                        val example: String by lazy {
-                            var example = result.getString("example")
-                            for (res in Regex("\\[([^]]+)]").findAll(example)) {
-                                val param = URLEncoder.encode(res.value.removePrefix("[").removeSuffix("]"), "UTF-8")
-                                example = example.replace(res.value, "${res.value}(https://www.urbandictionary.com/define.php?term=$param)")
-                            }
-                            example
-                        }
-                        val author: String = result.getString("author")
-                        val like: Int = result.getInt("thumbs_up")
-                        val dislike: Int = result.getInt("thumbs_down")
-                        val link = "https://www.urbandictionary.com/define.php?term=${URLEncoder.encode(arguments, "UTF-8")}"
-                        author("Result For $word:", link) { event.selfUser.effectiveAvatarUrl }
+                        author("Result for $word:", link) { event.selfUser.effectiveAvatarUrl }
                         color { Immutable.SUCCESS }
                         thumbnail { event.selfUser.effectiveAvatarUrl }
                         field(title = "Meaning:") {
@@ -90,10 +95,16 @@ class UrbanCommand : Command {
                         field(true, "Dislikes:") {
                             "${event.jda.getEmoteById(391954570705895434)?.asMention ?: "\uD83D\uDC4E"} \u2014 $dislike"
                         }
-                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
                         timestamp()
                     }
-                    event.channel.sendMessage(embed).queue()
+                    event.textChannel.run {
+                        if (!isNSFW && hasFoundNsfw) {
+                            sendFailure("Some sexually explicit content has been found while defining the term! You need to go to the channel marked as NSFW!")
+                        } else {
+                            sendMessage(embed)
+                        }
+                    }.queue()
                 }
             } catch (e: Exception) {
                 event.sendFailure("Something went wrong! ${e::class.simpleName}: ${e.message}").queue()

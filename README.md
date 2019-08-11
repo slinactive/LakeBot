@@ -20,3 +20,4 @@ LakeBot is the next generation of [KabyBot](https://github.com/KabyBot/KabyBot).
 * **[Guava](https://github.com/google/guava)** — the set of core libraries by Google including a lot of useful stuff
 * **[GeoNames](http://www.geonames.org/)** — the geographical database covering all countries and containing over eleven million toponyms
 * **[Reflections](https://github.com/ronmamo/reflections)** — the library scanning the classpath, indexing the metadata, and allowing to query it on runtime
+* **[Perspective Comment Analyzer](https://www.perspectiveapi.com/#/start)** — the library able to analyze text for sexually explicit, threatening, insulting, toxic, or flirting content
