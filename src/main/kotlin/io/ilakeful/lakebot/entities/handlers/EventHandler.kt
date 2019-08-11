@@ -135,7 +135,7 @@ object EventHandler : ListenerAdapter() {
         if (event.guild.selfMember.isConnected && event.guild.selfMember.connectedChannel == event.channelLeft) {
             val members = event.channelLeft.members.filter { !it.user.isBot }
             if (members.isEmpty()) {
-                if (AudioUtils[event.guild].trackScheduler.queue.isEmpty()) {
+                if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
                     AudioUtils.clear(event.guild, AudioUtils[event.guild])
                 } else {
                     AudioUtils[event.guild].audioPlayer.isPaused = true
@@ -156,7 +156,7 @@ object EventHandler : ListenerAdapter() {
         if (event.guild.selfMember.isConnected && event.guild.selfMember.connectedChannel == event.channelLeft) {
             val members = event.channelLeft.members.filter { !it.user.isBot }
             if (members.isEmpty()) {
-                if (AudioUtils[event.guild].trackScheduler.queue.isEmpty()) {
+                if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
                     AudioUtils.clear(event.guild, AudioUtils[event.guild])
                 } else {
                     AudioUtils[event.guild].audioPlayer.isPaused = true
