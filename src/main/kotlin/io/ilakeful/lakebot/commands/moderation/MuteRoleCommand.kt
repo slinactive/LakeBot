@@ -23,11 +23,46 @@ import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class MuteRoleCommand : Command {
+    companion object {
+        @JvmStatic
+        fun denyPermissions(muteRole: Role, guild: Guild) {
+            for (channel in guild.textChannelCache) {
+                try {
+                    val override = channel.putPermissionOverride(muteRole)
+                    val denied = listOf(
+                            Permission.MESSAGE_ADD_REACTION,
+                            Permission.MESSAGE_ATTACH_FILES,
+                            Permission.MESSAGE_EMBED_LINKS,
+                            Permission.MESSAGE_MENTION_EVERYONE,
+                            Permission.MESSAGE_TTS,
+                            Permission.MESSAGE_WRITE
+                    )
+                    override.deny = Permission.getRaw(denied)
+                    override.queue()
+                } catch (ignored: Exception) {
+                }
+            }
+            for (channel in guild.voiceChannelCache) {
+                try {
+                    val override = channel.putPermissionOverride(muteRole)
+                    val denied = listOf(
+                            Permission.PRIORITY_SPEAKER,
+                            Permission.VOICE_CONNECT,
+                            Permission.VOICE_SPEAK
+                    )
+                    override.deny = Permission.getRaw(denied)
+                    override.queue()
+                } catch (ignored: Exception) {
+                }
+            }
+        }
+    }
     override val name = "muterole"
     override val aliases = listOf("mute-role")
     override val description = "The command managing a mute role"
@@ -44,14 +79,8 @@ class MuteRoleCommand : Command {
                     when {
                         event.message.mentionedRoles.isNotEmpty() -> {
                             event.guild.setMuteRole(event.message.mentionedRoles.first())
-                            event.sendSuccess("The mute role has been set!").queue()
-                            for (channel in event.guild.textChannelCache) {
-                                try {
-                                    val override = channel.putPermissionOverride(event.message.mentionedRoles.first())
-                                    override.deny = 34880
-                                    override.queue()
-                                } catch (ignored: Exception) {
-                                }
+                            event.sendSuccess("The mute role has been set!").queue {
+                                denyPermissions(event.message.mentionedRoles.first(), event.guild)
                             }
                         }
                         event.guild.searchRoles(arguments).isNotEmpty() -> {
@@ -59,7 +88,7 @@ class MuteRoleCommand : Command {
                             if (list.size > 1) {
                                 event.channel.sendMessage(buildEmbed {
                                     color { Immutable.SUCCESS }
-                                    author("Select The Role:") { event.selfUser.effectiveAvatarUrl }
+                                    author("Select the Role:") { event.selfUser.effectiveAvatarUrl }
                                     for ((index, role) in list.withIndex()) {
                                         appendln { "${index + 1}. ${role.name}" }
                                     }
@@ -70,29 +99,17 @@ class MuteRoleCommand : Command {
                                     selectRole(event, it, list, process)
                                 }
                             } else {
-                                event.guild.setMuteRole(list[0])
-                                event.sendSuccess("The mute role has been set!").queue()
-                                for (channel in event.guild.textChannelCache) {
-                                    try {
-                                        val override = channel.putPermissionOverride(list[0])
-                                        override.deny = 34880
-                                        override.queue()
-                                    } catch (ignored: Exception) {
-                                    }
+                                event.guild.setMuteRole(list.first())
+                                event.sendSuccess("The mute role has been set!").queue {
+                                    denyPermissions(list.first(), event.guild)
                                 }
                             }
                         }
                         args[0] matches Regex.DISCORD_ID && event.guild.getRoleById(args[0]) !== null -> {
                             val role = event.guild.getRoleById(args[0])!!
                             event.guild.setMuteRole(role)
-                            event.sendSuccess("The mute role has been set!").queue()
-                            for (channel in event.guild.textChannelCache) {
-                                try {
-                                    val override = channel.putPermissionOverride(role)
-                                    override.deny = 34880
-                                    override.queue()
-                                } catch (ignored: Exception) {
-                                }
+                            event.sendSuccess("The mute role has been set!").queue {
+                                denyPermissions(role, event.guild)
                             }
                         }
                         else -> event.sendFailure("Couldn't find that role!").queue()
@@ -128,16 +145,10 @@ class MuteRoleCommand : Command {
             if (c.isInt) {
                 if (c.toInt() in 1..roles.size) {
                     msg.delete().queue()
-                    event.guild.setMuteRole(roles[c.toInt() - 1])
+                    val role = roles[c.toInt() - 1]
+                    event.guild.setMuteRole(role)
                     event.sendSuccess("The mute role has been set!").queue()
-                    for (channel in event.guild.textChannelCache) {
-                        try {
-                            val override = channel.putPermissionOverride(roles[c.toInt() - 1])
-                            override.deny = 34880
-                            override.queue()
-                        } catch (ignored: Exception) {
-                        }
-                    }
+                    denyPermissions(role, event.guild)
                     WAITER_PROCESSES -= process
                 } else {
                     event.sendFailure("Try again!").await { selectRole(event, msg, roles, process) }

@@ -23,9 +23,11 @@ import io.ilakeful.lakebot.utils.AudioUtils
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import net.dv8tion.jda.api.Permission
 
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent
+import net.dv8tion.jda.api.events.channel.voice.VoiceChannelCreateEvent
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent
@@ -179,7 +181,32 @@ object EventHandler : ListenerAdapter() {
                 val id = event.guild.muteRole!!
                 val role = event.guild.getRoleById(id)!!
                 val override = event.channel.putPermissionOverride(role)
-                override.deny = 34880
+                val denied = listOf(
+                        Permission.MESSAGE_ADD_REACTION,
+                        Permission.MESSAGE_ATTACH_FILES,
+                        Permission.MESSAGE_EMBED_LINKS,
+                        Permission.MESSAGE_MENTION_EVERYONE,
+                        Permission.MESSAGE_TTS,
+                        Permission.MESSAGE_WRITE
+                )
+                override.deny = Permission.getRaw(denied)
+                override.queue()
+            } catch (ignored: Exception) {
+            }
+        }
+    }
+    override fun onVoiceChannelCreate(event: VoiceChannelCreateEvent) {
+        if (event.guild.isMuteRoleEnabled) {
+            try {
+                val id = event.guild.muteRole!!
+                val role = event.guild.getRoleById(id)!!
+                val override = event.channel.putPermissionOverride(role)
+                val denied = listOf(
+                        Permission.PRIORITY_SPEAKER,
+                        Permission.VOICE_CONNECT,
+                        Permission.VOICE_SPEAK
+                )
+                override.deny = Permission.getRaw(denied)
                 override.queue()
             } catch (ignored: Exception) {
             }

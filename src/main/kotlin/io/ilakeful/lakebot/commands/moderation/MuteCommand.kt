@@ -117,6 +117,7 @@ class MuteCommand : Command {
                         }
                         event.sendSuccess("${user.tag} was successfully muted!").queue()
                         event.guild.addRoleToMember(member, role).queue()
+                        event.guild.kickVoiceMember(member).queue()
                         user.openPrivateChannel().queue { channel ->
                             channel.sendMessage(embed).queue(null) {}
                         }
