@@ -38,7 +38,7 @@ open class PlayCommand : Command {
                 if (!event.guild.selfMember.isConnected) {
                     event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel)
                 }
-                AudioUtils.loadAndPlay(event.guild, event.textChannel, event.argsRaw!!)
+                AudioUtils.loadAndPlay(event.author, event.guild, event.textChannel, event.argsRaw!!)
             }
         } else {
             val attachment = event.message.attachments.firstOrNull()
@@ -49,7 +49,7 @@ open class PlayCommand : Command {
                     if (!event.guild.selfMember.isConnected) {
                         event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel)
                     }
-                    AudioUtils.loadAndPlay(event.guild, event.textChannel, attachment.url)
+                    AudioUtils.loadAndPlay(event.author, event.guild, event.textChannel, attachment.url)
                 }
             } else {
                 event.channel.sendFailure("You specified no link/query and attached no file!").queue()

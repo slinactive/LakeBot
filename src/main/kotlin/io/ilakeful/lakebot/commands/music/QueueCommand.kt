@@ -47,7 +47,12 @@ class QueueCommand : Command {
                         embed { num, pages ->
                             for (track in pages[num - 1]) {
                                 appendln {
-                                    "**${elements.indexOf(track) + 1}. [${track.info.title}](${track.info.uri}) (${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})**"
+                                    val id = track.userData as? Long
+                                    val requester = id?.let { event.jda.getUserById(it) }
+                                    "**${elements.indexOf(track) + 1}. " +
+                                            "[${track.info.title}](${track.info.uri}) " +
+                                            "(${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})**" +
+                                            requester.let { if (it !== null) " (requested by ${it.asMention})" else "" }
                                 }
                             }
                             color { Immutable.SUCCESS }
@@ -63,10 +68,16 @@ class QueueCommand : Command {
                             }
                             field(title = "Volume") { "${AudioUtils[event.guild].audioPlayer.volume}%" }
                             field(title = "Now Playing:") {
-                                "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
+                                val track = AudioUtils[event.guild].audioPlayer.playingTrack
+                                val id = track.userData as? Long
+                                val requester = id?.let { event.jda.getUserById(it) }
+                                "**[${track.info.title}](${track.info.uri})** " +
+                                        "(${TimeUtils.asDuration(track.position)}/" +
+                                        "${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})" +
+                                        requester.let { if (it !== null) " (requested by ${it.asMention})" else "" }
                             }
                             footer(event.author.effectiveAvatarUrl) {
-                                "Page $num/${pages.size} | Requested by ${event.author.tag}"
+                                "Page $num/${pages.size} | Requested by ${event.author.asTag}"
                             }
                         }
                     }
@@ -78,7 +89,13 @@ class QueueCommand : Command {
                         }
                         field(title = "Volume") { "${AudioUtils[event.guild].audioPlayer.volume}%" }
                         field(title = "Now Playing:") {
-                            "**[${AudioUtils[event.guild].audioPlayer.playingTrack.info.title}](${AudioUtils[event.guild].audioPlayer.playingTrack.info.uri})** (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)}/${if (AudioUtils[event.guild].audioPlayer.playingTrack.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.duration)})"
+                            val track = AudioUtils[event.guild].audioPlayer.playingTrack
+                            val id = track.userData as? Long
+                            val requester = id?.let { event.jda.getUserById(it) }
+                            "**[${track.info.title}](${track.info.uri})** " +
+                                    "(${TimeUtils.asDuration(track.position)}/" +
+                                    "${if (track.duration == Long.MAX_VALUE) "LIVE" else TimeUtils.asDuration(track.duration)})" +
+                                    requester.let { if (it !== null) " (requested by ${it.asMention})" else "" }
                         }
                         color { Immutable.SUCCESS }
                         author("LakePlayer") { event.selfUser.effectiveAvatarUrl }

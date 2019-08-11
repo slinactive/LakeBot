@@ -31,7 +31,7 @@ class PlayingCommand : Command {
     override val description = "The command sending information about the currently playing song"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
-            event.sendFailure("There is no track that is being played now!").queue()
+            event.channel.sendFailure("There is no track that is being played now!").queue()
         } else {
             val player = AudioUtils[event.guild].audioPlayer
             val track = player.playingTrack
@@ -39,6 +39,8 @@ class PlayingCommand : Command {
             val url = track.info.uri
             val now = TimeUtils.asDuration(track.position)
             val total = TimeUtils.asDuration(track.duration)
+            val id = track.userData as? Long
+            val requester = id?.let { event.jda.getUserById(it) }
             val timeline = MusicUtils.getProgressBar(if (track.duration == Long.MAX_VALUE) Long.MAX_VALUE else track.position, track.duration)
             val bar = "$timeline ($now/${if (track.duration == Long.MAX_VALUE) "LIVE" else total})"
             val embed = buildEmbed {
@@ -51,7 +53,10 @@ class PlayingCommand : Command {
                 }
                 field(title = "Volume") { "${AudioUtils[event.guild].audioPlayer.volume}%" }
                 field(title = "Duration:") { bar }
-                footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                if (requester !== null) {
+                    field(title = "Requester:") { requester.asMention }
+                }
+                footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
             }
             event.channel.sendMessage(embed).queue()
         }

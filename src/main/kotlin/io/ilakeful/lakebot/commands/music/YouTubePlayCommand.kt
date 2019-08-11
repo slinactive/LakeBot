@@ -74,7 +74,7 @@ class YouTubePlayCommand : PlayCommand() {
                                 }
                             }
                         } else {
-                            AudioUtils.loadAndPlay(event.guild, event.textChannel, event.argsRaw!!)
+                            AudioUtils.loadAndPlay(event.author, event.guild, event.textChannel, event.argsRaw!!)
                         }
                     } else {
                         event.sendFailure("I can't find that on YouTube!").queue()
@@ -96,7 +96,7 @@ class YouTubePlayCommand : PlayCommand() {
                     val index: Int = c.toInt() - 1
                     val video = videos[index]
                     val link = "https://youtu.be/${video.id}"
-                    AudioUtils.loadAndPlay(event.guild, event.textChannel, link)
+                    AudioUtils.loadAndPlay(event.author, event.guild, event.textChannel, link)
                     WAITER_PROCESSES -= process
                 } else {
                     event.sendFailure("Try again!").await { awaitInt(event, videos, msg, process) }

@@ -30,6 +30,7 @@ import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.TextChannel
+import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 object AudioUtils {
@@ -54,15 +55,17 @@ object AudioUtils {
         guild.audioManager.sendingHandler = manager.sendHandler
         return manager
     }
-    fun loadAndPlay(guild: Guild, channel: TextChannel, trackUrl: String) {
+    fun loadAndPlay(requester: User, guild: Guild, channel: TextChannel, trackUrl: String) {
         val musicManager = this[guild]
         PLAYER_MANAGER.loadItemOrdered(musicManager, trackUrl, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
+                track.userData = requester.idLong
                 musicManager.trackScheduler += track
                 channel.sendSuccess("[${track.info.title}](${track.info.uri}) has been added to queue!").queue()
             }
             override fun playlistLoaded(playlist: AudioPlaylist) {
                 for (track in playlist.tracks) {
+                    track.userData = requester.idLong
                     musicManager.trackScheduler += track
                 }
                 val description = "${if (!playlist.isSearchResult) "[${playlist.name}]($trackUrl)" else playlist.name} has been added to queue!"
