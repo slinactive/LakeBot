@@ -46,7 +46,7 @@ class ServerCommand : Command {
         author(guild.name) { guild.iconUrl }
         color { Immutable.SUCCESS }
         thumbnail { guild.iconUrl }
-        footer(author.effectiveAvatarUrl) { "Requested by ${author.tag}" }
+        footer(author.effectiveAvatarUrl) { "Requested by ${author.asTag}" }
         timestamp()
         field(true, "Name:") { guild.name.escapeDiscordMarkdown() }
         field(true, "ID:") { guild.id }
@@ -62,7 +62,7 @@ class ServerCommand : Command {
         field(true, "Bots:") {
             "${guild.memberCache.count { it.user.isBot }}/${guild.memberCache.size()}"
         }
-        field(true, "Owner:") { guild.owner!!.user.tag.escapeDiscordMarkdown() }
+        field(true, "Owner:") { guild.owner?.user?.asTag?.escapeDiscordMarkdown() ?: "N/A" }
         field(true, "Region:") { guild.region.getName() }
         field(true, "Emotes:") { guild.emoteCache.size().toString() }
         field(true, "Categories:") { guild.categoryCache.size().toString() }
@@ -87,13 +87,11 @@ class ServerCommand : Command {
             }
         }
     }
-    suspend fun serverMenu(event: MessageReceivedEvent) = event.channel.sendMessage(buildEmbed {
+    suspend fun serverMenu(event: MessageReceivedEvent) = event.channel.sendEmbed {
         color { Immutable.SUCCESS }
-        author { "Select The Action:" }
-        description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Avatar" }
-    }).await {
-        val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
-        WAITER_PROCESSES += process
+        author { "Select the Action:" }
+        description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Icon" }
+    }.await {
         it.addReaction("\u0031\u20E3").complete()
         it.addReaction("\u0032\u20E3").complete()
         it.addReaction("\u274C").complete()
@@ -106,30 +104,25 @@ class ServerCommand : Command {
             when (e.reactionEmote.name) {
                 "\u0031\u20E3" -> {
                     it.delete().queue()
-                    WAITER_PROCESSES -= process
                     val embed = serverInfo(event.author) { event.guild }
                     event.channel.sendMessage(embed).queue()
                 }
                 "\u0032\u20E3" -> {
                     it.delete().queue()
-                    val embed = buildEmbed {
-                        author("Server Avatar:", event.guild.iconUrl) { null }
+                    event.channel.sendEmbed {
+                        author("Server Icon:", event.guild.iconUrl) { null }
                         image { "${event.guild.iconUrl}?size=2048" }
-                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
-                    }
-                    event.channel.sendMessage(embed).queue()
-                    WAITER_PROCESSES -= process
+                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
+                    }.queue()
                 }
                 "\u274C" -> {
                     it.delete().queue()
-                    event.sendSuccess("Process successfully stopped!").queue()
-                    WAITER_PROCESSES -= process
+                    event.channel.sendSuccess("Successfully canceled!").queue()
                 }
             }
         } else {
             it.delete().queue()
-            event.sendFailure("Time is up!").queue()
-            WAITER_PROCESSES -= process
+            event.channel.sendFailure("Time is up!").queue()
         }
     }
 }

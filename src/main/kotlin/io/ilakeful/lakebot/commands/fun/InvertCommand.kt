@@ -37,26 +37,22 @@ class InvertCommand : Command {
             |$command <url> -> inverts an image from the link""".trimMargin()
     }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        if (args.isNotEmpty()) {
+        val arguments = event.argsRaw
+        if (arguments !== null) {
             try {
-                ImageUtils.urlToBytes(URL(event.argsRaw!!)).let {
-                    event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(it)), "inverted.png").queue()
+                ImageUtils.urlToBytes(URL(arguments)).let {
+                    event.channel.sendFile(
+                            ImageUtils.imageToBytes(ImageUtils.getInvertedImage(it)),
+                            "inverted.png"
+                    ).queue()
                 }
             } catch (t: Throwable) {
-                when {
-                    event.message.mentionedMembers.isNotEmpty() -> {
-                        val avatar = "${event.message.mentionedMembers[0].user.effectiveAvatarUrl}?size=2048"
-                        event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
-                    }
-                    event.guild.getMemberByTagSafely(event.argsRaw!!) !== null -> {
-                        val avatar = "${event.jda.getUserByTagSafely(event.argsRaw!!)!!.effectiveAvatarUrl}?size=2048"
-                        event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
-                    }
-                    event.guild.searchMembers(event.argsRaw!!).isNotEmpty() -> {
-                        val avatar = "${event.guild.searchMembers(event.argsRaw!!)[0].user.effectiveAvatarUrl}?size=2048"
-                        event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
-                    }
-                    else -> event.sendFailure("The user cannot be found!").queue()
+                event.retrieveMembers(command = this, massMention = false) {
+                    val avatar = "${it.user.effectiveAvatarUrl}?size=2048"
+                    event.channel.sendFile(
+                            ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)),
+                            "inverted.png"
+                    ).queue()
                 }
             }
         } else {
@@ -64,13 +60,19 @@ class InvertCommand : Command {
                 val attachment = event.message.attachments[0]
                 if (attachment.isImage) {
                     val att = "${attachment.url}?size=2048"
-                    event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(att)), "inverted.png").queue()
+                    event.channel.sendFile(
+                            ImageUtils.imageToBytes(ImageUtils.getInvertedImage(att)),
+                            "inverted.png"
+                    ).queue()
                 } else {
-                    event.message.addReaction("\u274C").queue()
+                    event.channel.sendFailure("The attachment caused some failure!").queue()
                 }
             } else {
                 val avatar = "${event.author.effectiveAvatarUrl}?size=2048"
-                event.channel.sendFile(ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)), "inverted.png").queue()
+                event.channel.sendFile(
+                        ImageUtils.imageToBytes(ImageUtils.getInvertedImage(avatar)),
+                        "inverted.png"
+                ).queue()
             }
         }
     }

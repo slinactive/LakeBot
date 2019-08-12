@@ -18,10 +18,13 @@ package io.ilakeful.lakebot.entities.extensions
 
 import io.ilakeful.lakebot.entities.EventWaiter
 
+import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.requests.restaction.MessageAction
 
 import java.util.concurrent.TimeUnit
 
 suspend fun Message.awaitConfirmation(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) = EventWaiter.awaitConfirmation(this, user, delay, unit)
 suspend fun Message.awaitNullableConfirmation(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) = EventWaiter.awaitNullableConfirmation(this, user,  delay, unit)
+fun MessageAction.embed(lazyBuilder: EmbedBuilder.() -> Unit) = embed(buildEmbed(lazyBuilder))

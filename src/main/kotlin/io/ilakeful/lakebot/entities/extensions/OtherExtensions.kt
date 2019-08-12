@@ -35,7 +35,7 @@ suspend fun <T> selectEntity(
         process: WaiterProcess?,
         time: Long = 1L,
         unit: TimeUnit = TimeUnit.MINUTES,
-        block: (T) -> Unit
+        block: suspend (T) -> Unit
 ) = selectEntity(event, message, entities, addProcess, process, time to unit, block)
 suspend fun <T> selectEntity(
         event: MessageReceivedEvent,
@@ -44,7 +44,7 @@ suspend fun <T> selectEntity(
         addProcess: Boolean = false,
         process: WaiterProcess?,
         delay: Pair<Long, TimeUnit> = 1L to TimeUnit.MINUTES,
-        block: (T) -> Unit
+        block: suspend (T) -> Unit
 ) {
     if (addProcess && process !== null) {
         WAITER_PROCESSES += process
@@ -74,7 +74,7 @@ suspend fun <T> selectEntity(
             content.toLowerCase() == "exit" -> {
                 message?.delete()?.queue()
                 removeProcess()
-                event.channel.sendSuccess("Successfully stopped!").queue()
+                event.channel.sendSuccess("Successfully canceled!").queue()
             }
             else -> event.channel.sendFailure("Try again!").await {
                 selectEntity(event, message, entities, addProcess, process, delay, block)

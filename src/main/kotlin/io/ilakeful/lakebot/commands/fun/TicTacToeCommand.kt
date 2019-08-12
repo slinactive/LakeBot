@@ -104,53 +104,50 @@ class TicTacToeCommand : Command {
     override val aliases = listOf("ttt", "tic-tac-toe")
     override val usage: (String) -> String = { "${super.usage(it)} <user>" }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        if (event.argsRaw !== null) {
-            try {
-                val starter = event.author
-                val opponent = when {
-                    event.message.mentionedMembers.isNotEmpty() -> event.message.mentionedMembers.first().user
-                    event.guild.getMemberByTagSafely(args[0]) !== null -> event.jda.getUserByTagSafely(args[0])!!
-                    event.guild.searchMembers(args[0]).isNotEmpty() -> event.guild.searchMembers(args[0]).first().user
-                    else -> throw IllegalArgumentException("Couldn't find this user!")
+        event.retrieveMembers(
+                command = this,
+                massMention = false,
+                predicate = { member ->
+                    WAITER_PROCESSES.none {
+                        member.user.idLong in it.users
+                                && event.channel.idLong == it.channel
+                                && !member.user.isBot
+                                && !member.user.isFake
+                                && member.user != event.author
+                    }
                 }
-                if (!opponent.isBot && !opponent.isFake && opponent != event.author) {
-                    val process = WaiterProcess(mutableListOf(starter, opponent), event.textChannel, this)
-                    WAITER_PROCESSES += process
-                    event.channel.sendMessage(opponent.asMention).embed(buildEmbed {
-                        color { Immutable.CONFIRMATION }
-                        author { "Warning!" }
-                        description { "You were challenged by ${starter.asMention} to the tic-tac-toe game! Want to accept the challenge?" }
-                    }).await {
-                        val isWillingToPlay = EventWaiter.awaitNullableConfirmation(it, opponent)
-                        if (isWillingToPlay !== null) {
-                            if (isWillingToPlay) {
-                                it.delete().queue()
-                                val ttt = TicTacToe(starter, opponent)
-                                event.channel.sendMessage(buildEmbed {
-                                    description { "${ttt.printableBoard}It's ${starter.asMention}'s turn!" }
-                                    color { Immutable.SUCCESS }
-                                }).await {
-                                    awaitTurn(ttt, event, starter, opponent, TTT_CROSS, TTT_NOUGHT, process)
-                                }
-                            } else {
-                                it.delete().queue()
-                                event.channel.sendSuccess("The challenge was declined!").queue()
-                                WAITER_PROCESSES -= process
-                            }
-                        } else {
-                            it.delete().queue()
-                            event.channel.sendFailure("Time is up!").queue()
-                            WAITER_PROCESSES -= process
+        ) { member ->
+            val starter = event.author
+            val opponent = member.user
+            val process = WaiterProcess(mutableListOf(starter, opponent), event.textChannel, this)
+            WAITER_PROCESSES += process
+            event.channel.sendMessage(opponent.asMention).embed {
+                color { Immutable.CONFIRMATION }
+                author { "Warning!" }
+                description { "You were challenged by ${starter.asMention} to the tic-tac-toe game! Want to accept the challenge?" }
+            }.await {
+                val isWillingToPlay = EventWaiter.awaitNullableConfirmation(it, opponent)
+                if (isWillingToPlay !== null) {
+                    if (isWillingToPlay) {
+                        it.delete().queue()
+                        val ttt = TicTacToe(starter, opponent)
+                        event.channel.sendEmbed {
+                            description { "${ttt.printableBoard}It's ${starter.asMention}'s turn!" }
+                            color { Immutable.SUCCESS }
+                        }.await {
+                            awaitTurn(ttt, event, starter, opponent, TTT_CROSS, TTT_NOUGHT, process)
                         }
+                    } else {
+                        it.delete().queue()
+                        event.channel.sendSuccess("The challenge was declined!").queue()
+                        WAITER_PROCESSES -= process
                     }
                 } else {
-                    throw IllegalArgumentException("You have specified the wrong user!")
+                    it.delete().queue()
+                    event.channel.sendFailure("Time is up!").queue()
+                    WAITER_PROCESSES -= process
                 }
-            } catch (e: IllegalArgumentException) {
-                event.sendFailure(e.message ?: "Something went wrong!").queue()
             }
-        } else {
-            event.sendFailure("You haven't specified the user you want to challenge!").queue()
         }
     }
     private suspend fun awaitTurn(
@@ -174,25 +171,25 @@ class TicTacToeCommand : Command {
                         if (!ttt.isOver) {
                             if (!ttt.board.none { rowLambda -> !rowLambda.none { it matches TicTacToe.BOARD_REGEX } }) {
                                 ttt.inverseCurrentTurn()
-                                event.channel.sendMessage(buildEmbed {
+                                event.channel.sendEmbed {
                                     description { "${ttt.printableBoard}It's ${ttt.currentTurn.asMention}'s turn!" }
                                     color { Immutable.SUCCESS }
-                                }).await {
+                                }.await {
                                     awaitTurn(ttt, event, author, mentioned, cross, nought, process)
                                 }
                             } else {
-                                event.channel.sendMessage(buildEmbed {
+                                event.channel.sendEmbed {
                                     description { "${ttt.printableBoard}It's a draw!" }
                                     color { Immutable.SUCCESS }
-                                }).queue {
+                                }.queue {
                                     WAITER_PROCESSES -= process
                                 }
                             }
                         } else {
-                            event.channel.sendMessage(buildEmbed {
+                            event.channel.sendEmbed {
                                 description { "${ttt.printableBoard}And ${ttt.currentTurn.asMention} wins! Well done!" }
                                 color { Immutable.FAILURE }
-                            }).queue {
+                            }.queue {
                                 WAITER_PROCESSES -= process
                             }
                         }
@@ -208,11 +205,11 @@ class TicTacToeCommand : Command {
                         if (isWillingToExit !== null) {
                             if (isWillingToExit) {
                                 it.delete().queue()
-                                event.channel.sendSuccess("The process was finished!").queue()
+                                event.channel.sendSuccess("Successfully finished!").queue()
                                 WAITER_PROCESSES -= process
                             } else {
                                 it.delete().queue()
-                                event.channel.sendSuccess("Let's carry on!").queue()
+                                event.channel.sendSuccess("Successfully canceled!").queue()
                                 awaitTurn(ttt, event, author, mentioned, cross, nought, process)
                             }
                         }

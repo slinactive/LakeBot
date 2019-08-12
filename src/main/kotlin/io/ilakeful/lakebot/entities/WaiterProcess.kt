@@ -23,6 +23,11 @@ import java.util.UUID
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.entities.User
 
-data class WaiterProcess(val users: MutableList<User>, val channel: TextChannel, val command: Command?) {
+class WaiterProcess(val users: MutableList<Long>, val channel: Long, val command: Command?) {
+    constructor(
+            users: MutableList<User>,
+            channel: TextChannel,
+            command: Command?
+    ) : this(users.map { it.idLong }.toMutableList(), channel.idLong, command)
     val id = UUID.randomUUID().toString()
 }

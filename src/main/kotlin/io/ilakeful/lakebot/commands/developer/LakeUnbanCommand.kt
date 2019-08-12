@@ -25,38 +25,11 @@ class LakeUnbanCommand : Command {
     override val name = "lakeunban"
     override val description = "The command lifting LakeBan against the user"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user>"
-    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (args.isNotEmpty()) {
-        when {
-            event.message.mentionedUsers.isNotEmpty() -> {
-                val user = event.message.mentionedUsers[0]
-                if (user.lakeBan === null) {
-                    event.sendFailure("This user isn't banned!").queue()
-                } else {
-                    user.clearLakeBan()
-                    event.sendSuccess("User was unbanned successfully!").queue()
-                }
-            }
-            event.jda.getUserByTagSafely(event.argsRaw!!) !== null -> {
-                val user = event.jda.getUserByTagSafely(event.argsRaw!!)!!
-                if (user.lakeBan === null) {
-                    event.sendFailure("This user isn't banned!").queue()
-                } else {
-                    user.clearLakeBan()
-                    event.sendSuccess("User was unbanned successfully!").queue()
-                }
-            }
-            event.guild.searchMembers(event.argsRaw!!).isNotEmpty() -> {
-                val user = event.guild.searchMembers(event.argsRaw!!)[0].user
-                if (user.lakeBan === null) {
-                    event.sendFailure("This user isn't banned!").queue()
-                } else {
-                    user.clearLakeBan()
-                    event.sendSuccess("User was unbanned successfully!").queue()
-                }
-            }
-            else -> event.sendFailure("Couldn't find this user!").queue()
-        }
-    } else {
-        event.sendFailure("You specified no content!").queue()
+    override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = event.retrieveMembers(
+            command = this,
+            predicate = { it.user.lakeBan !== null }
+    ) {
+        it.user.clearLakeBan()
+        event.channel.sendSuccess("${it.user.asTag} has been successfully released from LakeBan!").queue()
     }
 }

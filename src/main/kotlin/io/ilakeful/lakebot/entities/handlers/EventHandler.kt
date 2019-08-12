@@ -85,7 +85,7 @@ object EventHandler : ListenerAdapter() {
                 if (mute !== null) {
                     val muteObject = mute["mute", Document::class.java]
                     val ago = muteObject.getLong("time")
-                    val muteTime = muteObject.getLong("long")
+                    val muteTime = muteObject.getLong("term")
                     val restAction = guild.removeRoleFromMember(member, role)
                     if (System.currentTimeMillis() >= ago + muteTime) {
                         restAction.queue(
@@ -112,7 +112,7 @@ object EventHandler : ListenerAdapter() {
                 event.guild.addRoleToMember(event.member, role).queue()
                 val muteObject = mute["mute", Document::class.java]
                 val ago = muteObject.getLong("time")
-                val muteTime = muteObject.getLong("long")
+                val muteTime = muteObject.getLong("term")
                 val restAction = event.guild.removeRoleFromMember(event.member, role)
                 if (System.currentTimeMillis() >= ago + muteTime) {
                     restAction.queue(

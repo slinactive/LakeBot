@@ -16,8 +16,14 @@
 
 package io.ilakeful.lakebot.entities.extensions
 
+import io.ilakeful.lakebot.Immutable
+import io.ilakeful.lakebot.WAITER_PROCESSES
+import io.ilakeful.lakebot.commands.Command
+import io.ilakeful.lakebot.entities.WaiterProcess
+
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 fun JDA.searchUsers(target: String): List<User> {
     val list = userCache.filter {
@@ -70,11 +76,169 @@ fun Guild.searchTextChannels(target: String): List<TextChannel> {
     }).reversed()
 }
 
-inline infix fun JDA.searchUsers(crossinline lazy: () -> String): List<User> = this.searchUsers(lazy())
-inline infix fun JDA.searchGuilds(crossinline lazy: () -> String): List<Guild> = this.searchGuilds(lazy())
-inline infix fun Guild.searchMembers(crossinline lazy: () -> String): List<Member> = this.searchMembers(lazy())
-inline infix fun Guild.searchRoles(crossinline lazy: () -> String): List<Role> = this.searchRoles(lazy())
-inline infix fun Guild.searchTextChannels(crossinline lazy: () -> String): List<TextChannel> = this.searchTextChannels(lazy())
+suspend fun MessageReceivedEvent.retrieveMembers(
+        command: Command? = null,
+        query: String? = null,
+        mentionMode: Boolean = true,
+        massMention: Boolean = true,
+        membersLimit: Int = 5,
+        applyLimitToMentioned: Boolean = true,
+        useAuthorIfNoArguments: Boolean = false,
+        predicate: (Member) -> Boolean = { true },
+        noArgumentsFailureBlock: suspend () -> Unit = { channel.sendFailure("You haven't specified any arguments!").queue() },
+        noMemberFoundBlock: suspend () -> Unit = { channel.sendFailure("LakeBot did not manage to find the required user!").queue() },
+        block: suspend (Member) -> Unit
+) {
+    val arguments = query?.trim() ?: argsRaw
+    if (!arguments.isNullOrEmpty()) {
+        when {
+            if (mentionMode) {
+                message.mentionedMembers.any(predicate)
+            } else {
+                arguments matches Regex.DISCORD_USER && guild.getMemberById(
+                        arguments.replace(Regex.DISCORD_USER, "\$1")
+                ) !== null
+            } -> {
+                if (mentionMode) {
+                    val members by lazy {
+                        val mentioned = message.mentionedMembers.filter(predicate)
+                        if (applyLimitToMentioned) {
+                            mentioned.take(membersLimit)
+                        } else {
+                            mentioned
+                        }
+                    }
+                    if (massMention) {
+                        for (result in members) {
+                            block(result)
+                        }
+                    } else {
+                        block(members.first())
+                    }
+                } else {
+                    val result = guild.getMemberById(arguments.replace(Regex.DISCORD_USER, "\$1"))!!
+                    block(result)
+                }
+            }
+            guild.getMemberByTagSafely(arguments) !== null -> {
+                val result = guild.getMemberByTagSafely(arguments)!!
+                block(result)
+            }
+            arguments matches Regex.DISCORD_ID && guild.getMemberById(arguments) !== null -> {
+                val result = guild.getMemberById(arguments)!!
+                block(result)
+            }
+            guild.searchMembers(arguments).any(predicate) -> {
+                val members = guild.searchMembers(arguments).filter(predicate).take(membersLimit)
+                if (members.size > 1) {
+                    channel.sendEmbed {
+                        color { Immutable.SUCCESS }
+                        author("Select the User:") { selfUser.effectiveAvatarUrl }
+                        for ((index, result) in members.withIndex()) {
+                            appendln { "${index + 1}. ${result.user.asTag.escapeDiscordMarkdown()}" }
+                        }
+                        footer { "Type in \"exit\" to kill the process" }
+                    }.await {
+                        val process = WaiterProcess(mutableListOf(author), textChannel, command)
+                        selectEntity(
+                                event = this,
+                                message = it,
+                                entities = members,
+                                addProcess = true,
+                                process = process
+                        ) { result -> block(result) }
+                    }
+                } else {
+                    block(members.first())
+                }
+            }
+            else -> noMemberFoundBlock()
+        }
+    } else {
+        if (useAuthorIfNoArguments) {
+            block(member!!)
+        } else {
+            noArgumentsFailureBlock()
+        }
+    }
+}
+suspend fun MessageReceivedEvent.retrieveRoles(
+        command: Command? = null,
+        query: String? = null,
+        mentionMode: Boolean = true,
+        massMention: Boolean = true,
+        rolesLimit: Int = 5,
+        applyLimitToMentioned: Boolean = true,
+        predicate: (Role) -> Boolean = { true },
+        noArgumentsFailureBlock: suspend () -> Unit = { channel.sendFailure("You haven't specified any arguments!").queue() },
+        noRoleFoundBlock: suspend () -> Unit = { channel.sendFailure("LakeBot did not manage to find the required role!").queue() },
+        block: suspend (Role) -> Unit
+) {
+    val arguments = query?.trim() ?: argsRaw
+    if (!arguments.isNullOrEmpty()) {
+        when {
+            if (mentionMode) {
+                message.mentionedRoles.any(predicate)
+            } else {
+                arguments matches Regex.DISCORD_ROLE && guild.getRoleById(
+                        arguments.replace(Regex.DISCORD_ROLE, "\$1")
+                ) !== null
+            } -> {
+                if (mentionMode) {
+                    val roles by lazy {
+                        val mentioned = message.mentionedRoles.filter(predicate)
+                        if (applyLimitToMentioned) {
+                            mentioned.take(rolesLimit)
+                        } else {
+                            mentioned
+                        }
+                    }
+                    if (massMention) {
+                        for (result in roles) {
+                            block(result)
+                        }
+                    } else {
+                        block(roles.first())
+                    }
+                } else {
+                    val result = guild.getRoleById(arguments.replace(Regex.DISCORD_ROLE, "\$1"))!!
+                    block(result)
+                }
+            }
+            arguments matches Regex.DISCORD_ID && guild.getRoleById(arguments) !== null -> {
+                val result = guild.getRoleById(arguments)!!
+                block(result)
+            }
+            guild.searchRoles(arguments).any(predicate) -> {
+                val roles = guild.searchRoles(arguments).filter(predicate).take(rolesLimit)
+                if (roles.size > 1) {
+                    channel.sendEmbed {
+                        color { Immutable.SUCCESS }
+                        author("Select the Role:") { selfUser.effectiveAvatarUrl }
+                        for ((index, result) in roles.withIndex()) {
+                            appendln { "${index + 1}. ${result.name.escapeDiscordMarkdown()}" }
+                        }
+                        footer { "Type in \"exit\" to kill the process" }
+                    }.await {
+                        val process = WaiterProcess(mutableListOf(author), textChannel, command)
+                        selectEntity(
+                                event = this,
+                                message = it,
+                                entities = roles,
+                                addProcess = true,
+                                process = process
+                        ) { result -> block(result) }
+                    }
+                } else {
+                    block(roles.first())
+                }
+            }
+            else -> noRoleFoundBlock()
+        }
+    } else {
+        noArgumentsFailureBlock()
+    }
+}
 
 fun getPriority(actual: String, expected: String): Int = when {
     expected == actual -> 6

@@ -23,74 +23,33 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class LakeBanCommand : Command {
     override val name = "lakeban"
-    override val description = "The command giving the user LakeBan (after which they can't use LakeBot)"
+    override val description = "The command giving the user LakeBan (after which they cannot use LakeBot any longer)"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user> <reason>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (args.size > 1) {
-        when {
-            args[0] matches Regex.DISCORD_USER -> {
-                val user = event.jda.getUserById(args[0].replace(Regex.DISCORD_USER, "\$1"))
-                if (user === null) {
-                    event.sendFailure("Couldn't find this user!").queue()
+        event.retrieveMembers(
+                command = this,
+                query = args.first(),
+                massMention = false,
+                predicate = { !it.user.isLBDeveloper && !it.user.isBot }
+        ) { member ->
+            val user = member.user
+            event.channel.sendConfirmation("Are you sure you want to give LakeBan to ${user.asTag}?").await {
+                val isWillingToBan = it.awaitNullableConfirmation(event.author)
+                if (isWillingToBan !== null) {
+                    if (isWillingToBan) {
+                        user.putLakeBan(event.argsRaw?.split("\\s+".toRegex(), 2)?.last() ?: "No reason provided")
+                        event.channel.sendSuccess("${user.asTag} has successfully gotten LakeBan!").queue()
+                        it.delete().queue()
+                    } else {
+                        event.channel.sendSuccess("Successfully canceled!").queue()
+                        it.delete().queue()
+                    }
                 } else {
-                    event.sendConfirmation("Are you sure you want to ban this user?").await {
-                        val boolean = it.awaitNullableConfirmation(event.author)
-                        if (boolean !== null) {
-                            if (boolean) {
-                                user.putLakeBan(event.argsRaw!!.split("\\s+".toRegex(), 2)[1])
-                                event.sendSuccess("${user.tag} got LakeBan!").queue()
-                                it.delete().queue()
-                            } else {
-                                event.sendSuccess("Successfully canceled!").queue()
-                                it.delete().queue()
-                            }
-                        } else {
-                            event.sendFailure("Time is up!").queue()
-                            it.delete().queue()
-                        }
-                    }
+                    event.channel.sendFailure("Time is up!")
                 }
             }
-            event.jda.getUserByTagSafely(args[0]) !== null -> {
-                val user = event.jda.getUserByTagSafely(args[0])!!
-                event.channel.sendConfirmation("Are you sure you want to ban this user?").await {
-                    val boolean = it.awaitNullableConfirmation(event.author)
-                    if (boolean !== null) {
-                        if (boolean) {
-                            user.putLakeBan(event.argsRaw!!.split("\\s+".toRegex(), 2)[1])
-                            event.sendSuccess("${user.tag} got LakeBan!").queue()
-                            it.delete().queue()
-                        } else {
-                            event.sendSuccess("Successfully canceled!").queue()
-                            it.delete().queue()
-                        }
-                    } else {
-                        event.sendFailure("Time is up!").queue()
-                        it.delete().queue()
-                    }
-                }
-            }
-            event.guild.searchMembers(args[0]).isNotEmpty() -> {
-                val user = event.guild.searchMembers(args[0])[0].user
-                event.sendConfirmation("Are you sure you want to ban this user?").await {
-                    val boolean = it.awaitNullableConfirmation(event.author)
-                    if (boolean !== null) {
-                        if (boolean) {
-                            user.putLakeBan(event.argsRaw!!.split("\\s+".toRegex(), 2)[1])
-                            event.sendSuccess("${user.tag} got LakeBan!").queue()
-                            it.delete().queue()
-                        } else {
-                            event.sendSuccess("Successfully canceled!").queue()
-                            it.delete().queue()
-                        }
-                    } else {
-                        event.sendFailure("Time is up!").queue()
-                        it.delete().queue()
-                    }
-                }
-            }
-            else -> event.sendFailure("Couldn't find this user!").queue()
         }
     } else {
-        event.sendFailure("You didn't specify the reason!").queue()
+        event.channel.sendFailure("The command has been used in a wrong way!").queue()
     }
 }

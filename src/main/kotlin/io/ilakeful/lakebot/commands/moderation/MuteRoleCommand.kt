@@ -16,15 +16,11 @@
 
 package io.ilakeful.lakebot.commands.moderation
 
-import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
-import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
-import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.Permission.*
 import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
@@ -36,14 +32,14 @@ class MuteRoleCommand : Command {
                 try {
                     val override = channel.putPermissionOverride(muteRole)
                     val denied = listOf(
-                            Permission.MESSAGE_ADD_REACTION,
-                            Permission.MESSAGE_ATTACH_FILES,
-                            Permission.MESSAGE_EMBED_LINKS,
-                            Permission.MESSAGE_MENTION_EVERYONE,
-                            Permission.MESSAGE_TTS,
-                            Permission.MESSAGE_WRITE
+                            MESSAGE_ADD_REACTION,
+                            MESSAGE_ATTACH_FILES,
+                            MESSAGE_EMBED_LINKS,
+                            MESSAGE_MENTION_EVERYONE,
+                            MESSAGE_TTS,
+                            MESSAGE_WRITE
                     )
-                    override.deny = Permission.getRaw(denied)
+                    override.deny = getRaw(denied)
                     override.queue()
                 } catch (ignored: Exception) {
                 }
@@ -52,11 +48,11 @@ class MuteRoleCommand : Command {
                 try {
                     val override = channel.putPermissionOverride(muteRole)
                     val denied = listOf(
-                            Permission.PRIORITY_SPEAKER,
-                            Permission.VOICE_CONNECT,
-                            Permission.VOICE_SPEAK
+                            PRIORITY_SPEAKER,
+                            VOICE_CONNECT,
+                            VOICE_SPEAK
                     )
-                    override.deny = Permission.getRaw(denied)
+                    override.deny = getRaw(denied)
                     override.queue()
                 } catch (ignored: Exception) {
                 }
@@ -70,100 +66,44 @@ class MuteRoleCommand : Command {
         |${super.usage(prefix)} ${'\u2014'} disables mute role if it iss enabled
         |${super.usage(prefix)} <role> ${'\u2014'} sets mute role""".trimMargin()
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        when (Permission.MANAGE_SERVER) {
-            !in event.member!!.permissions -> event.sendFailure("You don't have required permissions!").queue()
-            !in event.guild.selfMember.permissions -> event.sendFailure("LakeBot doesn't have required permissions!").queue()
+        when (MANAGE_SERVER) {
+            !in event.member!!.permissions -> {
+                event.channel.sendFailure("You do not have the required permission to manage the server!").queue()
+            }
+            !in event.selfMember!!.permissions -> {
+                event.channel.sendFailure("LakeBot does not have the required permission to manage the server!").queue()
+            }
             else -> {
-                val arguments = event.argsRaw
-                if (arguments !== null) {
-                    when {
-                        event.message.mentionedRoles.isNotEmpty() -> {
-                            event.guild.setMuteRole(event.message.mentionedRoles.first())
-                            event.sendSuccess("The mute role has been set!").queue {
-                                denyPermissions(event.message.mentionedRoles.first(), event.guild)
-                            }
-                        }
-                        event.guild.searchRoles(arguments).isNotEmpty() -> {
-                            val list = event.guild.searchRoles(arguments).take(5)
-                            if (list.size > 1) {
-                                event.channel.sendMessage(buildEmbed {
-                                    color { Immutable.SUCCESS }
-                                    author("Select the Role:") { event.selfUser.effectiveAvatarUrl }
-                                    for ((index, role) in list.withIndex()) {
-                                        appendln { "${index + 1}. ${role.name}" }
+                event.retrieveRoles(
+                        command = this,
+                        massMention = false,
+                        noArgumentsFailureBlock = {
+                            if (event.guild.isMuteRoleEnabled) {
+                                event.channel.sendConfirmation("Are you sure you want to disable the mute role?").await {
+                                    val isWillingToDisable = it.awaitNullableConfirmation(event.author)
+                                    it.delete()
+                                    if (isWillingToDisable !== null) {
+                                        if (isWillingToDisable) {
+                                            event.guild.clearMuteRole()
+                                            event.channel.sendSuccess("The mute role has been successfully disabled!").queue()
+                                        } else {
+                                            event.channel.sendSuccess("Successfully canceled!").queue()
+                                        }
+                                    } else {
+                                        event.channel.sendFailure("Time is up!").queue()
                                     }
-                                    footer { "Type in \"exit\" to kill the process" }
-                                }).await {
-                                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
-                                    WAITER_PROCESSES += process
-                                    selectRole(event, it, list, process)
                                 }
                             } else {
-                                event.guild.setMuteRole(list.first())
-                                event.sendSuccess("The mute role has been set!").queue {
-                                    denyPermissions(list.first(), event.guild)
-                                }
+                                event.channel.sendFailure("You specified no content!").queue()
                             }
                         }
-                        args[0] matches Regex.DISCORD_ID && event.guild.getRoleById(args[0]) !== null -> {
-                            val role = event.guild.getRoleById(args[0])!!
-                            event.guild.setMuteRole(role)
-                            event.sendSuccess("The mute role has been set!").queue {
-                                denyPermissions(role, event.guild)
-                            }
-                        }
-                        else -> event.sendFailure("Couldn't find that role!").queue()
-                    }
-                } else {
-                    if (event.guild.isMuteRoleEnabled) {
-                        event.sendConfirmation("Are you sure you want to disable mute role?").await {
-                            val confirmation = it.awaitNullableConfirmation(event.author)
-                            if (confirmation !== null) {
-                                if (confirmation) {
-                                    it.delete().queue()
-                                    event.guild.clearMuteRole()
-                                    event.sendSuccess(text = "The mute role has been disabled!").queue()
-                                } else {
-                                    it.delete().queue()
-                                    event.sendSuccess("Process was canceled!").queue()
-                                }
-                            } else {
-                                it.delete().queue()
-                                event.sendFailure("Time is up!").queue()
-                            }
-                        }
-                    } else {
-                        event.sendFailure("You specified no content!").queue()
+                ) {
+                    event.guild.setMuteRole(it)
+                    event.channel.sendSuccess("The mute role has been set!").queue { _ ->
+                        denyPermissions(it, event.guild)
                     }
                 }
             }
-        }
-    }
-    suspend fun selectRole(event: MessageReceivedEvent, msg: Message, roles: List<Role>, process: WaiterProcess) {
-        val c = event.channel.awaitMessage(event.author)?.contentRaw
-        if (c !== null) {
-            if (c.isInt) {
-                if (c.toInt() in 1..roles.size) {
-                    msg.delete().queue()
-                    val role = roles[c.toInt() - 1]
-                    event.guild.setMuteRole(role)
-                    event.sendSuccess("The mute role has been set!").queue()
-                    denyPermissions(role, event.guild)
-                    WAITER_PROCESSES -= process
-                } else {
-                    event.sendFailure("Try again!").await { selectRole(event, msg, roles, process) }
-                }
-            } else if (c.toLowerCase() == "exit") {
-                msg.delete().queue()
-                WAITER_PROCESSES -= process
-                event.sendSuccess("Process successfully stopped!").queue()
-            } else {
-                event.sendFailure("Try again!").await { selectRole(event, msg, roles, process) }
-            }
-        } else {
-            msg.delete().queue()
-            WAITER_PROCESSES -= process
-            event.sendFailure("Time is up!").queue()
         }
     }
 }

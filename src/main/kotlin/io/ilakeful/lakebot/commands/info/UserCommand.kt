@@ -17,16 +17,13 @@
 package io.ilakeful.lakebot.commands.info
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.EventWaiter
-import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
@@ -40,38 +37,8 @@ class UserCommand : Command {
     override val description = "The command sending complete information about your account or an account of the specified user"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user (optional)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        val arguments = event.argsRaw
-        val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
-        if (arguments !== null) {
-            when {
-                event.message.mentionedMembers.isNotEmpty() -> userMenu(event, event.message.mentionedMembers[0], process)
-                event.guild.getMemberByTagSafely(arguments) !== null -> userMenu(event, event.guild.getMemberByTagSafely(arguments)!!, process)
-                event.guild.searchMembers(arguments).isNotEmpty() -> {
-                    val list = event.guild.searchMembers(arguments).take(5)
-                    if (list.size > 1) {
-                        event.channel.sendMessage(buildEmbed {
-                            color { Immutable.SUCCESS }
-                            author("Select the User:") { event.selfUser.effectiveAvatarUrl }
-                            for ((index, member) in list.withIndex()) {
-                                appendln { "${index + 1}. ${member.user.asTag}" }
-                            }
-                            footer { "Type in \"exit\" to kill the process" }
-                        }).await {
-                            WAITER_PROCESSES += process
-                            selectUser(event, it, list, process)
-                        }
-                    } else {
-                        userMenu(event, list[0], process)
-                    }
-                }
-                args[0] matches Regex.DISCORD_ID && event.guild.getMemberById(args[0]) !== null -> {
-                    val member = event.guild.getMemberById(args[0])
-                    userMenu(event, member!!, process)
-                }
-                else -> event.channel.sendFailure("Couldn't find that user!").queue()
-            }
-        } else {
-            userMenu(event, event.member!!, process)
+        event.retrieveMembers(command = this, massMention = false, useAuthorIfNoArguments = true) {
+            userMenu(event, it)
         }
     }
     inline fun userInfo(author: User, lazy: () -> Member) = buildEmbed {
@@ -84,15 +51,21 @@ class UserCommand : Command {
         thumbnail { user.effectiveAvatarUrl }
         footer(author.effectiveAvatarUrl) { "Requested by ${author.asTag}" }
         timestamp()
-        field(true, "Online Status:") { member.onlineStatus.name.replace("_", " ").capitalizeAll(true) }
+        field(true, "Online Status:") {
+            member.onlineStatus.name.replace("_", " ").capitalizeAll(true)
+        }
         field(true, if (member.activities.isNotEmpty()) when (member.activities.first().type) {
             Activity.ActivityType.LISTENING -> "Listening To:"
             Activity.ActivityType.STREAMING -> "Streaming:"
             Activity.ActivityType.WATCHING -> "Watching:"
             else -> "Playing:"
         } else "Game Status:") { member.activities.firstOrNull()?.name ?: "None" }
-        field(true, "Creation Date:") { user.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
-        field(true, "Join Date:") { member.timeJoined.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
+        field(true, "Creation Date:") {
+            user.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+        }
+        field(true, "Join Date:") {
+            member.timeJoined.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+        }
         field(true, "ID:") { user.id }
         field(true, "Color:") { member.color?.rgb?.toHex()?.takeLast(6)?.prepend("#") ?: "Default" }
         field(true, "Username:") { user.name.escapeDiscordMarkdown() }
@@ -103,7 +76,7 @@ class UserCommand : Command {
             field(true, "Acknowledgements:") {
                 when {
                     member.isOwner -> "Server Owner"
-                    member.hasPermission(Permission.ADMINISTRATOR) -> "Server Admin"
+                    member.hasPermission(Permission.ADMINISTRATOR) -> "Server Administrator"
                     member.hasPermission(Permission.MANAGE_SERVER) -> "Server Moderator"
                     else -> "Unknown"
                 }
@@ -122,15 +95,11 @@ class UserCommand : Command {
             field(title = "Key Permissions:") { member.keyPermissions.map { it.getName() }.joinToString() }
         }
     }
-    suspend fun userMenu(
-            event: MessageReceivedEvent,
-            member: Member,
-            process: WaiterProcess
-    ) = event.channel.sendMessage(buildEmbed {
+    suspend fun userMenu(event: MessageReceivedEvent, member: Member) = event.channel.sendEmbed {
         color { Immutable.SUCCESS }
         author { "Select the Action:" }
         description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get an Avatar" }
-    }).await {
+    }.await {
         it.addReaction("\u0031\u20E3").complete()
         it.addReaction("\u0032\u20E3").complete()
         it.addReaction("\u274C").complete()
@@ -143,7 +112,6 @@ class UserCommand : Command {
             when (e.reactionEmote.name) {
                 "\u0031\u20E3" -> {
                     it.delete().queue()
-                    WAITER_PROCESSES -= process
                     val embed = userInfo(event.author) { member }
                     event.channel.sendMessage(embed).queue()
                 }
@@ -156,45 +124,14 @@ class UserCommand : Command {
                         footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
                     }
                     event.channel.sendMessage(embed).queue()
-                    WAITER_PROCESSES -= process
                 }
                 "\u274C" -> {
                     it.delete().queue()
-                    event.channel.sendSuccess("Process successfully stopped!").queue()
-                    WAITER_PROCESSES -= process
+                    event.channel.sendSuccess("Successfully canceled!").queue()
                 }
             }
         } else {
             it.delete().queue()
-            event.channel.sendFailure("Time is up!").queue()
-            WAITER_PROCESSES -= process
-        }
-    }
-    suspend fun selectUser(
-            event: MessageReceivedEvent,
-            message: Message,
-            members: List<Member>,
-            process: WaiterProcess
-    ) {
-        val c = event.channel.awaitMessage(event.author)?.contentRaw
-        if (c !== null) {
-            if (c.isInt) {
-                if (c.toInt() in 1..members.size) {
-                    message.delete().queue()
-                    userMenu(event, members[c.toInt() - 1], process)
-                } else {
-                    event.channel.sendFailure("Try again!").await { selectUser(event, message, members, process) }
-                }
-            } else if (c.toLowerCase() == "exit") {
-                message.delete().queue()
-                WAITER_PROCESSES -= process
-                event.channel.sendSuccess("Successfully stopped!").queue()
-            } else {
-                event.channel.sendFailure("Try again!").await { selectUser(event, message, members, process) }
-            }
-        } else {
-            message.delete().queue()
-            WAITER_PROCESSES -= process
             event.channel.sendFailure("Time is up!").queue()
         }
     }

@@ -38,37 +38,8 @@ class RoleCommand : Command {
     override val description = "The command sending complete information about the specified role"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <role>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        val arguments = event.argsRaw
-        if (arguments !== null) {
-            val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
-            when {
-                event.message.mentionedRoles.isNotEmpty() -> roleMenu(event, event.message.mentionedRoles[0], process)
-                event.guild.searchRoles(arguments).isNotEmpty() -> {
-                    val list = event.guild.searchRoles(arguments).take(5)
-                    if (list.size > 1) {
-                        event.channel.sendMessage(buildEmbed {
-                            color { Immutable.SUCCESS }
-                            author("Select The Role:") { event.selfUser.effectiveAvatarUrl }
-                            for ((index, role) in list.withIndex()) {
-                                appendln { "${index + 1}. ${role.name}" }
-                            }
-                            footer { "Type in \"exit\" to kill the process" }
-                        }).await {
-                            WAITER_PROCESSES += process
-                            selectRole(event, it, list, process)
-                        }
-                    } else {
-                        roleMenu(event, list[0], process)
-                    }
-                }
-                args[0] matches Regex.DISCORD_ID && event.guild.getRoleById(args[0]) !== null -> {
-                    val role = event.guild.getRoleById(args[0])
-                    roleMenu(event, role!!, process)
-                }
-                else -> event.sendFailure("Couldn't find that role!").queue()
-            }
-        } else {
-            event.sendFailure("You specified no role!").queue()
+        event.retrieveRoles(command = this, massMention = false) {
+            roleMenu(event, it)
         }
     }
     inline fun roleInfo(author: User, lazy: () -> Role) = buildEmbed {
@@ -77,7 +48,7 @@ class RoleCommand : Command {
         if (role.color !== null) {
             thumbnail { "attachment://${role.color!!.rgb.toHex().takeLast(6)}.png" }
         }
-        footer(author.effectiveAvatarUrl) { "Requested by ${author.tag}" }
+        footer(author.effectiveAvatarUrl) { "Requested by ${author.asTag}" }
         timestamp()
         field(true, "Name:") { role.name.escapeDiscordMarkdown() }
         field(true, "ID:") { role.id }
@@ -87,22 +58,22 @@ class RoleCommand : Command {
         field(true, "Hoisted:") { role.isHoisted.asString() }
         field(true, "Mentionable:") { role.isMentionable.asString() }
         field(true, "Color:") { role.color?.rgb?.toHex()?.takeLast(6)?.prepend("#") ?: "Default" }
-        field(true, "Creation Date:") { role.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
+        field(true, "Creation Date:") {
+            role.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+        }
         if (role.keyPermissions.isNotEmpty()) {
-            field(title = "Key Permissions:") { role.keyPermissions.mapNotNull { it.getName() }.joinToString() }
+            field(title = "Key Permissions:") { role.keyPermissions.map { it.getName() }.joinToString() }
         }
     }
-    suspend fun roleMenu(event: MessageReceivedEvent, role: Role, process: WaiterProcess) = if (role.color === null) {
-        WAITER_PROCESSES -= process
+    suspend fun roleMenu(event: MessageReceivedEvent, role: Role) = if (role.color === null) {
         val embed = roleInfo(event.author) { role }
         event.channel.sendMessage(embed).queue()
     } else {
-        event.channel.sendMessage(buildEmbed {
+        event.channel.sendEmbed {
             color { Immutable.SUCCESS }
-            author { "Select The Action:" }
+            author { "Select the Action:" }
             description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Color Information" }
-        }).await {
-            WAITER_PROCESSES += process
+        }.await {
             it.addReaction("\u0031\u20E3").complete()
             it.addReaction("\u0032\u20E3").complete()
             it.addReaction("\u274C").complete()
@@ -115,7 +86,6 @@ class RoleCommand : Command {
                 when (e.reactionEmote.name) {
                     "\u0031\u20E3" -> {
                         it.delete().queue()
-                        WAITER_PROCESSES -= process
                         val embed = roleInfo(event.author) { role }
                         val color = ImageUtils.getColorImage(role.color!!, 250, 250)
                         event.channel.sendMessage(embed).addFile(color, "${role.color!!.rgb.toHex().takeLast(6)}.png").queue()
@@ -123,43 +93,16 @@ class RoleCommand : Command {
                     "\u0032\u20E3" -> {
                         it.delete().queue()
                         ColorCommand()(event, arrayOf(role.color!!.rgb.toHex().takeLast(6)))
-                        WAITER_PROCESSES -= process
                     }
                     "\u274C" -> {
                         it.delete().queue()
-                        event.sendSuccess("Process successfully stopped!").queue()
-                        WAITER_PROCESSES -= process
+                        event.channel.sendSuccess("Successfully canceled!").queue()
                     }
                 }
             } else {
                 it.delete().queue()
-                event.sendFailure("Time is up!").queue()
-                WAITER_PROCESSES -= process
+                event.channel.sendFailure("Time is up!").queue()
             }
-        }
-    }
-    suspend fun selectRole(event: MessageReceivedEvent, msg: Message, roles: List<Role>, process: WaiterProcess) {
-        val c = event.channel.awaitMessage(event.author)?.contentRaw
-        if (c !== null) {
-            if (c.isInt) {
-                if (c.toInt() in 1..roles.size) {
-                    msg.delete().queue()
-                    roleMenu(event, roles[c.toInt() - 1], process)
-                    WAITER_PROCESSES -= process
-                } else {
-                    event.sendFailure("Try again!").await { selectRole(event, msg, roles, process) }
-                }
-            } else if (c.toLowerCase() == "exit") {
-                msg.delete().queue()
-                WAITER_PROCESSES -= process
-                event.sendSuccess("Process successfully stopped!").queue()
-            } else {
-                event.sendFailure("Try again!").await { selectRole(event, msg, roles, process) }
-            }
-        } else {
-            msg.delete().queue()
-            WAITER_PROCESSES -= process
-            event.sendFailure("Time is up!").queue()
         }
     }
 }
