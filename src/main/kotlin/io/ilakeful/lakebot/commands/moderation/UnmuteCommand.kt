@@ -16,15 +16,11 @@
 
 package io.ilakeful.lakebot.commands.moderation
 
-import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
-import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.Permission.*
 import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class UnmuteCommand : Command {
@@ -34,107 +30,69 @@ class UnmuteCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
-            when {
-                MANAGE_ROLES !in event.member!!.permissions -> event.sendFailure("You don't have required permissions!").queue()
-                MANAGE_ROLES !in event.guild.selfMember.permissions -> event.sendFailure("LakeBot doesn't have required permissions!").queue()
-                !event.guild.isMuteRoleEnabled -> event.sendFailure("The mute role isn't enabled!").queue()
+            when (MANAGE_ROLES) {
+                !in event.member!!.permissions -> {
+                    event.channel.sendFailure("You do not have the required permission to manage roles!").queue()
+                }
+                !in event.selfMember!!.permissions -> {
+                    event.channel.sendFailure("LakeBot does not have the required permission to manage roles!").queue()
+                }
                 else -> {
-                    when {
-                        args[0] matches Regex.DISCORD_USER -> {
-                            val member = event.guild.getMemberById(args[0].replace(Regex.DISCORD_USER, "\$1"))
-                            if (member !== null) {
-                                unmuteUser(event) { member }
+                    event.retrieveMembersWithIsMassProperty(
+                            command = this,
+                            predicate = { event.selfMember!!.canInteract(it) && event.member!!.canInteract(it) }
+                    ) { member, (isMass, massSize) ->
+                        if (!event.guild.isMuteRoleEnabled) {
+                            event.channel.sendFailure("The mute role is not enabled!").queue()
+                            event.guild.clearMute(member.user)
+                        } else {
+                            if (!isMass || (isMass && massSize == 1)) {
+                                unmuteUser(event) { member}
                             } else {
-                                event.sendFailure("Couldn't find that user!").queue()
-                            }
-                        }
-                        args[0] matches Regex.DISCORD_ID && event.guild.getMemberById(args[0]) !== null -> {
-                            val member = event.guild.getMemberById(args[0])!!
-                            unmuteUser(event) { member }
-                        }
-                        event.guild.getMemberByTagSafely(args[0]) !== null -> {
-                            val member = event.guild.getMemberByTagSafely(args[0])!!
-                            unmuteUser(event) { member }
-                        }
-                        event.guild.searchMembers(arguments).isNotEmpty() -> {
-                            val list = event.guild.searchMembers(arguments).take(5)
-                            if (list.size > 1) {
-                                event.channel.sendMessage(buildEmbed {
-                                    color { Immutable.SUCCESS }
-                                    author("Select The User:") { event.selfUser.effectiveAvatarUrl }
-                                    for ((index, member) in list.withIndex()) {
-                                        appendln { "${index + 1}. ${member.user.tag}" }
+                                if (event.guild.getRoleById(event.guild.muteRole!!)!! !in member.roles) {
+                                    if (event.guild.getMute(member.user) !== null) {
+                                        event.guild.clearMute(member.user)
                                     }
-                                    footer { "Type in \"exit\" to kill the process" }
-                                }).await {
-                                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
-                                    WAITER_PROCESSES += process
-                                    selectUser(event, it, list, process)
+                                } else {
+                                    if (event.guild.getMute(member.user) !== null) {
+                                        unmuteUser(event) { member }
+                                    } else {
+                                        event.guild.clearMute(member.user)
+                                    }
                                 }
-                            } else {
-                                unmuteUser(event) { list.first() }
                             }
                         }
-                        else -> event.sendFailure("Couldn't find that user!").queue()
                     }
                 }
             }
         } else {
-            event.sendFailure("You specified no content!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
     suspend fun unmuteUser(event: MessageReceivedEvent, lazyMember: () -> Member) {
         val member = lazyMember()
         val user = member.user
-        if (event.member!!.canInteract(member) && event.guild.selfMember.canInteract(member)) {
-            val role = event.guild.getRoleById(event.guild.muteRole!!)!!
-            if (role !in member.roles || event.guild.getMute(user) === null) {
-                event.guild.clearMute(user)
-                event.sendFailure("That user is already unmuted!").queue()
-            } else {
-                event.channel.sendConfirmation("Are you sure you want to unmute this member?").await {
-                    val confirmation = it.awaitNullableConfirmation(event.author)
-                    if (confirmation !== null) {
-                        it.delete().queue()
-                        if (confirmation) {
-                            event.guild.clearMute(user)
-                            event.sendSuccess("${user.tag} was successfully unmuted!").queue()
-                            event.guild.removeRoleFromMember(member, role).queue()
-                        } else {
-                            event.sendSuccess("Process was canceled!").queue()
-                        }
+        val role = event.guild.getRoleById(event.guild.muteRole!!)!!
+        if (role !in member.roles || event.guild.getMute(user) === null) {
+            event.guild.clearMute(user)
+            event.channel.sendFailure("${user.asTag} is already unmuted!").queue()
+        } else {
+            event.channel.sendConfirmation("Are you sure you want to unmute ${user.asTag}?").await {
+                val confirmation = it.awaitNullableConfirmation(event.author)
+                if (confirmation !== null) {
+                    it.delete().queue()
+                    if (confirmation) {
+                        event.guild.clearMute(user)
+                        event.channel.sendSuccess("${user.asTag} has been successfully unmuted!").queue()
+                        event.guild.removeRoleFromMember(member, role).queue()
                     } else {
-                        it.delete().queue()
-                        event.sendFailure("Time is up!").queue()
+                        event.channel.sendSuccess("Successfully canceled!").queue()
                     }
-                }
-            }
-        } else {
-            event.sendFailure("You can't unmute that user!").queue()
-        }
-    }
-    suspend fun selectUser(event: MessageReceivedEvent, msg: Message, members: List<Member>, process: WaiterProcess) {
-        val c = event.channel.awaitMessage(event.author)?.contentRaw
-        if (c !== null) {
-            if (c.isInt) {
-                if (c.toInt() in 1..members.size) {
-                    msg.delete().queue()
-                    WAITER_PROCESSES -= process
-                    unmuteUser(event) { members[c.toInt() - 1] }
                 } else {
-                    event.sendFailure("Try again!").await { selectUser(event, msg, members, process) }
+                    it.delete().queue()
+                    event.channel.sendFailure("Time is up!").queue()
                 }
-            } else if (c.toLowerCase() == "exit") {
-                msg.delete().queue()
-                WAITER_PROCESSES -= process
-                event.sendSuccess("Process successfully stopped!").queue()
-            } else {
-                event.sendFailure("Try again!").await { selectUser(event, msg, members, process) }
             }
-        } else {
-            msg.delete().queue()
-            WAITER_PROCESSES -= process
-            event.sendFailure("Time is up!").queue()
         }
     }
 }

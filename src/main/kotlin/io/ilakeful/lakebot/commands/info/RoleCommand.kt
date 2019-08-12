@@ -38,7 +38,11 @@ class RoleCommand : Command {
     override val description = "The command sending complete information about the specified role"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <role>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        event.retrieveRoles(command = this, massMention = false) {
+        event.retrieveRoles(
+                command = this,
+                massMention = false,
+                predicate = { !it.isPublicRole }
+        ) {
             roleMenu(event, it)
         }
     }

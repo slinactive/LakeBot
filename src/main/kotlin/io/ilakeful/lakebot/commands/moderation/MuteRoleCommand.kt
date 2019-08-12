@@ -77,6 +77,7 @@ class MuteRoleCommand : Command {
                 event.retrieveRoles(
                         command = this,
                         massMention = false,
+                        predicate = { !it.isPublicRole },
                         noArgumentsFailureBlock = {
                             if (event.guild.isMuteRoleEnabled) {
                                 event.channel.sendConfirmation("Are you sure you want to disable the mute role?").await {

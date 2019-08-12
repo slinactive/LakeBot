@@ -17,7 +17,6 @@
 package io.ilakeful.lakebot.entities.extensions
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.WaiterProcess
 
@@ -97,7 +96,7 @@ suspend fun MessageReceivedEvent.retrieveMembers(
             } else {
                 arguments matches Regex.DISCORD_USER && guild.getMemberById(
                         arguments.replace(Regex.DISCORD_USER, "\$1")
-                ) !== null
+                ).let { it !== null && predicate(it) }
             } -> {
                 if (mentionMode) {
                     val members by lazy {
@@ -120,11 +119,11 @@ suspend fun MessageReceivedEvent.retrieveMembers(
                     block(result)
                 }
             }
-            guild.getMemberByTagSafely(arguments) !== null -> {
+            guild.getMemberByTagSafely(arguments).let { it !== null && predicate(it) } -> {
                 val result = guild.getMemberByTagSafely(arguments)!!
                 block(result)
             }
-            arguments matches Regex.DISCORD_ID && guild.getMemberById(arguments) !== null -> {
+            arguments matches Regex.DISCORD_ID && guild.getMemberById(arguments).let { it !== null && predicate(it) } -> {
                 val result = guild.getMemberById(arguments)!!
                 block(result)
             }
@@ -155,7 +154,7 @@ suspend fun MessageReceivedEvent.retrieveMembers(
             else -> noMemberFoundBlock()
         }
     } else {
-        if (useAuthorIfNoArguments) {
+        if (useAuthorIfNoArguments && predicate(member!!)) {
             block(member!!)
         } else {
             noArgumentsFailureBlock()
@@ -182,7 +181,7 @@ suspend fun MessageReceivedEvent.retrieveRoles(
             } else {
                 arguments matches Regex.DISCORD_ROLE && guild.getRoleById(
                         arguments.replace(Regex.DISCORD_ROLE, "\$1")
-                ) !== null
+                ).let { it !== null && predicate(it) }
             } -> {
                 if (mentionMode) {
                     val roles by lazy {
@@ -205,7 +204,7 @@ suspend fun MessageReceivedEvent.retrieveRoles(
                     block(result)
                 }
             }
-            arguments matches Regex.DISCORD_ID && guild.getRoleById(arguments) !== null -> {
+            arguments matches Regex.DISCORD_ID && guild.getRoleById(arguments).let { it !== null && predicate(it) } -> {
                 val result = guild.getRoleById(arguments)!!
                 block(result)
             }
@@ -237,6 +236,92 @@ suspend fun MessageReceivedEvent.retrieveRoles(
         }
     } else {
         noArgumentsFailureBlock()
+    }
+}
+internal suspend fun MessageReceivedEvent.retrieveMembersWithIsMassProperty(
+        command: Command? = null,
+        query: String? = null,
+        mentionMode: Boolean = true,
+        massMention: Boolean = true,
+        membersLimit: Int = 5,
+        applyLimitToMentioned: Boolean = true,
+        useAuthorIfNoArguments: Boolean = false,
+        predicate: (Member) -> Boolean = { true },
+        noArgumentsFailureBlock: suspend () -> Unit = { channel.sendFailure("You haven't specified any arguments!").queue() },
+        noMemberFoundBlock: suspend () -> Unit = { channel.sendFailure("LakeBot did not manage to find the required user!").queue() },
+        block: suspend (Member, isMass: Pair<Boolean, Int>) -> Unit
+) {
+    val arguments = query?.trim() ?: argsRaw
+    if (!arguments.isNullOrEmpty()) {
+        when {
+            if (mentionMode) {
+                message.mentionedMembers.any(predicate)
+            } else {
+                arguments matches Regex.DISCORD_USER && guild.getMemberById(
+                        arguments.replace(Regex.DISCORD_USER, "\$1")
+                ).let { it !== null && predicate(it) }
+            } -> {
+                if (mentionMode) {
+                    val members by lazy {
+                        val mentioned = message.mentionedMembers.filter(predicate)
+                        if (applyLimitToMentioned) {
+                            mentioned.take(membersLimit)
+                        } else {
+                            mentioned
+                        }
+                    }
+                    if (massMention) {
+                        for (result in members) {
+                            block(result, true to members.size)
+                        }
+                    } else {
+                        block(members.first(), false to 1)
+                    }
+                } else {
+                    val result = guild.getMemberById(arguments.replace(Regex.DISCORD_USER, "\$1"))!!
+                    block(result, false to 1)
+                }
+            }
+            guild.getMemberByTagSafely(arguments).let { it !== null && predicate(it) } -> {
+                val result = guild.getMemberByTagSafely(arguments)!!
+                block(result, false to 1)
+            }
+            arguments matches Regex.DISCORD_ID && guild.getMemberById(arguments).let { it !== null && predicate(it) } -> {
+                val result = guild.getMemberById(arguments)!!
+                block(result, false to 1)
+            }
+            guild.searchMembers(arguments).any(predicate) -> {
+                val members = guild.searchMembers(arguments).filter(predicate).take(membersLimit)
+                if (members.size > 1) {
+                    channel.sendEmbed {
+                        color { Immutable.SUCCESS }
+                        author("Select the User:") { selfUser.effectiveAvatarUrl }
+                        for ((index, result) in members.withIndex()) {
+                            appendln { "${index + 1}. ${result.user.asTag.escapeDiscordMarkdown()}" }
+                        }
+                        footer { "Type in \"exit\" to kill the process" }
+                    }.await {
+                        val process = WaiterProcess(mutableListOf(author), textChannel, command)
+                        selectEntity(
+                                event = this,
+                                message = it,
+                                entities = members,
+                                addProcess = true,
+                                process = process
+                        ) { result -> block(result, false to 1) }
+                    }
+                } else {
+                    block(members.first(), false to 1)
+                }
+            }
+            else -> noMemberFoundBlock()
+        }
+    } else {
+        if (useAuthorIfNoArguments && predicate(member!!)) {
+            block(member!!, false to 1)
+        } else {
+            noArgumentsFailureBlock()
+        }
     }
 }
 

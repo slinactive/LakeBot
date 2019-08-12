@@ -19,14 +19,12 @@ package io.ilakeful.lakebot.commands.utils
 import com.google.api.services.youtube.model.Video
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.utils.TimeUtils
 import io.ilakeful.lakebot.utils.YouTubeUtils
 
-import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class YouTubeCommand : Command {
@@ -41,91 +39,66 @@ class YouTubeCommand : Command {
             try {
                 val videos = YouTubeUtils.getVideos(arguments)
                 if (videos.isNotEmpty()) {
-                    val embed = buildEmbed {
+                    event.channel.sendEmbed {
+                        footer(event.author.effectiveAvatarUrl) { "Type in \"exit\" to kill the process" }
+                        author("YouTube Results for \"$arguments\":") { event.selfUser.effectiveAvatarUrl }
+                        color { Immutable.SUCCESS }
                         for ((index, video) in videos.withIndex()) {
                             appendln {
-                                "**${index + 1}. [${video.snippet.title}](https://youtu.be/${video.id})** — uploaded by ${video.snippet.channelTitle} (${TimeUtils.asDuration(YouTubeUtils.getDuration(video))})"
-                            }
-                            footer(event.author.effectiveAvatarUrl) {
-                                "Type in \"exit\" to kill the process"
-                            }
-                            author("YouTube Results For $arguments:") {
-                                event.selfUser.effectiveAvatarUrl
-                            }
-                            color {
-                                Immutable.SUCCESS
+                                "**${index + 1}. " +
+                                        "[${video.snippet.title}](https://youtu.be/${video.id})** " +
+                                        "— uploaded by ${video.snippet.channelTitle}" +
+                                        " (${TimeUtils.asDuration(YouTubeUtils.getDuration(video))})"
                             }
                         }
-                    }
-                    event.channel.sendMessage(embed).await {
-                        val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
-                        WAITER_PROCESSES += process
-                        awaitInt(event, videos, it, process)
+                    }.await {
+                        selectEntity(
+                                event = event,
+                                message = it,
+                                entities = videos,
+                                addProcess = true,
+                                process = WaiterProcess(
+                                        users = mutableListOf(event.author),
+                                        channel = event.textChannel,
+                                        command = this
+                                )
+                        ) { video ->
+                            event.channel.sendMessage(getYTEmbed(video)).queue()
+                        }
                     }
                 } else {
-                    event.sendFailure("Couldn't find that in YouTube!").queue()
+                    event.channel.sendFailure("No results found by the query!").queue()
                 }
             } catch (e: Exception) {
-                event.sendFailure("Something went wrong searching YouTube!").queue()
+                event.channel.sendFailure(
+                        "Something went wrong while searching YouTube! ${e::class.simpleName}: ${e.message}"
+                ).queue()
             }
         } else {
-            event.sendFailure("You specified no query!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
-    private suspend fun awaitInt(event: MessageReceivedEvent, videos: List<Video>, msg: Message, process: WaiterProcess) {
-        val c = event.channel.awaitMessage(event.author)?.contentRaw
-        if (c !== null) {
-            if (c.isInt) {
-                if (c.toInt() in 1..videos.size) {
-                    msg.delete().queue()
-                    val index: Int = c.toInt() - 1
-                    val video: Video = videos[index]
-                    buildEmbed {
-                        val thumbs = video.snippet.thumbnails
-                        val thumbnail = when {
-                            thumbs.maxres != null -> thumbs.maxres
-                            thumbs.high != null -> thumbs.high
-                            thumbs.medium != null -> thumbs.medium
-                            thumbs.default != null -> thumbs.default
-                            thumbs.standard != null -> thumbs.standard
-                            else -> null
-                        }
-                        color {
-                            Immutable.SUCCESS
-                        }
-                        setAuthor(video.snippet.channelTitle, "https://www.youtube.com/channel/${video.snippet.channelId}")
-                        title("https://youtu.be/${video.id}") {
-                            video.snippet.title
-                        }
-                        field(title ="Description:") {
-                            when {
-                                video.snippet.description.isNullOrEmpty() -> "No description provided"
-                                video.snippet.description.count() > 1024 -> video.snippet.description.substring(0, 1021) + "..."
-                                else -> video.snippet.description
-                            }
-                        }
-                        field(true, "Duration:") {
-                            TimeUtils.asDuration(YouTubeUtils.getDuration(video))
-                        }
-                        image {
-                            thumbnail?.url
-                        }
-                    }.let { event.sendMessage(it).queue() }
-                    WAITER_PROCESSES -= process
-                } else {
-                    event.sendFailure("Try again!").await { awaitInt(event, videos, msg, process) }
-                }
-            } else if (c.toLowerCase() == "exit") {
-                msg.delete().queue()
-                WAITER_PROCESSES -= process
-                event.sendSuccess("Process successfully stopped!").queue()
-            } else {
-                event.sendFailure("Try again!").await { awaitInt(event, videos, msg, process) }
-            }
-        } else {
-            msg.delete().queue()
-            WAITER_PROCESSES -= process
-            event.sendFailure("Time is up!").queue()
+    private fun getYTEmbed(video: Video) = buildEmbed {
+        val thumbs = video.snippet.thumbnails
+        val thumbnail = when {
+            thumbs.maxres !== null -> thumbs.maxres
+            thumbs.high !== null -> thumbs.high
+            thumbs.medium !== null -> thumbs.medium
+            thumbs.default !== null -> thumbs.default
+            thumbs.standard !== null -> thumbs.standard
+            else -> null
         }
+        color { Immutable.SUCCESS }
+        setAuthor(video.snippet.channelTitle, "https://www.youtube.com/channel/${video.snippet.channelId}")
+        title("https://youtu.be/${video.id}") { video.snippet.title }
+        field(title ="Description:") {
+            when {
+                video.snippet.description.isNullOrEmpty() -> "No description provided"
+                video.snippet.description.count() > 1024 -> video.snippet.description.substring(0, 1021) + "..."
+                else -> video.snippet.description
+            }
+        }
+        field(true, "Duration:") { TimeUtils.asDuration(YouTubeUtils.getDuration(video)) }
+        image { thumbnail?.url }
     }
 }

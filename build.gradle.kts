@@ -48,7 +48,7 @@ application {
     mainClassName = "io.ilakeful.lakebot.LakeBotKt"
     applicationName = "lakebot"
     group = "io.ilakeful.lakebot"
-    version = Version(1, 0, stability = Version.Stability.BETA, unstable = 12).toString()
+    version = Version(1, 0, stability = Version.Stability.BETA, unstable = 13).toString()
 }
 
 java {

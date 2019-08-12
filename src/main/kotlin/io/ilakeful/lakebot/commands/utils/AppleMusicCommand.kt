@@ -17,7 +17,6 @@
 package io.ilakeful.lakebot.commands.utils
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.applemusic.*
@@ -26,7 +25,6 @@ import io.ilakeful.lakebot.utils.TimeUtils
 
 import khttp.get
 
-import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 import org.json.JSONObject
@@ -66,7 +64,7 @@ class AppleMusicCommand : Command {
             explicit { json.getString("collectionExplicitness") == "explicit" }
         }
         url { json.getString("trackViewUrl") }
-        previewUrl { json.getString("previewUrl") }
+        previewUrl { json.optString("previewUrl", null) }
         id { json.getLong("trackId") }
         artwork { json.optString("artworkUrl100", null) }
         releaseDate { OffsetDateTime.parse(json.getString("releaseDate")) }
@@ -83,8 +81,7 @@ class AppleMusicCommand : Command {
             val results = searchForSongs(arguments)
             if (results.isNotEmpty()) {
                 if (results.size > 1) {
-                    val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
-                    event.channel.sendMessage(buildEmbed {
+                    event.channel.sendEmbed {
                         color { Immutable.SUCCESS }
                         author("Select the Song:") { event.selfUser.effectiveAvatarUrl }
                         footer { "Type in \"exit\" to kill the process | Format: author - track - album" }
@@ -95,9 +92,20 @@ class AppleMusicCommand : Command {
                                     if (isSingle) "" else " - [${song.album.title}](${song.album.url})"
                             }
                         }
-                    }).await {
-                        WAITER_PROCESSES += process
-                        selectSong(event, it, results, process)
+                    }.await {
+                        selectEntity(
+                                event = event,
+                                message = it,
+                                entities = results,
+                                addProcess = true,
+                                process = WaiterProcess(
+                                        users = mutableListOf(event.author),
+                                        channel = event.textChannel,
+                                        command = this
+                                )
+                        ) { song ->
+                            sendSongInfo(event, song)
+                        }
                     }
                 } else {
                     val song = results.first()
@@ -114,12 +122,14 @@ class AppleMusicCommand : Command {
         color { Immutable.SUCCESS }
         author("${song.author.name} - ${song.title}", song.url) { song.artwork ?: event.selfUser.effectiveAvatarUrl }
         thumbnail { song.artwork ?: event.selfUser.effectiveAvatarUrl }
-        description { "Want to play the track's preview? [Here's the link!](${song.previewUrl})"}
+        if (song.previewUrl !== null) {
+            description { "Want to play the track's preview? [Here's the link!](${song.previewUrl})"}
+        }
         field(true, "Artist:") { "[${song.author.name}](${song.author.url})" }
         field(true, "Song:") { "[${song.title}](${song.url})" }
         field(true, "Album:") { "[${song.album.title}](${song.album.url})" }
         field(true, "ID:") { song.id.toString() }
-        field(true, "Release:") { song.releaseDate.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
+        field(true, "Release:") { song.releaseDate.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim() }
         field(true, "Genre:") { song.genre }
         field(true, "Track Number:") { song.number.toString() }
         field(true, "Duration:") { TimeUtils.asDuration(song.duration) }
@@ -127,37 +137,4 @@ class AppleMusicCommand : Command {
         footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
         timestamp()
     }.queue()
-    private suspend fun selectSong(
-            event: MessageReceivedEvent,
-            message: Message,
-            songs: List<Song>,
-            process: WaiterProcess
-    ) {
-        val content = event.channel.awaitMessage(event.author)?.contentRaw
-        if (content !== null) {
-            when {
-                content.isInt -> {
-                    val index = content.toInt()
-                    if (index in 1..songs.size) {
-                        message.delete().queue()
-                        val song = songs[index - 1]
-                        WAITER_PROCESSES -= process
-                        sendSongInfo(event, song)
-                    } else {
-                        event.channel.sendFailure("Try again!").await { selectSong(event, message, songs, process) }
-                    }
-                }
-                content.toLowerCase() == "exit" -> {
-                    message.delete().queue()
-                    WAITER_PROCESSES -= process
-                    event.channel.sendSuccess("Successfully stopped!").queue()
-                }
-                else -> event.channel.sendFailure("Try again!").await { selectSong(event, message, songs, process) }
-            }
-        } else {
-            message.delete().queue()
-            WAITER_PROCESSES -= process
-            event.channel.sendFailure("Time is up!").queue()
-        }
-    }
 }

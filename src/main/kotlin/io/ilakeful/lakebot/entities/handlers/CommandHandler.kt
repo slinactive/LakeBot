@@ -75,11 +75,20 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
                 val command = this[args[0].toLowerCase().substring(event.guild.prefix.length)]
                 if (command !== null) {
                     when {
-                        command.isDeveloper && !event.author.isLBDeveloper -> event.sendFailure("You don't have permissions to execute this command!").queue()
-                        event.author.lakeBan !== null -> event.sendFailure("${event.author.asMention}, sorry! You can't execute this command because you got LakeBan for `${event.author.lakeBan?.getString("reason")}`!").queue()
+                        command.isDeveloper && !event.author.isLBDeveloper -> {
+                            event.channel.sendFailure("You do not have permissions to execute this command!").queue()
+                        }
+                        event.author.lakeBan !== null -> {
+                            event.channel.sendFailure(
+                                    "${event.author.asMention}, sorry! " +
+                                            "You are unable to execute the command " +
+                                            "because you have gotten LakeBan " +
+                                            "for `${event.author.lakeBan?.getString("reason")}`!"
+                            ).queue()
+                        }
                         else -> {
-                            val processOfTheUser = WAITER_PROCESSES.firstOrNull { event.author in it.users && event.textChannel == it.channel }
-                            if (processOfTheUser === null) {
+                            val condition = event.author.idLong in it.users && event.textChannel.idLong == it.channel
+                            if (WAITER_PROCESSES.none(condition)) {
                                 CoroutineScope(this).launch {
                                     if (command.cooldown > 0) {
                                         val key = "${command.name}|${event.author.id}"

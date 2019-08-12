@@ -17,10 +17,8 @@
 package io.ilakeful.lakebot.commands.info
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.EventWaiter
-import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.OnlineStatus

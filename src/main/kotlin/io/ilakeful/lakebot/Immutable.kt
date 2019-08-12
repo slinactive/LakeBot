@@ -28,7 +28,7 @@ object Immutable {
     const val PERMISSIONS = 2146958591L
     const val GITHUB_REPOSITORY = "https://github.com/ilakeful/LakeBot"
     const val USER_AGENT = "Mozilla/5.0 (Windows NT 6.3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3416.0 Safari/537.36"
-    val VERSION = Version(1, 0, stability = Stability.BETA, unstable = 12)
+    val VERSION = Version(1, 0, stability = Stability.BETA, unstable = 13)
     val LOGGER = LoggerFactory.getLogger("LakeBot")!!
     val BOT_TOKEN = System.getenv("BOT_TOKEN")!!
     val YOUTUBE_API_KEY = System.getenv("YOUTUBE_API_KEY")!!

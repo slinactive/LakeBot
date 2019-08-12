@@ -217,7 +217,7 @@ class PruneCommand : Command {
                                     ) { member ->
                                         pruneMessages(
                                                 count = count,
-                                                response = { "Deleted $it message${if (it == 1) "" else "s"} sent by \"${member.user.asTag}\"!" },
+                                                response = { "Deleted $it message${if (it == 1) "" else "s"} sent by ${member.user.asTag}!" },
                                                 event = event,
                                                 predicate = { it.author == member.user }
                                         )

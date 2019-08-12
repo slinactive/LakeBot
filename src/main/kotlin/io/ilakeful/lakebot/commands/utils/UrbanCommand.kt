@@ -71,7 +71,7 @@ class UrbanCommand : Command {
                             .map { PerspectiveApiUtils.probability(it) }
                             .any { it >= 0.9f }
                     val embed = buildEmbed {
-                        author("Result for $word:", link) { event.selfUser.effectiveAvatarUrl }
+                        author("Result for \"$word\":", link) { event.selfUser.effectiveAvatarUrl }
                         color { Immutable.SUCCESS }
                         thumbnail { event.selfUser.effectiveAvatarUrl }
                         field(title = "Meaning:") {

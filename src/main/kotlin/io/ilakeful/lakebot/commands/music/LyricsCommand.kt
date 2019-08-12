@@ -17,7 +17,6 @@
 package io.ilakeful.lakebot.commands.music
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
@@ -27,7 +26,6 @@ import io.ilakeful.lakebot.utils.AudioUtils
 import khttp.get
 import khttp.post
 
-import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 import org.json.JSONArray
@@ -48,52 +46,30 @@ class LyricsCommand : Command {
             )
             return "Bearer ${post(api, headers = emptyMap(), data = data).jsonObject.getString("access_token")}"
         }
+    companion object {
+        @JvmField
+        val REGEX_TO_REMOVE = "([\\[({](?:\\s+)?)((?:off(?:icial)?|sd|[48]k|(?:f(?:ull\\s+)?)?hd|hq)?((?:\\s+)?(vid(?:eo)?))|live|(?:w(ith|/)(?:\\s+)?)?lyrics|guitar|((?:(instr(?:ument(?:al)?)?|original|official))?(?:\\s+)?(?:(version|(?:re)?mix))?)|acoustics?|(?:f(?:ull\\s+)?)?hd|sd|[48]k|(?:official\\s+)?hq)((?:\\s+)?[]})])"
+                .toRegex(RegexOption.IGNORE_CASE)
+    }
     override val name = "lyrics"
     override val aliases = listOf("genius")
     override val description = "The command sending the lyrics of the specified or currently playing song"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <song name (optional if the song is playing)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
-        val arguments = event.argsRaw
-        if (arguments !== null) {
-            val songs = searchSongs(arguments)
-            if (songs.isNotEmpty()) {
-                event.channel.sendMessage(buildEmbed {
-                    color { Immutable.SUCCESS }
-                    author("Select The Song:") { event.selfUser.effectiveAvatarUrl }
-                    footer { "Type in \"exit\" to kill the process" }
-                    for ((index, song) in songs.withIndex()) {
-                        appendln { "${index + 1}. ${song.author} - ${song.title}" }
-                    }
-                }).await {
-                    WAITER_PROCESSES += process
-                    selectSong(event, it, songs, process)
-                }
+        val noArgumentsMessage = "You haven't specified any arguments!"
+        try {
+            val query = event.argsRaw
+                    ?: AudioUtils[event.guild].audioPlayer.playingTrack?.info?.title?.removeContent(REGEX_TO_REMOVE)
+                    ?: throw IllegalArgumentException(noArgumentsMessage)
+            songInfo(searchSongs(query), event)
+        } catch (e: Exception) {
+            if (e is IllegalArgumentException) {
+                event.channel.sendFailure(e.message ?: noArgumentsMessage).queue()
             } else {
-                event.sendFailure("Couldn't find that track!").queue()
+                event.channel.sendFailure(
+                        "Something went wrong! ${e::class.simpleName ?: "Unknown exception"}: ${e.message ?: "absent message"}"
+                ).queue()
             }
-        } else if (AudioUtils[event.guild].audioPlayer.playingTrack !== null) {
-            val track = AudioUtils[event.guild].audioPlayer.playingTrack.info.title
-            val regex = "(?:[\\[({])?((official)(?:\\s+(video))?|live|lyrics|guitar|((original|official)\\s+|re)mix|acoustics?|hd|sd|4k|full\\s+hd|hq)(?:[]})])?"
-                    .toRegex(RegexOption.IGNORE_CASE)
-            val songs = searchSongs(track.removeContent(regex))
-            if (songs.isNotEmpty()) {
-                event.channel.sendMessage(buildEmbed {
-                    color { Immutable.SUCCESS }
-                    author("Select The Song:") { event.selfUser.effectiveAvatarUrl }
-                    footer { "Type in \"exit\" to kill the process" }
-                    for ((index, song) in songs.withIndex()) {
-                        appendln { "${index + 1}. ${song.author} - ${song.title}" }
-                    }
-                }).await {
-                    WAITER_PROCESSES += process
-                    selectSong(event, it, songs, process)
-                }
-            } else {
-                event.sendFailure("Couldn't find that track!").queue()
-            }
-        } else {
-            event.sendFailure("You specified no content!").queue()
         }
     }
     private val Song.lyrics: String
@@ -101,14 +77,27 @@ class LyricsCommand : Command {
             val doc = Jsoup.connect(link).userAgent(Immutable.USER_AGENT).get()
             return doc.selectFirst(".lyrics").wholeText().replace(Regex("<(br)(?:(?:\\s+)?/)?>"), "\n")
         }
-    private suspend fun selectSong(event: MessageReceivedEvent, msg: Message, songs: List<Song>, process: WaiterProcess) {
-        val c = event.channel.awaitMessage(event.author)?.contentRaw
-        if (c !== null) {
-            if (c.isInt) {
-                if (c.toInt() in 1..songs.size) {
-                    msg.delete().queue()
-                    val song = songs[c.toInt() - 1]
-                    WAITER_PROCESSES -= process
+    private suspend fun songInfo(songs: List<Song>, event: MessageReceivedEvent) {
+        if (songs.isNotEmpty()) {
+            event.channel.sendEmbed {
+                color { Immutable.SUCCESS }
+                author("Select the Song:") { event.selfUser.effectiveAvatarUrl }
+                footer { "Type in \"exit\" to kill the process" }
+                for ((index, song) in songs.withIndex()) {
+                    appendln { "${index + 1}. ${song.author} - ${song.title}" }
+                }
+            }.await {
+                selectEntity(
+                        event = event,
+                        message = it,
+                        entities = songs,
+                        addProcess = true,
+                        process = WaiterProcess(
+                                users = mutableListOf(event.author),
+                                channel = event.textChannel,
+                                command = this
+                        )
+                ) { song ->
                     if (song.lyrics.length > 2048) {
                         val paginator = buildPaginator<Char> {
                             size { 2048 }
@@ -122,34 +111,26 @@ class LyricsCommand : Command {
                                     event.selfUser.effectiveAvatarUrl
                                 }
                                 color { Immutable.SUCCESS }
-                                footer(event.author.effectiveAvatarUrl) { "Page $num/${pages.size} | Requested by ${event.author.tag}" }
+                                footer(event.author.effectiveAvatarUrl) {
+                                    "Page $num/${pages.size} | Requested by ${event.author.asTag}"
+                                }
                             }
                         }
                         paginator()
                     } else {
-                        event.channel.sendMessage(buildEmbed {
+                        event.channel.sendEmbed {
                             author("${song.author} - ${song.title}", song.link) {
                                 event.selfUser.effectiveAvatarUrl
                             }
                             color { Immutable.SUCCESS }
                             description { song.lyrics }
-                            footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
-                        }).queue()
+                            footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
+                        }.queue()
                     }
-                } else {
-                    event.sendFailure("Try again!").await { selectSong(event, msg, songs, process) }
                 }
-            } else if (c.toLowerCase() == "exit") {
-                msg.delete().queue()
-                WAITER_PROCESSES -= process
-                event.sendSuccess("Process successfully stopped!").queue()
-            } else {
-                event.sendFailure("Try again!").await { selectSong(event, msg, songs, process) }
             }
         } else {
-            msg.delete().queue()
-            WAITER_PROCESSES -= process
-            event.sendFailure("Time is up!").queue()
+            event.channel.sendFailure("No results found by the query!").queue()
         }
     }
     private fun searchSongs(title: String): List<Song> {
