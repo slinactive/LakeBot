@@ -19,6 +19,7 @@ package io.ilakeful.lakebot.entities.handlers
 import io.ilakeful.lakebot.Immutable
 import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
+import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 
 import kotlinx.coroutines.CoroutineScope
@@ -87,7 +88,8 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
                             ).queue()
                         }
                         else -> {
-                            val condition = event.author.idLong in it.users && event.textChannel.idLong == it.channel
+                            val condition = { process: WaiterProcess ->
+                                event.author.idLong in process.users && event.textChannel.idLong == process.channel }
                             if (WAITER_PROCESSES.none(condition)) {
                                 CoroutineScope(this).launch {
                                     if (command.cooldown > 0) {
