@@ -49,7 +49,7 @@ class ServerCommand : Command {
         field(true, "Name:") { guild.name.escapeDiscordMarkdown() }
         field(true, "ID:") { guild.id }
         field(true, "Creation Date:") {
-            guild.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "")
+            guild.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
         }
         field(true, "Online Members:") {
             "${guild.memberCache.count { it.onlineStatus == OnlineStatus.ONLINE }}/${guild.memberCache.size()}"
