@@ -109,12 +109,8 @@ class TicTacToeCommand : Command {
                 massMention = false,
                 predicate = { member ->
                     WAITER_PROCESSES.none {
-                        member.user.idLong in it.users
-                                && event.channel.idLong == it.channel
-                                && !member.user.isBot
-                                && !member.user.isFake
-                                && member.user != event.author
-                    }
+                        member.user.idLong in it.users && event.channel.idLong == it.channel
+                    } && !member.user.isBot && !member.user.isFake && member.user != event.author
                 }
         ) { member ->
             val starter = event.author

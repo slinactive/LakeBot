@@ -46,9 +46,7 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
     operator fun contains(command: String): Boolean = this[command] !== null && this[command] in registeredCommands
     operator fun contains(command: Command): Boolean = command in registeredCommands
     operator fun get(id: Long): Command? = registeredCommands.firstOrNull { it.id == id }
-    operator fun get(name: String): Command? = registeredCommands.filter {
-        getPriority(name.toLowerCase(), it) > 0
-    }.sortedBy { getPriority(name.toLowerCase(), it) }.firstOrNull()
+    operator fun get(name: String): Command? = registeredCommands.maxBy { getPriority(name.toLowerCase(), it) }
     operator fun plusAssign(command: Command) {
         registeredCommands += command
     }
