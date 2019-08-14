@@ -30,13 +30,13 @@ class RestartCommand : Command {
     override val description = "The command restarting the currently playing song"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
-            event.sendFailure("There is no track that is being played now!").queue()
+            event.channel.sendFailure("No track is currently playing!").queue()
         } else {
             if (event.member!!.isConnected) {
                 AudioUtils[event.guild].audioPlayer.playingTrack.position = 0
-                event.sendSuccess("Track has been restarted!").queue()
+                event.channel.sendSuccess("The track has been restarted!").queue()
             } else {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             }
         }
     }

@@ -95,7 +95,7 @@ class MuteRoleCommand : Command {
                                     }
                                 }
                             } else {
-                                event.channel.sendFailure("You specified no content!").queue()
+                                event.channel.sendFailure("You haven't specified any arguments!").queue()
                             }
                         }
                 ) {

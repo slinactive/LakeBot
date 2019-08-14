@@ -27,18 +27,16 @@ class JumpBackCommand : Command {
     override val name = "jumpback"
     override val aliases = listOf("windback", "returnto", "jumpbackward", "rewind", "jump-back", "wind-back", "return-to", "jump-backward")
     override val description = "The command rewinding the song back"
-    override val usage: (String) -> String = { "${super.usage(it)} <time>" }
-    override val examples = { it: String ->
-        mapOf(
-            "$it$name 1m32s" to "rewinds track from 02:37 to 01:05",
-            "$it$name 1h30s" to "rewinds track from 01:02:54 to 02:24",
-            "$it$name 5s" to "rewinds track from 00:11 to 00:06"
-        )
-    }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <time>"
+    override val examples = fun(prefix: String) = mapOf(
+            "$prefix$name 1m32s" to "rewinds the track from 02:37 to 01:05",
+            "$prefix$name 1h30s" to "rewinds the track from 01:02:54 to 02:24",
+            "$prefix$name 5s" to "rewinds the track from 00:11 to 00:06"
+    )
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member!!.isConnected) {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             } else {
                 if (AudioUtils[event.guild].audioPlayer.playingTrack !== null) {
                     if (TimeUtils.TIME_REGEX.containsMatchIn(args[0])) {
@@ -52,17 +50,17 @@ class JumpBackCommand : Command {
                                 event.channel.sendSuccess("Jumped to the specified position (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)})!").queue()
                             }
                         } catch (e: Exception) {
-                            event.sendFailure("That's not a valid time format!").queue()
+                            event.channel.sendFailure("That is an invalid time format!").queue()
                         }
                     } else {
-                        event.sendFailure("That's not a valid time format!").queue()
+                        event.channel.sendFailure("That is an invalid time format!").queue()
                     }
                 } else {
-                    event.sendFailure("There is no track that is being played now!").queue()
+                    event.channel.sendFailure("No track is currently playing!").queue()
                 }
             }
         } else {
-            event.sendFailure("You specified no time!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

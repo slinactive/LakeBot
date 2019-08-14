@@ -51,10 +51,10 @@ class AkinatorCommand : Command {
     override val description = """The command launching Akinator game.
         |After the game launch you're supposed to answer with **YES**, **NO**, **DONT KNOW**, **PROBABLY**, or **PROBABLY NOT** until Akinator guesses your character. Type in **BACK** in order to return to previous question. Type in "exit" in order to terminate the current game. Type in "aliases" in order to get more ways of answering.
     """.trimMargin()
-    override val usage = { it: String -> "${super.usage(it)} <language (optional)>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <language (optional)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         try {
-            val language = languages[args.firstOrNull()?.toLowerCase() ?: "english"] ?: throw IllegalArgumentException("That's invalid language!")
+            val language = languages[args.firstOrNull()?.toLowerCase() ?: "english"] ?: throw IllegalArgumentException("That is an invalid language!")
             val api = buildAkiwrapper {
                 localization { language }
                 filterProfanity { !event.textChannel.isNSFW }

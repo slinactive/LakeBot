@@ -29,7 +29,7 @@ class VolumeCommand : Command {
     override val description = "The command allowing volume control on the bot side"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <volume>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
-        event.sendFailure("There is no track that is being played now!").queue()
+        event.channel.sendFailure("No track is currently playing!").queue()
     } else {
         if (event.member!!.isConnected) {
             if (args.isNotEmpty()) {
@@ -37,15 +37,15 @@ class VolumeCommand : Command {
                     val volume = args[0].toInt()
                     AudioUtils[event.guild].audioPlayer.volume = volume
                     val progressBar = MusicUtils.getProgressBar(volume.toLong(), 100)
-                    event.sendSuccess("**0%** $progressBar **100%**").queue()
+                    event.channel.sendSuccess("**0%** $progressBar **100%**").queue()
                 } else {
-                    event.sendFailure("That's not a valid value!").queue()
+                    event.channel.sendFailure("That is an invalid value!").queue()
                 }
             } else {
-                event.sendFailure("You specified no value!").queue()
+                event.channel.sendFailure("You haven't specified any arguments!").queue()
             }
         } else {
-            event.sendFailure("You're not in the voice channel!").queue()
+            event.channel.sendFailure("You are not connected to the voice channel!").queue()
         }
     }
 }

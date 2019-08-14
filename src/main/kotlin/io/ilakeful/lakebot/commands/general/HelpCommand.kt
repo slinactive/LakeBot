@@ -39,7 +39,7 @@ class HelpCommand : Command {
                     "**[Invite Link](https://discordapp.com/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)** \u2022 **[GitHub Repository](${Immutable.GITHUB_REPOSITORY})**"
                 }
                 timestamp()
-                footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
                 val categories = mutableMapOf<CommandCategory, MutableList<Command>>()
                 for (command in CommandHandler.registeredCommands) {
                     val category = command.category
@@ -104,14 +104,14 @@ class HelpCommand : Command {
                             }
                         }
                         timestamp()
-                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
                     }
                     event.channel.sendMessage(embed).queue()
                 } else {
                     command(event, emptyArray())
                 }
             } else {
-                event.sendFailure("That command doesn't exist!").queue()
+                event.channel.sendFailure("The command does not exist!").queue()
             }
         }
     }

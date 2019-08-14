@@ -32,7 +32,7 @@ class WeatherCommand : Command {
     override val name = "weather"
     override val description = "The command sending information about the weather in the specified settlement"
     override val cooldown = 3L
-    override val usage = { it: String -> "${super.usage(it)} <city/town>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <location>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
@@ -107,18 +107,18 @@ class WeatherCommand : Command {
                                 append(" UTC")
                             }
                         }
-                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
                         timestamp()
                     }
                     event.channel.sendMessage(embed).queue()
                 } else {
-                    event.sendFailure("Couldn't find that town!").queue()
+                    event.channel.sendFailure("No location found by the query!").queue()
                 }
              } catch (e: Exception) {
-                event.sendFailure("Something went wrong!").queue()
+                event.channel.sendFailure("Something went wrong!").queue()
             }
         } else {
-            event.sendFailure("You specified no query!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

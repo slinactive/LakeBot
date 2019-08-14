@@ -27,10 +27,10 @@ class PingCommand : Command {
     override val aliases = listOf("delay", "response")
     override val description = "The command sending LakeBot's current response time separately from the statistics"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = event.jda.restPing.queue {
-        event.channel.sendMessage(buildEmbed {
+        event.channel.sendEmbed {
             field(true, "Rest Ping") { "$it ms" }
             field(true, "WebSocket Ping") { "${event.jda.gatewayPing} ms" }
             color { Immutable.SUCCESS }
-        }).queue()
+        }.queue()
     }
 }

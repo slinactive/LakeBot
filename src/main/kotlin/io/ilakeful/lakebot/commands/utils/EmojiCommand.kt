@@ -22,7 +22,10 @@ import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
+import org.ocpsoft.prettytime.PrettyTime
+
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 class EmojiCommand : Command {
     override val name = "char"
@@ -37,11 +40,17 @@ class EmojiCommand : Command {
                 val embed = buildEmbed {
                     color { Immutable.SUCCESS }
                     thumbnail { emote.imageUrl }
-                    footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                    footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
                     field(true, "Name:") { emote.name }
                     field(true, "ID:") { emote.id }
-                    field(true, "Animated:") { if (emote.isAnimated) "Yes" else "No" }
-                    field(true, "Creation Date:") { emote.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(" GMT", "") }
+                    field(true, "Animated:") { emote.isAnimated.asString() }
+                    field(true, "Creation Date:") {
+                        val prettyTime = PrettyTime()
+                        val date = emote.timeCreated
+                        val formatted = date.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+                        val ago = prettyTime.format(Date.from(date.toInstant()))
+                        "$formatted ($ago)"
+                    }
                     field(true, "Guild:") { emote.guild?.name?.escapeDiscordMarkdown() ?: "Unknown Guild" }
                     field(true, "Mention:") { "`${emote.asMention}`" }
                 }
@@ -49,13 +58,13 @@ class EmojiCommand : Command {
             } else {
                 val input = arguments.replace(" ", "")
                 if (input.length > 15) {
-                    event.sendFailure("Content can't be longer than 15 characters!").queue()
+                    event.channel.sendFailure("The length of content cannot be longer than 15 characters!").queue()
                 } else {
-                    val embed = buildEmbed {
+                    event.channel.sendEmbed {
                         color { Immutable.SUCCESS }
-                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                        footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
                         for (point in input.codePoints()) {
-                            val chars = Character.toChars(point)
+                            val chars = point.toChars()
                             var hex = point.toHex().toUpperCase()
                             while (hex.length < 4) {
                                 hex = "0$hex"
@@ -78,12 +87,11 @@ class EmojiCommand : Command {
                             append { " | " }
                             append { point.toChar().name?.capitalizeAll(true) ?: "Unknown" }
                         }
-                    }
-                    event.channel.sendMessage(embed).queue()
+                    }.queue()
                 }
             }
         } else {
-            event.sendFailure("You specified no content!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

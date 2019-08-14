@@ -33,11 +33,11 @@ class LoopCommand : Command {
     override val description = "The command either enabling or disabling repeat mode of the song or the queue"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
-            event.sendFailure("There is no track that is being played now!").queue()
+            event.channel.sendFailure("No track is currently playing!").queue()
         } else {
             if (event.member!!.isConnected) {
                 val scheduler = AudioUtils[event.guild].trackScheduler
-                event.sendMessage(buildEmbed {
+                event.channel.sendEmbed {
                     description {
                         when {
                             scheduler.isLoop -> """|${"\u0031\u20E3"} - queue loop
@@ -53,7 +53,7 @@ class LoopCommand : Command {
                     }
                     color { Immutable.SUCCESS }
                     author("Select Mode:") { event.selfUser.effectiveAvatarUrl }
-                }).await {
+                }.await {
                     it.addReaction("\u0031\u20E3").complete()
                     it.addReaction("\u0032\u20E3").complete()
                     it.addReaction("\u274C").complete()
@@ -69,11 +69,11 @@ class LoopCommand : Command {
                                 if (scheduler.isLoop) {
                                     scheduler.isQueueLoop = true
                                     scheduler.isLoop = false
-                                    event.sendSuccess(text = "Queue looping is enabled!").queue()
+                                    event.channel.sendSuccess(text = "Queue looping is enabled!").queue()
                                 } else {
                                     scheduler.isLoop = true
                                     scheduler.isQueueLoop = false
-                                    event.sendSuccess(text = "Single repeating is enabled!").queue()
+                                    event.channel.sendSuccess(text = "Single repeating is enabled!").queue()
                                 }
                             }
                             "\u0032\u20E3" -> {
@@ -82,31 +82,31 @@ class LoopCommand : Command {
                                     scheduler.isLoop -> {
                                         scheduler.isLoop = false
                                         scheduler.isQueueLoop = false
-                                        event.sendSuccess(text = "Single repeating is disabled!").queue()
+                                        event.channel.sendSuccess(text = "Single repeating is disabled!").queue()
                                     }
                                     scheduler.isQueueLoop -> {
                                         scheduler.isLoop = false
                                         scheduler.isQueueLoop = false
-                                        event.sendSuccess(text = "Queue looping is disabled!").queue()
+                                        event.channel.sendSuccess(text = "Queue looping is disabled!").queue()
                                     }
                                     else -> {
                                         scheduler.isQueueLoop = true
-                                        event.sendSuccess(text = "Queue looping is enabled!").queue()
+                                        event.channel.sendSuccess(text = "Queue looping is enabled!").queue()
                                     }
                                 }
                             }
                             "\u274C" -> {
                                 it.delete().queue()
-                                event.sendSuccess("Process successfully stopped!").queue()
+                                event.channel.sendSuccess("Successfully stopped!").queue()
                             }
                         }
                     } else {
                         it.delete().queue()
-                        event.sendFailure("Time is up!").queue()
+                        event.channel.sendFailure("Time is up!").queue()
                     }
                 }
             } else {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             }
         }
     }

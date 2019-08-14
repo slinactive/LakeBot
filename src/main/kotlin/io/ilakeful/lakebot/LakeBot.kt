@@ -44,8 +44,6 @@ private lateinit var client: MongoClient
 fun main() = try {
     runBlocking {
         client = ConfigUtils.CLIENT
-        delay(1000)
-        Immutable.LOGGER.info("MongoDB was successfully loaded!")
         val commandPackage = Reflections("io.ilakeful.lakebot.commands")
         DISCORD = buildJDA {
             token { Immutable.BOT_TOKEN }

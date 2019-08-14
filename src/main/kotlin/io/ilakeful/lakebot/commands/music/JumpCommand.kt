@@ -30,21 +30,19 @@ class JumpCommand : Command {
         val TIME_CODE_REGEX = "(?:(?<hours>\\d{1,2}):)?(?:(?<minutes>\\d{1,2}):)?(?<seconds>\\d{1,2})".toRegex()
     }
     override val name = "jump"
-    override val aliases = listOf("settime", "set-time")
+    override val aliases = listOf("settime", "set-time", "seek", "seekto", "seek-to")
     override val description = "The command setting the specified time for the currently playing track"
-    override val usage: (String) -> String = { "${super.usage(it)} <time>" }
-    override val examples = { it: String ->
-        mapOf(
-            "$it$name 00:05" to "rewinds track to 00:05",
-            "$it$name 2:15" to "rewinds track to 02:15",
-            "$it$name 02:42:00" to "rewinds track to 02:42:00",
-            "$it$name 25" to "rewinds track to 00:25"
-        )
-    }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <time>"
+    override val examples = fun(prefix: String) = mapOf(
+            "$prefix$name 00:05" to "seeks the track to 00:05",
+            "$prefix$name 2:15" to "seeks the track to 02:15",
+            "$prefix$name 02:42:00" to "seeks the track to 02:42:00",
+            "$prefix$name 25" to "seeks the track to 00:25"
+    )
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member!!.isConnected) {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             } else {
                 if (AudioUtils[event.guild].audioPlayer.playingTrack !== null) {
                     val arguments = event.argsRaw!!
@@ -65,23 +63,23 @@ class JumpCommand : Command {
                             )
                             val position = iterable.map { it.toMillis() }.sum()
                             if (position !in 0..AudioUtils[event.guild].audioPlayer.playingTrack.duration) {
-                                event.sendFailure("You can't make track jump to that position!").queue()
+                                event.channel.sendFailure("You cannot seek the track to the position!").queue()
                             } else {
                                 AudioUtils[event.guild].audioPlayer.playingTrack.position = position
                                 event.channel.sendSuccess("Jumped to the specified position (${TimeUtils.asDuration(AudioUtils[event.guild].audioPlayer.playingTrack.position)})!").queue()
                             }
                         } catch (e: Exception) {
-                            event.sendFailure("That's not a valid timecode!").queue()
+                            event.channel.sendFailure("That is an invalid time position!").queue()
                         }
                     } else {
-                        event.sendFailure("That's not a valid timecode!").queue()
+                        event.channel.sendFailure("That is an invalid time position!").queue()
                     }
                 } else {
-                    event.sendFailure("There is no track that is being played now!").queue()
+                    event.channel.sendFailure("No track is currently playing!").queue()
                 }
             }
         } else {
-            event.sendFailure("You specified no timecode!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

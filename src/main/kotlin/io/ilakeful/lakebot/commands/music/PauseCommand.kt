@@ -30,18 +30,18 @@ class PauseCommand : Command {
     override val description = "The command pausing the currently playing song"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
-            event.sendFailure("There is no track that is being played now!").queue()
+            event.channel.sendFailure("No track is currently playing!").queue()
         } else {
             if (event.member!!.isConnected) {
                 val player = AudioUtils[event.guild].audioPlayer
                 if (player.isPaused) {
-                    event.sendFailure("Track is already paused!").queue()
+                    event.channel.sendFailure("The track is already paused!").queue()
                 } else {
                     player.isPaused = true
-                    event.sendSuccess("Track has been paused!").queue()
+                    event.channel.sendSuccess("The track has been paused!").queue()
                 }
             } else {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             }
         }
     }

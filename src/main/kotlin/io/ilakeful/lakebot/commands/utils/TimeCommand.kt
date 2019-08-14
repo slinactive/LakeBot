@@ -40,10 +40,10 @@ class TimeCommand : Command {
                 if (forecast !== null) {
                     val (longitude, latitude) = forecast.coordinates
                     val url = "http://api.geonames.org/timezoneJSON?lat=$latitude&lng=$longitude&username=${Immutable.GEONAME_API_USER}"
-                    val response = get(url, headers = mapOf()).jsonObject
+                    val response = get(url, headers = emptyMap()).jsonObject
                     val time = response.getString("time").takeLast(5)
                     val name = "${forecast.city.name}, ${forecast.system.countryCode}"
-                    event.sendMessage(buildEmbed {
+                    event.channel.sendEmbed {
                         color { Immutable.SUCCESS }
                         author("Time - $name") { event.selfUser.effectiveAvatarUrl }
                         field(true, "12-Hour Time:") {
@@ -59,15 +59,16 @@ class TimeCommand : Command {
                             "$twentyHoursFormat:$minutes $amOrPm"
                         }
                         field(true, "24-Hour Time:") { time }
-                    }).queue()
+                    }.queue()
                 } else {
-                    event.sendFailure("Couldn't find that city or town!").queue()
+                    event.channel.sendFailure("No location found by the query!").queue()
                 }
             } catch (e: Exception) {
-                event.sendFailure("Something went wrong! Try again or contact developers!").queue()
+                event.channel.sendFailure("Something went wrong! " +
+                        "${e::class.simpleName ?: "Unknown exception"}: ${e.message ?: "absent message"}").queue()
             }
         } else {
-            event.sendFailure("You specified no content!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

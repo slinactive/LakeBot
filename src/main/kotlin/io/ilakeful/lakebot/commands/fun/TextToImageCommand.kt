@@ -27,17 +27,17 @@ class TextToImageCommand : Command {
     override val name = "tti"
     override val aliases = listOf("texttoimage", "text-to-image")
     override val description = "The command converting your text into an image"
-    override val usage: (String) -> String = { "${super.usage(it)} <text>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <text>"
     override val cooldown = 3L
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsStripped !== null) {
             try {
                 event.channel.sendFile(ImageUtils.getImagedText(event.argsStripped!!.split("\n")), "tti.png").queue()
             } catch (e: Exception) {
-                event.sendFailure("Something went wrong!").queue()
+                event.channel.sendFailure("Something went wrong!").queue()
             }
         } else {
-            event.sendFailure("You specified no content!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

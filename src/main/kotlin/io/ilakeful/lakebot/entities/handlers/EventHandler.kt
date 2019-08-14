@@ -23,8 +23,8 @@ import io.ilakeful.lakebot.utils.AudioUtils
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import net.dv8tion.jda.api.Permission
 
+import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent
 import net.dv8tion.jda.api.events.channel.voice.VoiceChannelCreateEvent

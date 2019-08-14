@@ -39,16 +39,16 @@ class CalculatorCommand : Command {
                 val evaluated = eval(arguments)
                 val asDouble = evaluated.toDouble()
                 val result = if (round(asDouble) == asDouble) evaluated.toPlainString().removeSuffix(".0") else "$evaluated"
-                event.sendMessage(buildEmbed {
+                event.channel.sendEmbed {
                     color { Immutable.SUCCESS }
                     author("LakeMath") { event.selfUser.effectiveAvatarUrl }
                     description { result }
-                }).queue()
+                }.queue()
             } catch (e: Exception) {
-                event.sendFailure("This expression may be invalid!").queue()
+                event.channel.sendFailure("The expression may be invalid!").queue()
             }
         } else {
-            event.sendFailure("You specified no content!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
     fun eval(expression: String): BigDecimal {

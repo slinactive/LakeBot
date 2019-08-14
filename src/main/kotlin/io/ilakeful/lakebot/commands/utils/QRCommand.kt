@@ -27,17 +27,17 @@ class QRCommand : Command {
     override val name = "qr"
     override val aliases = listOf("qrcode", "qrgen", "generate-qr", "qr-code")
     override val description = "The command generating an image with QR code from the specified text"
-    override val usage: (String) -> String = { "${super.usage(it)} <text>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <text>"
     override val cooldown = 2L
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             try {
                 event.channel.sendFile(ImageUtils.getQRCode(event.argsRaw!!), "qr.png").queue()
             } catch (e: Exception) {
-                event.sendFailure("Something went wrong!").queue()
+                event.channel.sendFailure("Something went wrong!").queue()
             }
         } else {
-            event.sendFailure("You specified no content!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

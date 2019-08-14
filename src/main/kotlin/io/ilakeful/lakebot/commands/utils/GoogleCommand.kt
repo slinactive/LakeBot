@@ -34,7 +34,7 @@ class GoogleCommand : Command {
     override val aliases = listOf("search")
     override val description = "The command searching something in Google by the specified query"
     override val cooldown = 3L
-    override val usage = { it: String -> "${super.usage(it)} <query>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <query>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
@@ -43,7 +43,7 @@ class GoogleCommand : Command {
                 val embed = buildEmbed {
                     color { Immutable.SUCCESS }
                     author("LakeSearch:") { event.selfUser.effectiveAvatarUrl }
-                    footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.tag}" }
+                    footer(event.author.effectiveAvatarUrl) { "Requested by ${event.author.asTag}" }
                     for (index in 0 until results.count()) {
                         val json = results.getJSONObject(index)
                         val title = json.getString("title")
@@ -53,10 +53,10 @@ class GoogleCommand : Command {
                 }
                 event.channel.sendMessage(embed).queue()
             } catch (e: Exception) {
-                event.sendFailure("Something went wrong!").queue()
+                event.channel.sendFailure("No results found by the query!").queue()
             }
         } else {
-            event.sendFailure("You specified no query!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
     @Throws(IOException::class)
@@ -67,7 +67,7 @@ class GoogleCommand : Command {
             try {
                 val params = "?safe=${if (isNSFW) "off" else "medium"}&cx=018291224751151548851%3Ajzifriqvl1o&key=$key&num=$limit"
                 val queryParam = "&q=${URLEncoder.encode(query, "UTF-8")}"
-                val req = get("$api$endpoint$params$queryParam", headers = mapOf())
+                val req = get("$api$endpoint$params$queryParam", headers = emptyMap())
                 if ("${req.statusCode}".startsWith('2')) {
                     return req.jsonObject.getJSONArray("items")
                 } else {

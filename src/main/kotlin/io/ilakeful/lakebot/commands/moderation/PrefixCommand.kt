@@ -31,28 +31,28 @@ class PrefixCommand : Command {
         if (args.isNotEmpty()) {
             val newPrefix = args[0].toLowerCase()
             if (newPrefix.length > 5) {
-                event.sendFailure("You can't use that as command prefix!").queue()
+                event.channel.sendFailure("The argument is unable to be used as a command prefix!").queue()
             } else {
-                event.sendConfirmation("Are you sure you want to change prefix for this server?").await {
+                event.channel.sendConfirmation("Are you sure you want to change prefix for this server?").await {
                     val confirmation = it.awaitNullableConfirmation(event.author)
                     if (confirmation !== null) {
                         it.delete().queue()
                         if (confirmation) {
                             event.guild.setPrefix(newPrefix)
-                            event.sendSuccess("Now prefix is $newPrefix").queue()
+                            event.channel.sendSuccess("Now the command prefix is $newPrefix").queue()
                         } else {
-                            event.sendSuccess("Successfully canceled!").queue()
+                            event.channel.sendSuccess("Successfully canceled!").queue()
                         }
                     } else {
-                        event.sendFailure("Time is up!").queue()
+                        event.channel.sendFailure("Time is up!").queue()
                         it.delete().queue()
                     }
                 }
             }
         } else {
-            event.sendFailure("You specified no content!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     } else {
-        event.sendFailure("You don't have permissions for executing that command!").queue()
+        event.channel.sendFailure("You do not have permissions for executing the command!").queue()
     }
 }

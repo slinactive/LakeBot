@@ -39,6 +39,7 @@ fun Char.Companion.getName(value: Char): String? = getName(value.toInt())
 operator fun Int.not() = inv()
 fun Int.toByteArray() = toLong().toByteArray()
 fun Int.toBinary() = toLong().toBinary()
+fun Int.toChars() = Character.toChars(this)
 fun Int.toHex() = toLong().toHex()
 fun Int.Companion.random(range: IntRange) = range.random()
 // List

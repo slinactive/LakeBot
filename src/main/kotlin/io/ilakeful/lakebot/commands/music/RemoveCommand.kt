@@ -24,13 +24,13 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class RemoveCommand : Command {
     override val name = "remove"
-    override val aliases = listOf("removeat", "unadd", "takeaway", "remove-at", "take-away")
+    override val aliases = listOf("removeat", "unadd", "remove-at", "rm")
     override val description = "The command removing the specified song from the queue"
-    override val usage: (String) -> String = { "${super.usage(it)} <index>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <index>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member!!.isConnected) {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             } else {
                 val manager = AudioUtils[event.guild]
                 val track = manager.audioPlayer.playingTrack
@@ -42,22 +42,22 @@ class RemoveCommand : Command {
                             index--
                             manager.trackScheduler.receiveQueue {
                                 val removable = it[index]
-                                event.channel.sendSuccess("[${removable.info.title}](${removable.info.uri}) successfully removed!").queue()
+                                event.channel.sendSuccess("[${removable.info.title}](${removable.info.uri}) has been successfully removed!").queue()
                                 it.removeAt(index)
                             }
                             manager.trackScheduler.queue += track
                         } else {
-                            event.sendFailure("You specified no correct number!").queue()
+                            event.channel.sendFailure("You haven't specified any required arguments!").queue()
                         }
                     } else {
-                        event.sendFailure("You specified no correct number!").queue()
+                        event.channel.sendFailure("You haven't specified any required arguments!").queue()
                     }
                 } else {
-                    event.sendFailure("Queue is empty!").queue()
+                    event.channel.sendFailure("The queue is empty!").queue()
                 }
             }
         } else {
-            event.sendFailure("You specified no index of track!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

@@ -29,12 +29,12 @@ class InvertCommand : Command {
     override val description = "The command inverting colors of the attached image or the avatar of the specified user"
     override val aliases = listOf("negative", "negate")
     override val cooldown = 3L
-    override val usage: (String) -> String = {
-        val command = super.usage(it)
-        """$command (without attachments) -> inverts your avatar
+    override val usage = fun(prefix: String): String {
+        val command = super.usage(prefix)
+        return """$command (without attachments) -> inverts your avatar
             |$command -> inverts an attached image
             |$command <user mention> -> inverts an avatar of specified user
-            |$command <url> -> inverts an image from the link""".trimMargin()
+            |$command <link> -> inverts an image from the link""".trimMargin()
     }
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw

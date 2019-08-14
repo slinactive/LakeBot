@@ -26,11 +26,11 @@ class SelectCommand : Command {
     override val name = "select"
     override val aliases = listOf("playat", "skipto", "choosesong", "play-at", "skip-to", "choose-song")
     override val description = "The command playing the specified song from the queue by the specified index"
-    override val usage: (String) -> String = { "${super.usage(it)} <index>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <index>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member!!.isConnected) {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             } else {
                 val manager = AudioUtils[event.guild]
                 manager.trackScheduler.queue -= manager.audioPlayer.playingTrack
@@ -45,17 +45,17 @@ class SelectCommand : Command {
                                 event.channel.sendSuccess("[${newTrack.info.title}](${newTrack.info.uri}) is playing now!").queue()
                             }
                         } else {
-                            event.sendFailure("You specified no correct number!").queue()
+                            event.channel.sendFailure("You haven't specified any required arguments!").queue()
                         }
                     } else {
-                        event.sendFailure("You specified no correct number!").queue()
+                        event.channel.sendFailure("You haven't specified any required arguments!").queue()
                     }
                 } else {
-                    event.sendFailure("Queue is empty!").queue()
+                    event.channel.sendFailure("The queue is empty!").queue()
                 }
             }
         } else {
-            event.sendFailure("You specified no index of track!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

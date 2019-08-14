@@ -26,65 +26,35 @@ class SayCommand : Command {
     override val name = "say"
     override val aliases = listOf("announce")
     override val description = "The command sending your message on behalf of LakeBot"
-    override val usage: (String) -> (String) = { "${super.usage(it)} <content>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <content>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        if (event.argsRaw !== null) {
-            if (event.message.attachments.none { it.isImage }) {
-                buildEmbed {
-                    author(event.author.tag) {
-                        event.author.effectiveAvatarUrl
-                    }
-                    color {
-                        Immutable.SUCCESS
-                    }
-                    description {
-                        event.argsRaw!!
-                    }
-                }.let {
-                    event.sendMessage(it).queue {
-                        try {
-                            event.message.delete().queue()
-                        } catch (ignored: Exception) {
-                        }
-                    }
-                }
-            } else {
-                val image = event.message.attachments.first { it.isImage }
-                buildEmbed {
-                    image {
-                        image.url
-                    }
-                    author(event.author.tag) {
-                        event.author.effectiveAvatarUrl
-                    }
-                    color {
-                        Immutable.SUCCESS
-                    }
-                    description {
-                        event.argsRaw!!
-                    }
-                }.let {
-                    event.sendMessage(it).queue()
+        val arguments = event.argsRaw
+        if (arguments !== null) {
+            event.channel.sendEmbed {
+                author(event.author.asTag) { event.author.effectiveAvatarUrl }
+                color { Immutable.SUCCESS }
+                image { event.message.attachments.firstOrNull { it.isImage }?.url }
+                description { arguments }
+            }.queue {
+                try {
+                    event.message.delete().queue()
+                } catch (ignored: Exception) {
                 }
             }
         } else {
             if (event.message.attachments.any { it.isImage }) {
-                val image = event.message.attachments.first { it.isImage }
-                buildEmbed {
-                    image {
-                        image.url
+                event.channel.sendEmbed {
+                    image { event.message.attachments.first { it.isImage }.url }
+                    author(event.author.asTag) { event.author.effectiveAvatarUrl }
+                    color { Immutable.SUCCESS }
+                }.queue {
+                    try {
+                        event.message.delete().queue()
+                    } catch (ignored: Exception) {
                     }
-                    author(event.author.tag) {
-                        event.author.effectiveAvatarUrl
-                    }
-                    color {
-                        Immutable.SUCCESS
-                    }
-                }.let {
-                    event.sendMessage(it).queue()
                 }
             } else {
-                event.sendFailure("You specified no content!").queue()
+                event.channel.sendFailure("You haven't specified any arguments!").queue()
             }
         }
     }

@@ -30,18 +30,18 @@ class ResumeCommand : Command {
     override val description = "The command resuming playback after being paused"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
-            event.sendFailure("There is no track that is being played now!").queue()
+            event.channel.sendFailure("No track is currently playing!").queue()
         } else {
             if (event.member!!.isConnected) {
                 val player = AudioUtils[event.guild].audioPlayer
                 if (!player.isPaused) {
-                    event.sendFailure("Track is already being played!").queue()
+                    event.channel.sendFailure("The track is already playing!").queue()
                 } else {
                     player.isPaused = false
-                    event.sendSuccess("Track has been resumed!").queue()
+                    event.channel.sendSuccess("The track has been resumed!").queue()
                 }
             } else {
-                event.sendFailure("You're not in the voice channel!").queue()
+                event.channel.sendFailure("You are not connected to the voice channel!").queue()
             }
         }
     }

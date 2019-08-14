@@ -35,13 +35,17 @@ import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
+import java.util.concurrent.Executors.newFixedThreadPool
+import kotlin.concurrent.thread
 
+private val coroutineDispatcher = newFixedThreadPool(3) { Thread(it, "EventWaiter") }
+        .asCoroutineDispatcher()
 /**
- * <b>EventWaiter</b> is designed to await for JDA events after launch, handling them and returning their instances.
+ * <b>EventWaiter</b> is designed to await JDA events and, after that, handle them and return their instances.
  *
  * This class also includes several useful utilities for use in commands.
  *
- * <b>NOTE</b>: Do NOT forget to add EventWaiter as event listener to your JDA instance!
+ * <b>NOTE</b>: Do NOT forget to add EventWaiter as an event listener to your JDA instance!
  *
  * <p>
  *  <i>Some pieces of code have been inspired from LaxusBot</i>
@@ -49,10 +53,8 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
  * </p>
  */
 @Author("ILakeful", "TheMonitorLizard (LaxusBot implementation)")
-object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContext(3, "EventWaiter"), AutoCloseable by newFixedThreadPoolContext(3, "EventWaiter") {
-    val tasks by lazy {
-        ConcurrentHashMap<KClass<*>, MutableSet<AwaitableTask<*>>>()
-    }
+object EventWaiter : EventListener, CoroutineContext by coroutineDispatcher, AutoCloseable by coroutineDispatcher {
+    val tasks = ConcurrentHashMap<KClass<*>, MutableSet<AwaitableTask<*>>>()
     inline fun <reified E: GenericEvent> receiveTask() = tasks[E::class]
     inline fun <reified E: GenericEvent> receiveEvent(
         delay: Long = -1,
@@ -75,7 +77,7 @@ object EventWaiter : EventListener, CoroutineContext by newFixedThreadPoolContex
      * @param delay the maximum amount of time to wait for. Default is -1 (infinity awaiting)
      * @param unit measurement of the timeout
      *
-     * @return deferred value (non-blocking cancellable future) of possibly-null event instance
+     * @return deferred value (non-blocking cancelable future) of possibly null event instance
      */
     @Author("ILakeful", "TheMonitorLizard (LaxusBot implementation)")
     fun <E: GenericEvent> receiveEvent(type: KClass<E>, check: suspend (E) -> Boolean, delay: Long = -1, unit: TimeUnit = TimeUnit.SECONDS): Deferred<E?> {

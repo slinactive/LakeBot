@@ -31,7 +31,7 @@ class ColorCommand : Command {
     override val aliases = listOf("colorinfo", "color-info")
     override val description = "The command sending short information about the specified color"
     override val cooldown = 3L
-    override val usage = { it: String -> "${super.usage(it)} <HEX code>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <HEX code>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         fun Color.toCmyk(): IntArray {
             val rgbArray = arrayOf(red, green, blue).map { it / 255f }
@@ -46,7 +46,7 @@ class ColorCommand : Command {
         }
         if (args.isNotEmpty()) {
             if (args[0] matches "#?(([A-Fa-f\\d]){3}|([A-Fa-f\\d]){6})".toRegex()) {
-                val request = get("http://www.thecolorapi.com/id?hex=${args[0].removePrefix("#").toLowerCase()}", headers = mapOf())
+                val request = get("http://www.thecolorapi.com/id?hex=${args[0].removePrefix("#").toLowerCase()}", headers = emptyMap())
                 val json = request.jsonObject
                 val name = json.getJSONObject("name").getString("value")
                 val closestHex = json.getJSONObject("name").getString("closest_named_hex").toLowerCase()
@@ -78,7 +78,7 @@ class ColorCommand : Command {
                             """.trimMargin()
                         }
                         field(title = "Closest Color:") {
-                            val r = get("http://www.thecolorapi.com/id?hex=${closestHex.removePrefix("#")}", headers = mapOf())
+                            val r = get("http://www.thecolorapi.com/id?hex=${closestHex.removePrefix("#")}", headers = emptyMap())
                             val closestHsl = r.jsonObject.getJSONObject("hsl")
                             val c = Color.decode(closestHex)
                             """**HEX**: $closestHex
@@ -92,7 +92,7 @@ class ColorCommand : Command {
                 }
                 event.channel.sendMessage(embed).addFile(image, "$clear.png").queue()
             } else {
-                event.sendFailure("That color isn't a valid one!").queue()
+                event.channel.sendFailure("The color is invalid!").queue()
             }
         } else {
             val r = Int.random(0..255)

@@ -22,7 +22,6 @@ import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.EmbedBuilder.ZERO_WIDTH_SPACE
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.internal.utils.Helpers
 
 class ChooseCommand : Command {
     override val name = "choose"
@@ -32,15 +31,15 @@ class ChooseCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
-            event.channel.sendMessage(buildEmbed {
+            event.channel.sendEmbed {
                 val toChoose = arguments.split("(\\s+\\|+\\s+)|(\\|+)".toRegex())
                 val random = toChoose.random()
-                val toSend = if (Helpers.isBlank(random)) ZERO_WIDTH_SPACE else random
+                val toSend = if (random.isBlank()) ZERO_WIDTH_SPACE else random
                 color { Immutable.SUCCESS }
                 description { toSend }
-            }).queue()
+            }.queue()
         } else {
-            event.sendFailure("You specified no content!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

@@ -29,7 +29,7 @@ open class PlayCommand : Command {
     override val name = "play"
     override val aliases = listOf("p", "pr", "playraw", "play-raw")
     override val description = "The command playing a song by the specified link"
-    override val usage: (String) -> String = { "${super.usage(it)} <query/link>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <query/link>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (event.argsRaw !== null) {
             if (!event.member!!.isConnected) {
@@ -52,7 +52,7 @@ open class PlayCommand : Command {
                     AudioUtils.loadAndPlay(event.author, event.guild, event.textChannel, attachment.url)
                 }
             } else {
-                event.channel.sendFailure("You specified no link/query and attached no file!").queue()
+                event.channel.sendFailure("You have specified no link/query and attached no file!").queue()
             }
         }
     }

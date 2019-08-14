@@ -25,20 +25,21 @@ import io.ilakeful.lakebot.entities.EventWaiter
 
 import java.util.concurrent.TimeUnit
 
-suspend fun MessageChannel.awaitMessage(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) = EventWaiter.awaitMessage(user, this, delay, unit)
-fun MessageChannel.sendEmbed(lazyBuilder: EmbedBuilder.() -> Unit) = this.sendMessage(buildEmbed(lazyBuilder))
-fun MessageChannel.sendSuccess(text: String) = this.sendMessage(buildEmbed {
+suspend fun MessageChannel.awaitMessage(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) =
+        EventWaiter.awaitMessage(user, this, delay, unit)
+fun MessageChannel.sendEmbed(lazyBuilder: EmbedBuilder.() -> Unit) = sendMessage(buildEmbed(lazyBuilder))
+fun MessageChannel.sendSuccess(text: String) = sendEmbed {
     color { Immutable.SUCCESS }
     author { "Success!" }
     description { text }
-})
-fun MessageChannel.sendFailure(text: String) = this.sendMessage(buildEmbed {
+}
+fun MessageChannel.sendFailure(text: String) = sendEmbed {
     color { Immutable.FAILURE }
     author { "Failure!" }
     description { text }
-})
-fun MessageChannel.sendConfirmation(text: String) = this.sendMessage(buildEmbed {
+}
+fun MessageChannel.sendConfirmation(text: String) = sendEmbed {
     color { Immutable.CONFIRMATION }
     author { "Warning!" }
     description { text }
-})
+}

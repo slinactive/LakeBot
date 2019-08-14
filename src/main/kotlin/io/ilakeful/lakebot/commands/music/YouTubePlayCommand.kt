@@ -76,7 +76,8 @@ class YouTubePlayCommand : PlayCommand() {
                     }
                 } catch (e: Exception) {
                     event.channel.sendFailure(
-                            "Something went wrong while searching YouTube! ${e::class.simpleName}: ${e.message}"
+                            "Something went wrong while searching YouTube! " +
+                                    "${e::class.simpleName ?: "Unknown exception"}: ${e.message ?: "absent message"}"
                     ).queue()
                 }
             } else {

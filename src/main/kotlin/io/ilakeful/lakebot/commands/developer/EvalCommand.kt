@@ -125,13 +125,13 @@ class EvalCommand : Command {
                 if (content.startsWith("kotlin", true)) {
                     kotlinEval(event, content.substring(6), engine)
                 } else {
-                    event.sendFailure("That's not a valid language!").queue()
+                    event.channel.sendFailure("That is an invalid language!").queue()
                 }
             } else {
                 kotlinEval(event, arguments, engine)
             }
         } else {
-            event.sendFailure("You specified no code!").queue()
+            event.channel.sendFailure("You haven't specified code!").queue()
         }
     }
     private fun kotlinEval(event: MessageReceivedEvent, content: String, engine: KotlinJsr223JvmLocalScriptEngine) {
@@ -193,9 +193,9 @@ class EvalCommand : Command {
                 }
             }
         } catch (t: Throwable) {
-            event.sendMessage(buildEmbed {
+            event.channel.sendEmbed {
                 color { Immutable.FAILURE }
-                author { "An error has occured:" }
+                author { "An error has occurred:" }
                 description {
                     """```kotlin
                         |${t::class.qualifiedName ?: t.javaClass.name ?: "Unknown"}
@@ -203,7 +203,7 @@ class EvalCommand : Command {
                         |${t.message?.safeSubstring(0, 1536) ?: "None"}```""".trimMargin()
                 }
                 timestamp()
-            }).queue()
+            }.queue()
         }
     }
 }

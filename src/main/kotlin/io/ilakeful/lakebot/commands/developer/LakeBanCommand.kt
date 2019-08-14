@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 class LakeBanCommand : Command {
     override val name = "lakeban"
     override val description = "The command giving the user LakeBan (after which they cannot use LakeBot any longer)"
-    override val usage = fun(prefix: String) = "${super.usage(prefix)} <user> <reason>"
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <member> <reason>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (args.size > 1) {
         event.retrieveMembers(
                 command = this,
@@ -37,7 +37,7 @@ class LakeBanCommand : Command {
                 val isWillingToBan = it.awaitNullableConfirmation(event.author)
                 if (isWillingToBan !== null) {
                     if (isWillingToBan) {
-                        user.putLakeBan(event.argsRaw?.split("\\s+".toRegex(), 2)?.last() ?: "No reason provided")
+                        user.putLakeBan(event.argsRaw?.split("\\s+".toRegex(), 2)?.last() ?: "no reason provided")
                         event.channel.sendSuccess("${user.asTag} has successfully gotten LakeBan!").queue()
                         it.delete().queue()
                     } else {

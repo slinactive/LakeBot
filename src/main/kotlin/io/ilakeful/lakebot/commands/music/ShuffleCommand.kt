@@ -34,7 +34,7 @@ class ShuffleCommand : Command {
             if (event.member!!.isConnected) {
                 manager.trackScheduler.receiveQueue {
                     it.shuffle()
-                    event.channel.sendSuccess("The queue was successfully shuffled!").queue()
+                    event.channel.sendSuccess("The queue has been successfully shuffled!").queue()
                 }
             } else {
                 event.channel.sendFailure("You are not connected to the voice channel!").queue()

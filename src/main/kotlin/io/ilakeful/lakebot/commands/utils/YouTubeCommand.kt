@@ -32,7 +32,7 @@ class YouTubeCommand : Command {
     override val aliases = listOf("yt", "ytsearch", "youtubesearch", "yts", "ys", "youtube-search")
     override val description = "The command searching for videos on YouTube by the specified query"
     override val cooldown = 5L
-    override val usage = { it: String -> "${super.usage(it)} <query>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <query>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
@@ -71,7 +71,8 @@ class YouTubeCommand : Command {
                 }
             } catch (e: Exception) {
                 event.channel.sendFailure(
-                        "Something went wrong while searching YouTube! ${e::class.simpleName}: ${e.message}"
+                        "Something went wrong while searching YouTube! " +
+                                "${e::class.simpleName ?: "Unknown exception"}: ${e.message ?: "absent message"}"
                 ).queue()
             }
         } else {

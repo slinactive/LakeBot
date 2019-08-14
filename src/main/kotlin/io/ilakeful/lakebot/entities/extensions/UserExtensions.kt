@@ -23,9 +23,6 @@ import net.dv8tion.jda.api.entities.User
 
 import org.bson.Document
 
-@Deprecated("Deprecated since 1.0", replaceWith = ReplaceWith("User#asTag"))
-val User.tag: String
-    get() = "${this.name}#${this.discriminator}"
 val User.lakeBan: Document?
     get() = ConfigUtils.getLakeBan(this)
 val User.isLBDeveloper: Boolean

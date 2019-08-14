@@ -28,11 +28,11 @@ class StopCommand : Command {
     override val description = "The command stopping the currently playing song and clearing the queue"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         when {
-            !event.member!!.isConnected -> event.sendFailure("You're not in the voice channel!").queue()
-            !event.guild.selfMember.isConnected -> event.sendFailure("I'm not in the voice channel!").queue()
+            !event.member!!.isConnected -> event.channel.sendFailure("You are not connected to the voice channel!").queue()
+            !event.guild.selfMember.isConnected -> event.channel.sendFailure("${event.selfUser.name} is not connected to the voice channel!").queue()
             else -> {
                 AudioUtils.clear(event.guild)
-                event.sendSuccess("Playback was successfully stopped and queue was successfully cleared!").queue()
+                event.channel.sendSuccess("Playback has been successfully stopped and queue has been successfully cleared!").queue()
             }
         }
     }

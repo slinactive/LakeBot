@@ -24,19 +24,22 @@ import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.utils.TimeUtils
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newFixedThreadPoolContext
 
 import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.Executors.newFixedThreadPool
 import java.util.concurrent.TimeUnit
 
 import kotlin.coroutines.CoroutineContext
 
-object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Command-Thread") {
+private val coroutineDispatcher = newFixedThreadPool(3) { Thread(it, "CommandHandler") }
+        .asCoroutineDispatcher()
+object CommandHandler : CoroutineContext by coroutineDispatcher, AutoCloseable by coroutineDispatcher {
     val registeredCommands = mutableListOf<Command>()
     private val cooldowns = mutableMapOf<String, OffsetDateTime>()
     private fun getPriority(actual: String, expected: Command): Int = when (actual) {

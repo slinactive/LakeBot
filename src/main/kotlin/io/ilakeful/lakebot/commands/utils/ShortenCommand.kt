@@ -26,15 +26,28 @@ import khttp.get
 
 import java.net.URLEncoder
 
-class ShortenerCommand : Command {
+class ShortenCommand : Command {
     override val name = "shorten"
-    override val aliases = listOf("shortener", "urlshortener", "shortenlink", "shorturl", "shortenedurl", "url-shortener", "shorten-link", "short-url", "shortened-url")
+    override val aliases = listOf(
+            "isgd",
+            "is-gd",
+            "shortener",
+            "urlshortener",
+            "shortenlink",
+            "shorturl",
+            "shortenedurl",
+            "url-shortener",
+            "shorten-link",
+            "short-url",
+            "shortened-url"
+    )
     override val description = "The command shortening the specified link"
     override val cooldown = 3L
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <link>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = if (args.isNotEmpty()) {
         try {
             val api = "https://is.gd/create.php?format=simple&url=${URLEncoder.encode(args[0], "UTF-8")}"
-            val response = get(api, headers = mapOf())
+            val response = get(api, headers = emptyMap())
             if ("${response.statusCode}".startsWith('2')) {
                 val embed = buildEmbed {
                     author("LakeShortener") { event.selfUser.effectiveAvatarUrl }
@@ -43,12 +56,12 @@ class ShortenerCommand : Command {
                 }
                 event.channel.sendMessage(embed).queue()
             } else {
-                event.sendFailure("That's not a valid URL!").queue()
+                event.channel.sendFailure("That is an invalid link!").queue()
             }
         } catch (e: Exception) {
-            event.sendFailure("Something went wrong!").queue()
+            event.channel.sendFailure("Something went wrong!").queue()
         }
     } else {
-        event.sendFailure("You specified no URL!").queue()
+        event.channel.sendFailure("You haven't specified any link!").queue()
     }
 }

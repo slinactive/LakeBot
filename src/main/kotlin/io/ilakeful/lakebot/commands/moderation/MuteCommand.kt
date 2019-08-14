@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 class MuteCommand : Command {
     override val name = "mute"
     override val description = "The command giving a mute to the specified member"
-    override val usage = fun(prefix: String) = "${super.usage(prefix)} <user> <time> <reason>"
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <member> <time> <reason>"
     override val examples = fun(prefix: String) = mapOf(
             "$prefix$name ILakeful 1w12h flood" to "mutes ILakeful for 7.5 days because of flood"
     )

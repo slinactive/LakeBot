@@ -32,7 +32,7 @@ class UrbanCommand : Command {
     override val aliases = listOf("ud", "urbandict", "urbandictionary", "urban-dictionary")
     override val description = "The command looking up the meaning of the specified word on Urban Dictionary"
     override val cooldown = 3L
-    override val usage = { it: String -> "${super.usage(it)} <term>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <term>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val arguments = event.argsRaw
         if (arguments !== null) {
@@ -42,7 +42,7 @@ class UrbanCommand : Command {
                 val response = get(endpoint, headers = emptyMap())
                 val json = response.jsonObject
                 if (json.getJSONArray("list").toList().isEmpty()) {
-                    event.sendFailure("Couldn't find that on Urban!").queue()
+                    event.channel.sendFailure("No results found by the query!").queue()
                 } else {
                     val result = json.getJSONArray("list").getJSONObject(0)
                     val word: String = result.getString("word")
@@ -107,10 +107,11 @@ class UrbanCommand : Command {
                     }.queue()
                 }
             } catch (e: Exception) {
-                event.sendFailure("Something went wrong! ${e::class.simpleName}: ${e.message}").queue()
+                event.channel.sendFailure("Something went wrong! " +
+                        "${e::class.simpleName ?: "Unknown exception"}: ${e.message ?: "absent message"}").queue()
             }
         } else {
-            event.sendFailure("You specified no query!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
 }

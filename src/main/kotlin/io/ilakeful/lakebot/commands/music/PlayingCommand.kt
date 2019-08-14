@@ -31,7 +31,7 @@ class PlayingCommand : Command {
     override val description = "The command sending information about the currently playing song"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (AudioUtils[event.guild].audioPlayer.playingTrack === null) {
-            event.channel.sendFailure("There is no track that is being played now!").queue()
+            event.channel.sendFailure("No track is currently playing!").queue()
         } else {
             val player = AudioUtils[event.guild].audioPlayer
             val track = player.playingTrack

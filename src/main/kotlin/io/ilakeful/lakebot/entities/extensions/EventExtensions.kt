@@ -16,15 +16,11 @@
 
 package io.ilakeful.lakebot.entities.extensions
 
-import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.api.requests.restaction.MessageAction
 
 import java.util.concurrent.TimeUnit
 
-@Deprecated(message = "Deprecated since 1.0", replaceWith = ReplaceWith("MessageChannel#awaitMessage"))
-suspend fun MessageReceivedEvent.awaitMessage(user: User, delay: Long = 1, unit: TimeUnit = TimeUnit.MINUTES) = channel.awaitMessage(user, delay, unit)
 val MessageReceivedEvent.selfUser: SelfUser
     get() = this.jda.selfUser
 val MessageReceivedEvent.selfMember: Member?
@@ -51,12 +47,3 @@ val MessageReceivedEvent.argsStripped: String?
     } catch (e: Exception) {
         null
     }
-fun MessageReceivedEvent.sendMessage(text: String): MessageAction = this.channel.sendMessage(text)
-fun MessageReceivedEvent.sendMessage(embed: MessageEmbed): MessageAction = this.channel.sendMessage(embed)
-fun MessageReceivedEvent.sendMessage(builder: EmbedBuilder): MessageAction = this.channel.sendMessage(builder.build())
-@Deprecated(message = "Deprecated since 1.0", replaceWith = ReplaceWith("MessageChannel#sendSuccess"))
-fun MessageReceivedEvent.sendSuccess(text: String): MessageAction = this.channel.sendSuccess(text)
-@Deprecated(message = "Deprecated since 1.0", replaceWith = ReplaceWith("MessageChannel#sendFailure"))
-fun MessageReceivedEvent.sendFailure(text: String): MessageAction = this.channel.sendFailure(text)
-@Deprecated(message = "Deprecated since 1.0", replaceWith = ReplaceWith("MessageChannel#sendConfirmation"))
-fun MessageReceivedEvent.sendConfirmation(text: String): MessageAction = this.channel.sendConfirmation(text)

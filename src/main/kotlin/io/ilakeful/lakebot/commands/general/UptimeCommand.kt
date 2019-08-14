@@ -19,6 +19,7 @@ package io.ilakeful.lakebot.commands.general
 import io.ilakeful.lakebot.Immutable
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.extensions.*
+import io.ilakeful.lakebot.utils.TimeUtils.asText
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
@@ -28,7 +29,7 @@ class UptimeCommand : Command {
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         val embed = buildEmbed {
             color { Immutable.SUCCESS }
-            field(title = "Uptime:") { event.jda.formattedUptime }
+            field(title = "Uptime:") { asText(event.jda.uptime) }
             footer { "Last Reboot" }
             timestamp { event.jda.startDate }
         }

@@ -30,10 +30,10 @@ import java.util.concurrent.TimeUnit
 class PruneCommand : Command {
     override val name = "prune"
     override val aliases = listOf("purge", "clearmessages", "clear-messages")
-    override val usage: (String) -> String = {
-        val command = "${super.usage(it)} <count>"
+    override val usage = fun(prefix: String): String {
+        val command = "${super.usage(prefix)} <count>"
         val dash = '\u2014'
-        """$command $dash clears all messages
+        return """$command $dash clears all messages
             |$command @mention/username#discriminator $dash clears messages from the specified user
             |$command embeds $dash clears embed messages
             |$command invites $dash clears messages containing any invite links

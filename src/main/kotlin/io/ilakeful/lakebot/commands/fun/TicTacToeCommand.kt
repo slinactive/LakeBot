@@ -102,7 +102,7 @@ class TicTacToeCommand : Command {
     override val name = "tictactoe"
     override val description = "The command allowing you to challenge someone to the tic-tac-toe game"
     override val aliases = listOf("ttt", "tic-tac-toe")
-    override val usage: (String) -> String = { "${super.usage(it)} <user>" }
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <member>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         event.retrieveMembers(
                 command = this,

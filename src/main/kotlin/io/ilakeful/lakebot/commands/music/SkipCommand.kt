@@ -37,7 +37,7 @@ class SkipCommand : Command {
                     val playing = manager.audioPlayer.playingTrack
                     event.channel.sendSuccess("Skipped to the next track ([${playing.info.title}](${playing.info.uri}))!").queue()
                 } catch (e: Exception) {
-                    event.channel.sendSuccess("Playback was successfully stopped!").queue()
+                    event.channel.sendSuccess("Playback has been successfully stopped!").queue()
                 }
             } else {
                 event.channel.sendFailure("You are not connected to the voice channel!").queue()

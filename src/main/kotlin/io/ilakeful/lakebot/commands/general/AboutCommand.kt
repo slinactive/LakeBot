@@ -22,6 +22,8 @@ import io.ilakeful.lakebot.Immutable
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.entities.handlers.CommandHandler
+import io.ilakeful.lakebot.utils.TimeUtils.asText
+
 import io.iskylake.weather.LakeWeatherInfo
 
 import net.dv8tion.jda.api.JDAInfo
@@ -48,7 +50,7 @@ class AboutCommand : Command {
                             |$description
                             |
                             |**[Invite Link](https://discordapp.com/oauth2/authorize?client_id=${event.selfUser.id}&permissions=${Immutable.PERMISSIONS}&scope=bot)** • **[GitHub Repository](${Immutable.GITHUB_REPOSITORY})**
-                            |**Creator/Developer**: ${appInfo.owner.tag}
+                            |**Creator/Developer**: ${appInfo.owner.asTag}
                             |**Commands**: ${CommandHandler.registeredCommands.size}
                             |**Bot Version**: ${Immutable.VERSION}
                             |**JDA Version**: ${JDAInfo.VERSION}
@@ -58,8 +60,8 @@ class AboutCommand : Command {
                             |**Kotlin Version**: ${System.getProperty("kotlin.version") ?: KotlinVersion.CURRENT}
                             |**Guilds**: ${event.jda.guildCache.size()}
                             |**Users**: ${event.jda.userCache.size()}
-                            |**Threads**: ${Thread.activeCount()}
-                            |**Uptime**: ${event.jda.formattedUptime}
+                            |**Active Threads**: ${Thread.activeCount()}
+                            |**Uptime**: ${asText(event.jda.uptime)}
                             |**Ping**: $ping ms
                         """.trimMargin()
                     }

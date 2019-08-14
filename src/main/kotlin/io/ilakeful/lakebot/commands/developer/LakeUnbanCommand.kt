@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 class LakeUnbanCommand : Command {
     override val name = "lakeunban"
     override val description = "The command lifting LakeBan against the user"
-    override val usage = fun(prefix: String) = "${super.usage(prefix)} <user>"
+    override val usage = fun(prefix: String) = "${super.usage(prefix)} <member>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) = event.retrieveMembers(
             command = this,
             predicate = { it.user.lakeBan !== null }

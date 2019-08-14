@@ -36,24 +36,24 @@ class GuessGameCommand : Command {
                 if (max in 5..500000) {
                     val toGuess = Int.random(1..max)
                     val round = 1
-                    event.channel.sendMessage(buildEmbed {
+                    event.channel.sendEmbed {
                         author { "Attempt #$round" }
                         description { "Let's go!" }
                         footer { "Type in \"exit\" to kill the process" }
                         color { Immutable.SUCCESS }
-                    }).await {
+                    }.await {
                         val process = WaiterProcess(mutableListOf(event.author), event.textChannel, this)
                         WAITER_PROCESSES += process
                         awaitInt(round, toGuess, event, process)
                     }
                 } else {
-                    event.sendFailure("The number is not in the correct range!").queue()
+                    event.channel.sendFailure("The number is not in the correct range!").queue()
                 }
             } else {
-                event.sendFailure("You must specify a maximum number!").queue()
+                event.channel.sendFailure("You must specify a maximum number!").queue()
             }
         } else {
-            event.sendFailure("You specified no content!").queue()
+            event.channel.sendFailure("You haven't specified any arguments!").queue()
         }
     }
     private suspend fun awaitInt(
@@ -75,31 +75,31 @@ class GuessGameCommand : Command {
                         }
                         input > toGuess -> {
                             attempt++
-                            event.channel.sendMessage(buildEmbed {
+                            event.channel.sendEmbed {
                                 color { Immutable.FAILURE }
                                 description { "It's too large!" }
                                 author { "Attempt #$attempt" }
-                            }).await { awaitInt(attempt, toGuess, event, process) }
+                            }.await { awaitInt(attempt, toGuess, event, process) }
                         }
                         input < toGuess -> {
                             attempt++
-                            event.channel.sendMessage(buildEmbed {
+                            event.channel.sendEmbed {
                                 color { Immutable.FAILURE }
                                 description { "It's too small!" }
                                 author { "Attempt #$attempt" }
-                            }).await { awaitInt(attempt, toGuess, event, process) }
+                            }.await { awaitInt(attempt, toGuess, event, process) }
                         }
                     }
                 }
                 content.toLowerCase() == "exit" -> {
                     WAITER_PROCESSES -= process
-                    event.sendSuccess("Process successfully stopped!").queue()
+                    event.channel.sendSuccess("Successfully stopped!").queue()
                 }
-                else -> event.sendFailure("Try again!").await { awaitInt(attempt, toGuess, event, process) }
+                else -> event.channel.sendFailure("Try again!").await { awaitInt(attempt, toGuess, event, process) }
             }
         } else {
             WAITER_PROCESSES -= process
-            event.sendFailure("Time is up!").queue()
+            event.channel.sendFailure("Time is up!").queue()
         }
     }
 }
