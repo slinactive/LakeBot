@@ -132,7 +132,7 @@ suspend fun MessageReceivedEvent.retrieveMembers(
                 if (members.size > 1) {
                     channel.sendEmbed {
                         color { Immutable.SUCCESS }
-                        author("Select the User:") { selfUser.effectiveAvatarUrl }
+                        author("Select User:") { selfUser.effectiveAvatarUrl }
                         for ((index, result) in members.withIndex()) {
                             appendln { "${index + 1}. ${result.user.asTag.escapeDiscordMarkdown()}" }
                         }
@@ -213,7 +213,7 @@ suspend fun MessageReceivedEvent.retrieveRoles(
                 if (roles.size > 1) {
                     channel.sendEmbed {
                         color { Immutable.SUCCESS }
-                        author("Select the Role:") { selfUser.effectiveAvatarUrl }
+                        author("Select Role:") { selfUser.effectiveAvatarUrl }
                         for ((index, result) in roles.withIndex()) {
                             appendln { "${index + 1}. ${result.name.escapeDiscordMarkdown()}" }
                         }
@@ -295,7 +295,7 @@ internal suspend fun MessageReceivedEvent.retrieveMembersWithIsMassProperty(
                 if (members.size > 1) {
                     channel.sendEmbed {
                         color { Immutable.SUCCESS }
-                        author("Select the User:") { selfUser.effectiveAvatarUrl }
+                        author("Select User:") { selfUser.effectiveAvatarUrl }
                         for ((index, result) in members.withIndex()) {
                             appendln { "${index + 1}. ${result.user.asTag.escapeDiscordMarkdown()}" }
                         }

@@ -36,7 +36,7 @@ open class PlayCommand : Command {
                 event.channel.sendFailure("You are not connected to the voice channel!").queue()
             } else {
                 if (!event.guild.selfMember.isConnected) {
-                    event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel)
+                    event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel!!)
                 }
                 AudioUtils.loadAndPlay(event.author, event.guild, event.textChannel, event.argsRaw!!)
             }
@@ -47,7 +47,7 @@ open class PlayCommand : Command {
                     event.channel.sendFailure("You are not connected to the voice channel!").queue()
                 } else {
                     if (!event.guild.selfMember.isConnected) {
-                        event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel)
+                        event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel!!)
                     }
                     AudioUtils.loadAndPlay(event.author, event.guild, event.textChannel, attachment.url)
                 }

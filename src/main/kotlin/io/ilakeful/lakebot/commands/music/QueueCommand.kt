@@ -33,17 +33,18 @@ class QueueCommand : Command {
     override val aliases = listOf("playlist", "q")
     override val description = "The command sending the current queue (playlist)"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
-        if (AudioUtils[event.guild].audioPlayer.playingTrack === null && AudioUtils[event.guild].trackScheduler.queue.isEmpty()) {
-            event.sendFailure("Queue is empty!").queue()
+        val queue = AudioUtils[event.guild].trackScheduler.queue
+        if (AudioUtils[event.guild].audioPlayer.playingTrack === null && queue.isEmpty()) {
+            event.channel.sendFailure("The queue is empty!").queue()
         } else {
             if (AudioUtils[event.guild].audioPlayer.playingTrack !== null) {
-                val queue = AudioUtils[event.guild].trackScheduler.queue
-                queue -= AudioUtils[event.guild].audioPlayer.playingTrack
-                if (queue.isNotEmpty()) {
+                if (queue.any { it != AudioUtils[event.guild].audioPlayer.playingTrack }) {
                     val paginator = buildPaginator<AudioTrack> {
                         event { event }
                         size { 10 }
-                        list { queue.toList() }
+                        list {
+                            queue.filter { it != AudioUtils[event.guild].audioPlayer.playingTrack }
+                        }
                         embed { num, pages ->
                             for (track in pages[num - 1]) {
                                 appendln {
@@ -103,7 +104,7 @@ class QueueCommand : Command {
                     event.channel.sendMessage(embed).queue()
                 }
             } else {
-                event.sendFailure("Queue is empty!").queue()
+                event.channel.sendFailure("The queue is empty!").queue()
                 AudioUtils.clear(event.guild)
             }
         }

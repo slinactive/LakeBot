@@ -81,7 +81,8 @@ object TimeUtils {
             append(secondsS)
         }
     }
-    fun asText(millis: Long): String {
+    fun asText(time: Long, unit: TimeUnit = TimeUnit.MILLISECONDS): String {
+        val millis = unit.toMillis(time)
         val days = TimeUnit.MILLISECONDS.toDays(millis)
         val hours = TimeUnit.MILLISECONDS.toHours(millis) - TimeUnit.DAYS.toHours(TimeUnit.MILLISECONDS.toDays(millis))
         val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis))
@@ -89,42 +90,34 @@ object TimeUtils {
         return buildString {
             var leading = false
             if (days > 0L) {
-                append(days)
-                append(" ")
-                append(if (days == 1L) "day" else "days")
+                append("$days day${if (days > 1L) "s" else ""}")
                 leading = true
             }
             if (hours > 0L) {
                 if (leading && (minutes != 0L || seconds != 0L)) {
                     append(", ")
                 }
-                if (!toString().isEmpty() && (minutes == 0L && seconds == 0L)) {
+                if (toString().isNotEmpty() && (minutes == 0L && seconds == 0L)) {
                     append(" and ")
                 }
-                append(hours)
-                append(" ")
-                append(if (hours == 1L) "hour" else "hours")
+                append("$hours hour${if (hours > 1L) "s" else ""}")
                 leading = true
             }
             if (minutes > 0L) {
                 if (leading && seconds != 0L) {
                     append(", ")
                 }
-                if (!toString().isEmpty() && seconds == 0L) {
+                if (toString().isNotEmpty() && seconds == 0L) {
                     append(" and ")
                 }
                 leading = true
-                append(minutes)
-                append(" ")
-                append(if (minutes == 1L) "minute" else "minutes")
+                append("$minutes minute${if (minutes > 1L) "s" else ""}")
             }
             if (seconds > 0L) {
                 if (leading) {
                     append(" and ")
                 }
-                append(seconds)
-                append(" ")
-                append(if (seconds == 1L) "second" else "seconds")
+                append("$seconds second${if (seconds > 1L) "s" else ""}")
             }
             if (toString().isEmpty() && !leading) {
                 append("0 seconds")

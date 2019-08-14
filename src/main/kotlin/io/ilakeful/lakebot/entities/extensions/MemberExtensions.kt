@@ -20,11 +20,11 @@ import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.VoiceChannel
 
 val Member.joinPosition: Long
-    get() = this.guild.memberCache.sortedWith(compareBy { it.timeJoined }).indexOf(this) + 1L
+    get() = this.guild.memberCache.sortedBy { it.timeJoined }.indexOf(this) + 1L
 val Member.connectedChannel: VoiceChannel?
-    get() = this.voiceState!!.channel
+    get() = this.voiceState?.channel
 val Member.isConnected: Boolean
-    get() = this.voiceState!!.inVoiceChannel() && this.connectedChannel !== null
+    get() = this.voiceState?.inVoiceChannel() == true && this.connectedChannel !== null
 val Member.joinOrder: String
     get() = this.getJoinOrder(true)
 fun Member.getJoinOrder(useLinks: Boolean): String {
@@ -38,7 +38,8 @@ fun Member.getJoinOrder(useLinks: Boolean): String {
         }
         if (joins[index] == member) {
             append(if (useLinks) {
-                "**[${joins[index].user.name.escapeDiscordMarkdown()}](https://discordapp.com/channels/@me/${joins[index].user.id})**"
+                "**[${joins[index].user.name.escapeDiscordMarkdown()}]" +
+                        "(https://discordapp.com/channels/@me/${joins[index].user.id})**"
             } else {
                 "**${joins[index].user.name.escapeDiscordMarkdown()}**"
             })
@@ -52,7 +53,8 @@ fun Member.getJoinOrder(useLinks: Boolean): String {
             append(" -> ")
             append(if (joins[i] == member) {
                 if (useLinks) {
-                    "**[${joins[i].user.name.escapeDiscordMarkdown()}](https://discordapp.com/channels/@me/${joins[i].user.id})**"
+                    "**[${joins[i].user.name.escapeDiscordMarkdown()}]" +
+                            "(https://discordapp.com/channels/@me/${joins[i].user.id})**"
                 } else {
                     "**${joins[i].user.name.escapeDiscordMarkdown()}**"
                 }

@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class EmotesCommand : Command {
     override val name = "emotes"
-    override val description = "The command sending the list of emotes (custom emojis) of the server"
+    override val description = "The command sending a list of emotes (custom emojis) of the server"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
         if (!event.guild.emoteCache.isEmpty) {
             val emotes = event.guild.emoteCache.mapNotNull { it.asMention }.joinToString()
@@ -35,10 +35,10 @@ class EmotesCommand : Command {
                     description { emotes }
                 }.let { event.channel.sendMessage(it).queue() }
             } else {
-                event.sendFailure("There are too many emotes to display!").queue()
+                event.channel.sendFailure("There are too many emotes to display!").queue()
             }
         } else {
-            event.sendFailure("There are no emotes!").queue()
+            event.channel.sendFailure("No emotes are found on the server!").queue()
         }
     }
 }

@@ -34,7 +34,7 @@ class YouTubePlayCommand : PlayCommand() {
             val arguments = event.argsRaw
             if (arguments !== null) {
                 if (!event.selfMember!!.isConnected) {
-                    event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel)
+                    event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel!!)
                 }
                 try {
                     if (arguments matches YouTubeUtils.VIDEO_REGEX) {

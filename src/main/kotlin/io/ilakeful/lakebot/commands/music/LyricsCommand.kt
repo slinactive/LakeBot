@@ -81,7 +81,7 @@ class LyricsCommand : Command {
         if (songs.isNotEmpty()) {
             event.channel.sendEmbed {
                 color { Immutable.SUCCESS }
-                author("Select the Song:") { event.selfUser.effectiveAvatarUrl }
+                author("Select Song:") { event.selfUser.effectiveAvatarUrl }
                 footer { "Type in \"exit\" to kill the process" }
                 for ((index, song) in songs.withIndex()) {
                     appendln { "${index + 1}. ${song.author} - ${song.title}" }

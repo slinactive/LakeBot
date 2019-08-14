@@ -83,7 +83,7 @@ class AppleMusicCommand : Command {
                 if (results.size > 1) {
                     event.channel.sendEmbed {
                         color { Immutable.SUCCESS }
-                        author("Select the Song:") { event.selfUser.effectiveAvatarUrl }
+                        author("Select Song:") { event.selfUser.effectiveAvatarUrl }
                         footer { "Type in \"exit\" to kill the process | Format: author - track - album" }
                         for ((index, song) in results.withIndex()) {
                             appendln {

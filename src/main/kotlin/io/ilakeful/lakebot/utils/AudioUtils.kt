@@ -61,27 +61,34 @@ object AudioUtils {
             override fun trackLoaded(track: AudioTrack) {
                 track.userData = requester.idLong
                 musicManager.trackScheduler += track
-                channel.sendSuccess("[${track.info.title}](${track.info.uri}) has been added to queue!").queue()
+                channel.sendSuccess("[${track.info.title}](${track.info.uri}) " +
+                        "has been successfully added to queue!").queue()
             }
             override fun playlistLoaded(playlist: AudioPlaylist) {
                 for (track in playlist.tracks) {
                     track.userData = requester.idLong
                     musicManager.trackScheduler += track
                 }
-                val description = "${if (!playlist.isSearchResult) "[${playlist.name}]($trackUrl)" else playlist.name} has been added to queue!"
+                val description = "${if (!playlist.isSearchResult) "[${playlist.name}]($trackUrl)" else playlist.name} " +
+                        "has been successfully added to queue!"
                 channel.sendSuccess(description).queue()
             }
-            override fun noMatches() = channel.sendFailure("Nothing found by $trackUrl!").queue()
-            override fun loadFailed(exception: FriendlyException) = channel.sendFailure("This track can't be played!").queue()
+            override fun noMatches() = channel.sendFailure("No results found by the query!").queue()
+            override fun loadFailed(exception: FriendlyException) = channel.sendFailure("The track is unable to be played!").queue()
         })
     }
     inline fun joinChannel(crossinline e: () -> MessageReceivedEvent) {
         val event = e()
         when {
-            !event.member!!.isConnected -> event.sendFailure("You're not in the voice channel!").queue()
-            event.guild.selfMember.isConnected && event.member!!.connectedChannel == event.guild.selfMember.connectedChannel -> event.sendFailure("I'm already in this voice channel!").queue()
+            !event.member!!.isConnected -> event.channel.sendFailure(
+                    "You are not connected to the voice channel!"
+            ).queue()
+            event.guild.selfMember.isConnected
+                    && event.member!!.connectedChannel == event.guild.selfMember.connectedChannel -> event.channel.sendFailure(
+                    "LakeBot is already connected to the voice channel!"
+            ).queue()
             else -> {
-                event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel)
+                event.guild.audioManager.openAudioConnection(event.member!!.connectedChannel!!)
                 event.channel.sendSuccess("Joined the voice channel!").queue()
             }
         }
@@ -103,8 +110,12 @@ object AudioUtils {
     inline fun leaveChannel(crossinline e: () -> MessageReceivedEvent) {
         val event = e()
         when {
-            !event.member!!.isConnected -> event.sendFailure("You're not in the voice channel!").queue()
-            event.selfMember?.isConnected == false -> event.sendFailure("I'm not in the voice channel!").queue()
+            !event.member!!.isConnected -> event.channel.sendFailure(
+                    "You are not connected to the voice channel!"
+            ).queue()
+            !event.selfMember!!.isConnected -> event.channel.sendFailure(
+                    "${event.selfUser.name} is not connected to the voice channel!"
+            ).queue()
             else -> {
                 clear(event.guild, this[event.guild])
                 event.channel.sendSuccess("Left the voice channel!").queue()

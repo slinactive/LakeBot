@@ -22,18 +22,21 @@ import io.ilakeful.lakebot.entities.EventWaiter
 import io.ilakeful.lakebot.entities.extensions.*
 
 import net.dv8tion.jda.api.Permission
-import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.entities.Activity.ActivityType.*
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 
+import org.ocpsoft.prettytime.PrettyTime
+
 import java.time.format.DateTimeFormatter
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class UserCommand : Command {
     override val name = "user"
-    override val aliases = listOf("userinfo", "usermenu", "user-info", "user-menu")
+    override val aliases = listOf("userinfo", "usermenu", "user-info", "user-menu", "whois", "who-is")
     override val description = "The command sending complete information about your account or an account of the specified user"
     override val usage = fun(prefix: String) = "${super.usage(prefix)} <user (optional)>"
     override suspend fun invoke(event: MessageReceivedEvent, args: Array<String>) {
@@ -44,7 +47,11 @@ class UserCommand : Command {
     inline fun userInfo(author: User, lazy: () -> Member) = buildEmbed {
         val member = lazy()
         val user = member.user
-        val hasPermissions = member.isOwner || member.hasPermission(Permission.ADMINISTRATOR) || member.hasPermission(Permission.MANAGE_SERVER) || member.roles.isEmpty()
+        val hasPermissionsOrNoRoles = member.isOwner
+                || member.hasPermission(Permission.ADMINISTRATOR)
+                || member.hasPermission(Permission.MANAGE_SERVER)
+                || member.roles.isEmpty()
+        val prettyTime = PrettyTime()
         val roles = member.roles.filter { !it.isPublicRole }
         author(user.asTag) { user.effectiveAvatarUrl }
         color { Immutable.SUCCESS }
@@ -52,27 +59,47 @@ class UserCommand : Command {
         footer(author.effectiveAvatarUrl) { "Requested by ${author.asTag}" }
         timestamp()
         field(true, "Online Status:") {
-            member.onlineStatus.name.replace("_", " ").capitalizeAll(true)
+            member.onlineStatus.name
+                    .split("_")
+                    .joinToString(separator = " ")
+                    .capitalizeAll(isForce = true)
         }
         field(true, if (member.activities.isNotEmpty()) when (member.activities.first().type) {
-            Activity.ActivityType.LISTENING -> "Listening To:"
-            Activity.ActivityType.STREAMING -> "Streaming:"
-            Activity.ActivityType.WATCHING -> "Watching:"
-            else -> "Playing:"
+            LISTENING -> "Listening To:"
+            STREAMING -> "Streaming:"
+            WATCHING -> "Watching:"
+            DEFAULT -> "Playing:"
+            else -> "Game Status:"
         } else "Game Status:") { member.activities.firstOrNull()?.name ?: "None" }
         field(true, "Creation Date:") {
-            user.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+            val date = user.timeCreated
+            val formatted = date.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+            val ago = prettyTime.format(Date.from(date.toInstant()))
+            "$formatted ($ago)"
         }
         field(true, "Join Date:") {
-            member.timeJoined.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+            val date = member.timeJoined
+            val formatted = date.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+            val ago = prettyTime.format(Date.from(date.toInstant()))
+            "$formatted ($ago)"
         }
         field(true, "ID:") { user.id }
         field(true, "Color:") { member.color?.rgb?.toHex()?.takeLast(6)?.prepend("#") ?: "Default" }
         field(true, "Username:") { user.name.escapeDiscordMarkdown() }
-        field(true, "Nickname:") { member.nickname?.escapeDiscordMarkdown() ?: "No Nickname" }
+        field(true, "Nickname:") { member.nickname?.escapeDiscordMarkdown() ?: "None" }
+        field(true, "Booster:") {
+            val bool = member in member.guild.boosters
+            bool.asString()
+        }
         field(title = "Join Order:") { member.joinOrder }
-        if (hasPermissions) {
-            field(true, "Join Position:") { "#${member.joinPosition}" }
+        field(
+                inline = if (!hasPermissionsOrNoRoles) {
+                    roles.size <= 2
+                } else true,
+                title = "Join Position:",
+                desc = { "#${member.joinPosition}" }
+        )
+        if (hasPermissionsOrNoRoles) {
             field(true, "Acknowledgements:") {
                 when {
                     member.isOwner -> "Server Owner"
@@ -81,12 +108,10 @@ class UserCommand : Command {
                     else -> "Unknown"
                 }
             }
-        } else {
-            field(roles.size <= 2, "Join Position:") { "#${member.joinPosition}" }
         }
         field(roles.size <= 2, if (roles.isEmpty()) "Roles:" else "Roles (${roles.size}):") {
             when {
-                roles.isEmpty() -> "No roles"
+                roles.isEmpty() -> "None"
                 roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString().length > 1024 -> "Too many roles to display"
                 else -> roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString()
             }
@@ -97,8 +122,8 @@ class UserCommand : Command {
     }
     suspend fun userMenu(event: MessageReceivedEvent, member: Member) = event.channel.sendEmbed {
         color { Immutable.SUCCESS }
-        author { "Select the Action:" }
-        description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get an Avatar" }
+        author { "Select Action:" }
+        description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Avatar" }
     }.await {
         it.addReaction("\u0031\u20E3").complete()
         it.addReaction("\u0032\u20E3").complete()

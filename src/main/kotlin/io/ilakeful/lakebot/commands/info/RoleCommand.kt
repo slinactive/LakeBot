@@ -17,11 +17,9 @@
 package io.ilakeful.lakebot.commands.info
 
 import io.ilakeful.lakebot.Immutable
-import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.commands.utils.ColorCommand
 import io.ilakeful.lakebot.entities.EventWaiter
-import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
 import io.ilakeful.lakebot.utils.ImageUtils
 
@@ -29,7 +27,10 @@ import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 
+import org.ocpsoft.prettytime.PrettyTime
+
 import java.time.format.DateTimeFormatter
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class RoleCommand : Command {
@@ -48,6 +49,7 @@ class RoleCommand : Command {
     }
     inline fun roleInfo(author: User, lazy: () -> Role) = buildEmbed {
         val role = lazy()
+        val prettyTime = PrettyTime()
         color { role.color }
         if (role.color !== null) {
             thumbnail { "attachment://${role.color!!.rgb.toHex().takeLast(6)}.png" }
@@ -63,7 +65,10 @@ class RoleCommand : Command {
         field(true, "Mentionable:") { role.isMentionable.asString() }
         field(true, "Color:") { role.color?.rgb?.toHex()?.takeLast(6)?.prepend("#") ?: "Default" }
         field(true, "Creation Date:") {
-            role.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+            val date = role.timeCreated
+            val formatted = date.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+            val ago = prettyTime.format(Date.from(date.toInstant()))
+            "$formatted ($ago)"
         }
         if (role.keyPermissions.isNotEmpty()) {
             field(title = "Key Permissions:") { role.keyPermissions.map { it.getName() }.joinToString() }
@@ -75,7 +80,7 @@ class RoleCommand : Command {
     } else {
         event.channel.sendEmbed {
             color { Immutable.SUCCESS }
-            author { "Select the Action:" }
+            author { "Select Action:" }
             description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Color Information" }
         }.await {
             it.addReaction("\u0031\u20E3").complete()

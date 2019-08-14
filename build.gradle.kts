@@ -84,6 +84,7 @@ dependencies {
     implementation(group = "org.jsoup", name = "jsoup", version = "1.12.1")
     implementation(group = "commons-validator", name = "commons-validator", version = "1.6")
     implementation(group = "org.reflections", name = "reflections", version = "0.9.11")
+    implementation(group = "org.ocpsoft.prettytime", name = "prettytime", version = "4.0.2.Final")
     implementation(kotlin("stdlib"))
     implementation(kotlin("stdlib-jdk8", version = kotlinVersion))
     implementation(kotlin("stdlib-jdk7", version = kotlinVersion))

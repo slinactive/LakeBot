@@ -52,7 +52,7 @@ class LoopCommand : Command {
                         }
                     }
                     color { Immutable.SUCCESS }
-                    author("Select The Mode:") { event.selfUser.effectiveAvatarUrl }
+                    author("Select Mode:") { event.selfUser.effectiveAvatarUrl }
                 }).await {
                     it.addReaction("\u0031\u20E3").complete()
                     it.addReaction("\u0032\u20E3").complete()

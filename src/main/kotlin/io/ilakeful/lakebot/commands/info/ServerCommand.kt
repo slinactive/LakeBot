@@ -20,13 +20,18 @@ import io.ilakeful.lakebot.Immutable
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.EventWaiter
 import io.ilakeful.lakebot.entities.extensions.*
+import io.ilakeful.lakebot.utils.TimeUtils
 
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
+import org.jetbrains.kotlin.backend.common.onlyIf
+
+import org.ocpsoft.prettytime.PrettyTime
 
 import java.time.format.DateTimeFormatter
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class ServerCommand : Command {
@@ -41,24 +46,30 @@ class ServerCommand : Command {
     inline fun serverInfo(author: User, lazy: () -> Guild) = buildEmbed {
         val guild = lazy()
         val roles = guild.roles.filter { !it.isPublicRole }
+        val members = guild.memberCache.size()
+        val prettyTime = PrettyTime()
         author(guild.name) { guild.iconUrl }
         color { Immutable.SUCCESS }
         thumbnail { guild.iconUrl }
+        description { "**Prefix**: ${guild.prefix}" }
         footer(author.effectiveAvatarUrl) { "Requested by ${author.asTag}" }
         timestamp()
         field(true, "Name:") { guild.name.escapeDiscordMarkdown() }
         field(true, "ID:") { guild.id }
         field(true, "Creation Date:") {
-            guild.timeCreated.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+            val date = guild.timeCreated
+            val formatted = date.format(DateTimeFormatter.RFC_1123_DATE_TIME).removeSuffix("GMT").trim()
+            val ago = prettyTime.format(Date.from(date.toInstant()))
+            "$formatted ($ago)"
         }
         field(true, "Online Members:") {
-            "${guild.memberCache.count { it.onlineStatus == OnlineStatus.ONLINE }}/${guild.memberCache.size()}"
+            "${guild.memberCache.count { it.onlineStatus == OnlineStatus.ONLINE }}/$members"
         }
         field(true, "Humans:") {
-            "${guild.memberCache.count { !it.user.isBot }}/${guild.memberCache.size()}"
+            "${guild.memberCache.count { !it.user.isBot }}/$members"
         }
         field(true, "Bots:") {
-            "${guild.memberCache.count { it.user.isBot }}/${guild.memberCache.size()}"
+            "${guild.memberCache.count { it.user.isBot }}/$members"
         }
         field(true, "Owner:") { guild.owner?.user?.asTag?.escapeDiscordMarkdown() ?: "N/A" }
         field(true, "Region:") { guild.region.getName() }
@@ -66,28 +77,62 @@ class ServerCommand : Command {
         field(true, "Categories:") { guild.categoryCache.size().toString() }
         field(true, "Text Channels:") { guild.textChannelCache.size().toString() }
         field(true, "Voice Channels:") { guild.voiceChannelCache.size().toString() }
-        field(true, "Prefix:") { guild.prefix }
+        field(true, "AFK Channel:") { guild.afkChannel?.name ?: "None" }
+        field(true, "AFK Timeout:") {
+            if (guild.afkChannel !== null) {
+                val seconds = guild.afkTimeout.seconds
+                TimeUtils.asText(seconds.toLong(), TimeUnit.SECONDS)
+            } else "None"
+        }
+        field(true, "Boosts:") { guild.boostCount.toString() }
+        field(true, "Boost Tier:") {
+            guild.boostTier.let { "${it.maxBitrate / 1000} kbps, ${it.maxEmotes} emotes" }
+        }
         field(true, "Verification Level:") {
-            guild.verificationLevel.name.capitalizeAll(true).replace("_", "")
+            guild.verificationLevel.name
+                    .split("_")
+                    .joinToString(separator = " ")
+                    .capitalizeAll(isForce = true)
+        }
+        field(true, "Notification Level:") {
+            guild.defaultNotificationLevel.name
+                    .split("_")
+                    .joinToString(separator = " ")
+                    .capitalizeAll(isForce = true)
+        }
+        field(true, "MFA Requirement:") {
+            val bool = guild.requiredMFALevel == Guild.MFALevel.TWO_FACTOR_AUTH
+            bool.asString()
         }
         field(roles.size > 2, if (roles.isEmpty()) "Roles:" else "Roles (${roles.size}):") {
             when {
-                roles.isEmpty() -> "No roles"
+                roles.isEmpty() -> "None"
                 roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString().length > 1024 -> "Too many roles to display"
                 else -> roles.mapNotNull { it.name.escapeDiscordMarkdown() }.joinToString()
             }
         }
         field(guild.emoteCache.size() > 2, if (guild.emoteCache.isEmpty) "Emotes:" else "Emotes (${guild.emoteCache.size()}):") {
             when {
-                guild.emoteCache.isEmpty -> "No emotes"
+                guild.emoteCache.isEmpty -> "None"
                 guild.emoteCache.mapNotNull { it.asMention }.joinToString().length > 1024 -> "Too many emotes to display"
                 else -> guild.emoteCache.mapNotNull { it.asMention }.joinToString()
             }
         }
+        field(guild.features.size > 3, "Features:") {
+            if (guild.features.isNotEmpty()) {
+                guild.features.mapNotNull {
+                    it.split("_").joinToString(" ") { el ->
+                        el.takeIf { ex ->
+                            ex !in arrayOf("URL", "VIP")
+                        }?.capitalizeAll(isForce = true) ?: el
+                    }
+                }.joinToString()
+            } else "None"
+        }
     }
     suspend fun serverMenu(event: MessageReceivedEvent) = event.channel.sendEmbed {
         color { Immutable.SUCCESS }
-        author { "Select the Action:" }
+        author { "Select Action:" }
         description { "\u0031\u20E3 \u2014 Get Information\n\u0032\u20E3 \u2014 Get Icon" }
     }.await {
         it.addReaction("\u0031\u20E3").complete()

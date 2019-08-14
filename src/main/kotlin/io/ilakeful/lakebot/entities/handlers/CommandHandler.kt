@@ -21,6 +21,7 @@ import io.ilakeful.lakebot.WAITER_PROCESSES
 import io.ilakeful.lakebot.commands.Command
 import io.ilakeful.lakebot.entities.WaiterProcess
 import io.ilakeful.lakebot.entities.extensions.*
+import io.ilakeful.lakebot.utils.TimeUtils
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
 
 import kotlin.coroutines.CoroutineContext
 
@@ -46,7 +48,10 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
     operator fun contains(command: String): Boolean = this[command] !== null && this[command] in registeredCommands
     operator fun contains(command: Command): Boolean = command in registeredCommands
     operator fun get(id: Long): Command? = registeredCommands.firstOrNull { it.id == id }
-    operator fun get(name: String): Command? = registeredCommands.maxBy { getPriority(name.toLowerCase(), it) }
+    operator fun get(name: String): Command? = registeredCommands
+            .sortedBy { getPriority(name.toLowerCase(), it) }
+            .reversed()
+            .firstOrNull()
     operator fun plusAssign(command: Command) {
         registeredCommands += command
     }
@@ -145,6 +150,6 @@ object CommandHandler : CoroutineContext by newFixedThreadPoolContext(3, "Comman
         if (time <= 0) {
             return null
         }
-        return "Please wait $time ${if (time == 1L) "second" else "seconds"} before launching command again!"
+        return "Please wait ${TimeUtils.asText(time, TimeUnit.SECONDS)} before launching command again!"
     }
 }
