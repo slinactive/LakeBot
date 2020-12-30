@@ -1,7 +1,3 @@
-# LakeBot [![JitPack](https://jitpack.io/v/ilakeful/LakeBot.svg)](https://jitpack.io/#ilakeful/LakeBot)
-LakeBot is the next generation of [KabyBot](https://github.com/KabyBot/KabyBot). It is a Discord multi-purpose bot coded in 100% [Kotlin](https://kotlinlang.org/).
-
-[![Powered By JDA](http://i.imgur.com/4Fhq6yQ.png)](https://github.com/DV8FromTheWorld/JDA)
 ## Libraries and APIs
 * **[Kotlin](https://github.com/JetBrains/kotlin)** — the programming language LakeBot uses
 * **[Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines)** — the official library presenting Kotlin coroutines
